@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QR &amp; onboarding</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Business logic docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>ChoreBoard</h2>
+      <a href="overview.html">Product overview</a>
+      <a href="local-first.html">Local-first &amp; relay</a>
+      <a href="keys-and-access.html">Keys &amp; access</a>
+      <a href="permissions.html">Kid permissions</a>
+      <a href="flows.html">User flows</a>
+      <a href="qr-and-onboarding.html" class="active">QR &amp; onboarding</a>
+    </nav>
+    <main>
+      <article>
+        <h1>QR &amp; onboarding</h1>
+        <p class="lead">Reduce typing long random codes — scan or paste deep links.</p>
+
+        <h2>QR payloads</h2>
+        <table>
+          <tr><th>QR</th><th>Payload shape</th><th>Use</th></tr>
+          <tr><td>Family join</td><td><code>choreboard://join?family=…</code></td><td>Kid device joins family</td></tr>
+          <tr><td>Parent unlock</td><td><code>choreboard://parent?secret=…</code></td><td>Parent admin on new device</td></tr>
+          <tr><td>Device link</td><td><code>choreboard://member?link=…</code></td><td>Kid signs completions</td></tr>
+        </table>
+
+        <h2>URL fallback</h2>
+        <p>Hosting with query param <code>?join=&lt;family-code&gt;</code> pre-fills join screen (see Welcome page).</p>
+
+        <h2>Where shown</h2>
+        <ul>
+          <li>Settings — family + parent QR</li>
+          <li>Add member — device link QR for kids</li>
+        </ul>
+
+        <h2>Future</h2>
+        <p>In-app camera scanner (not in v1) — today QR is generated for display; users can scan with the phone camera if the OS supports the deep link.</p>
+
+        <p>Code: <code>choreboard/web/src/kit/qr.ts</code>, <code>QRBlock.tsx</code>.</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

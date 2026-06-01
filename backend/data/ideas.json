@@ -1,0 +1,39 @@
+[
+  {
+    "id": "choreboard",
+    "title": "ChoreBoard",
+    "why": "Family chores + allowance tracker, local-first so families own their data — first app on the reusable Local-First Kit.",
+    "status": "building"
+  },
+  {
+    "id": "secondbrain",
+    "title": "Second Brain",
+    "why": "Obsidian-like HTML knowledge vault — local-first notes, internal links, search, and AI chat grounded in your vault.",
+    "status": "building"
+  },
+  {
+    "id": "idea-validator",
+    "title": "Idea Validator",
+    "why": "Score any idea against the three principles before you build — useful filter, great demo.",
+    "status": "building"
+  },
+  {
+    "id": "how-to-guides",
+    "title": "How-to guides",
+    "why": "Step-by-step Cursor and agent walkthroughs people can copy on their first solo ship.",
+    "status": "exploring"
+  },
+  {
+    "id": "the-idea-guy",
+    "title": "The Idea Guy site",
+    "why": "Living portfolio + knowledge base that proves one person can ship end-to-end with AI leverage.",
+    "status": "shipped",
+    "link": "#builds"
+  },
+  {
+    "id": "prompt-library",
+    "title": "Prompt library",
+    "why": "Curated prompts for common builder tasks — high steal-value for X traffic.",
+    "status": "parked"
+  }
+]

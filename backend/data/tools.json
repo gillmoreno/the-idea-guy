@@ -1,0 +1,70 @@
+{
+  "stack": [
+    {
+      "category": "Frontend",
+      "items": [
+        { "name": "Next.js 15", "role": "Static export, App Router" },
+        { "name": "React 19", "role": "UI components" },
+        { "name": "TypeScript", "role": "Type safety" }
+      ]
+    },
+    {
+      "category": "Backend",
+      "items": [
+        { "name": "Go 1.22", "role": "Small JSON API" },
+        { "name": "nginx", "role": "Reverse proxy + static files" }
+      ]
+    },
+    {
+      "category": "Ship",
+      "items": [
+        { "name": "Docker", "role": "One monolith image" },
+        { "name": "Cursor", "role": "AI pair-programmer" }
+      ]
+    }
+  ],
+  "workflow": [
+    {
+      "step": 1,
+      "title": "Start with the idea",
+      "description": "Filter through: useful over hype? Can one person ship it? Worth teaching in public?"
+    },
+    {
+      "step": 2,
+      "title": "Build with Cursor",
+      "description": "Project rules keep the AI on brand. Composer for features, agent for exploration."
+    },
+    {
+      "step": 3,
+      "title": "Ship the smallest useful thing",
+      "description": "Static first, API only when content must be live. One Docker image to deploy."
+    },
+    {
+      "step": 4,
+      "title": "Teach in public",
+      "description": "Post the process on X — hook, workflow, what shipped, what I learned, artifacts."
+    }
+  ],
+  "cursorRules": [
+    {
+      "id": "minimal-scope",
+      "title": "Minimal scope",
+      "description": "Smallest correct diff. No unrelated changes, no over-engineering."
+    },
+    {
+      "id": "match-conventions",
+      "title": "Match conventions",
+      "description": "Read surrounding code first. Reuse patterns — additions should look native."
+    },
+    {
+      "id": "docs-in-folder",
+      "title": "Document in docs_and_changelog",
+      "description": "New features and changes get a doc in the project docs folder."
+    },
+    {
+      "id": "ship-dont-perfect",
+      "title": "Ship, don't perfect",
+      "description": "Useful tests only. Comments for non-obvious logic. Bias toward shipping."
+    }
+  ]
+}

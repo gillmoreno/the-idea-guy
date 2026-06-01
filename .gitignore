@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+dist/
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+backend/server
+choreboard/relay/bin/
+choreboard/relay/relay
+.cursor/docs-sync-reminder.json

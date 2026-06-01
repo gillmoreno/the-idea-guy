@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChoreBoard — Product overview</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Business logic docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>ChoreBoard</h2>
+      <a href="overview.html" class="active">Product overview</a>
+      <a href="local-first.html">Local-first &amp; relay</a>
+      <a href="keys-and-access.html">Keys &amp; access</a>
+      <a href="permissions.html">Kid permissions</a>
+      <a href="flows.html">User flows</a>
+      <a href="qr-and-onboarding.html">QR &amp; onboarding</a>
+    </nav>
+    <main>
+      <article>
+        <h1>ChoreBoard <span class="tag">mini-app</span></h1>
+        <p class="lead">Turn household chores into allowance — without storing family data on a central database.</p>
+
+        <h2>Who it is for</h2>
+        <p>Parents who want kids to see what they can earn, track what was done, and pay allowance on a schedule — with data that stays on the family’s devices.</p>
+
+        <h2>Core ideas</h2>
+        <ul>
+          <li><strong>Chore catalog</strong> — tasks with difficulty and a dollar reward (e.g. make bed $0.50).</li>
+          <li><strong>Completions</strong> — kids mark done; some chores need parent approval.</li>
+          <li><strong>Balance</strong> — running total of approved earnings (penalties subtract).</li>
+          <li><strong>Payday</strong> — parent marks period paid; history is kept.</li>
+          <li><strong>Proposals</strong> — kids can suggest new chores; parent adds them to the catalog.</li>
+        </ul>
+
+        <h2>What we deliberately avoid</h2>
+        <ul>
+          <li>No server-side SQL with readable kid/chore rows.</li>
+          <li>No account emails/passwords in v1 (invite codes instead).</li>
+          <li>No “we host your family database” SaaS model by default.</li>
+        </ul>
+
+        <h2>Repo layout</h2>
+        <table>
+          <tr><th>Part</th><th>Role</th></tr>
+          <tr><td><code>choreboard/web/</code></td><td>Next.js PWA — UI + Local-First Kit client</td></tr>
+          <tr><td><code>choreboard/relay/</code></td><td>Go WebSocket relay — encrypted blob pipe only</td></tr>
+          <tr><td><code>docs_and_changelog/CHOREBOARD_*.md</code></td><td>Spec &amp; build notes (markdown)</td></tr>
+        </table>
+
+        <h2>Distribution (business)</h2>
+        <ul>
+          <li><strong>DIY</strong> — family runs relay at home or on a VPS; static app on CDN.</li>
+          <li><strong>Paid tier (future)</strong> — host <code>wss://</code> relay; charge for convenience, not for reading data (relay cannot decrypt).</li>
+        </ul>
+
+        <p>Next: <a href="local-first.html">Local-first &amp; relay</a>, <a href="keys-and-access.html">Keys &amp; access</a>.</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

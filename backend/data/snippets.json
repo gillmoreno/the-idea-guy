@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cursor-rules",
+    "title": "Cursor Rules for AI-Assisted Building",
+    "description": "How to write project rules so your AI pair-programmer stays on brand and on task.",
+    "tags": ["cursor", "ai", "workflow"]
+  },
+  {
+    "id": "one-person-stack",
+    "title": "The One-Person AI Stack",
+    "description": "Static frontend, small API, Docker monolith — a practical stack for shipping solo.",
+    "tags": ["architecture", "docker", "solo"]
+  },
+  {
+    "id": "static-first",
+    "title": "Static First, Dynamic When Needed",
+    "description": "Start with static export for speed. Add API endpoints only when content must be live.",
+    "tags": ["nextjs", "performance"]
+  },
+  {
+    "id": "teach-in-public",
+    "title": "Teach in Public on X",
+    "description": "Post hook → workflow → what shipped → key learning → artifacts. Steal-value drives followers.",
+    "tags": ["x", "content", "brand"]
+  }
+]

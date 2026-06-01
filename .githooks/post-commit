@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# After each commit, check if business HTML docs need syncing.
+ROOT="$(git rev-parse --show-toplevel)"
+"$ROOT/scripts/check-html-docs-sync.sh" || true

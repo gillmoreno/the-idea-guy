@@ -1,0 +1,9 @@
+services:
+  the-idea-guy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: the-idea-guy:latest
+    ports:
+      - "8080:80"
+    restart: unless-stopped

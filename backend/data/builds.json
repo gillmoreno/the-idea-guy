@@ -1,0 +1,14 @@
+[
+  {
+    "id": "the-idea-guy",
+    "title": "The Idea Guy",
+    "description": "Personal brand site and knowledge base — static Next.js, Go API, nginx, one Docker image.",
+    "tags": ["nextjs", "go", "docker", "nginx"],
+    "learning": "Static export plus a tiny API is enough for a solo brand site. Ship the monolith first, add sections as you go.",
+    "links": {
+      "demo": "/"
+    },
+    "shippedAt": "2026-05",
+    "status": "live"
+  }
+]

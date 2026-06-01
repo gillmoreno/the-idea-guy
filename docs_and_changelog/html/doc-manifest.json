@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "description": "Maps business-logic HTML pages to source paths. Used by scripts/check-html-docs-sync.sh and the html-docs agent skill.",
+  "features": [
+    {
+      "id": "docs-meta",
+      "title": "Documentation system",
+      "doc": "docs_and_changelog/html/how-docs-work.html",
+      "sources": [
+        "docs_and_changelog/html/doc-manifest.json",
+        ".cursor/skills/html-docs/",
+        "scripts/check-html-docs-sync.sh",
+        "scripts/install-git-hooks.sh",
+        ".githooks/"
+      ]
+    },
+    {
+      "id": "choreboard-overview",
+      "title": "ChoreBoard product overview",
+      "doc": "docs_and_changelog/html/choreboard/overview.html",
+      "sources": [
+        "choreboard/README.md",
+        "choreboard/web/src/app/page.tsx",
+        "choreboard/web/src/components/Welcome.tsx",
+        "choreboard/web/src/components/Setup.tsx",
+        "docs_and_changelog/CHOREBOARD_SPEC.md"
+      ]
+    },
+    {
+      "id": "choreboard-local-first",
+      "title": "Local-first and relay",
+      "doc": "docs_and_changelog/html/choreboard/local-first.html",
+      "sources": [
+        "choreboard/web/src/kit/sync.ts",
+        "choreboard/web/src/kit/crypto.ts",
+        "choreboard/relay/",
+        "docs_and_changelog/LOCAL_FIRST_KIT.md"
+      ]
+    },
+    {
+      "id": "choreboard-keys",
+      "title": "Keys and access",
+      "doc": "docs_and_changelog/html/choreboard/keys-and-access.html",
+      "sources": [
+        "choreboard/web/src/kit/invite.ts",
+        "choreboard/web/src/kit/crypto.ts",
+        "choreboard/web/src/lib/ChoreBoardContext.tsx",
+        "choreboard/web/src/lib/store.ts",
+        "choreboard/web/src/components/ParentGate.tsx",
+        "docs_and_changelog/CHOREBOARD_PERMISSIONS.md"
+      ]
+    },
+    {
+      "id": "choreboard-permissions",
+      "title": "Kid permissions",
+      "doc": "docs_and_changelog/html/choreboard/permissions.html",
+      "sources": [
+        "choreboard/web/src/lib/permissions.ts",
+        "choreboard/web/src/lib/types.ts",
+        "choreboard/web/src/components/PermissionsSettings.tsx",
+        "choreboard/web/src/components/KidView.tsx"
+      ]
+    },
+    {
+      "id": "choreboard-flows",
+      "title": "User flows",
+      "doc": "docs_and_changelog/html/choreboard/flows.html",
+      "sources": [
+        "choreboard/web/src/app/page.tsx",
+        "choreboard/web/src/components/ProfilePicker.tsx",
+        "choreboard/web/src/components/KidView.tsx",
+        "choreboard/web/src/components/ParentView.tsx",
+        "choreboard/web/src/lib/store.ts"
+      ]
+    },
+    {
+      "id": "choreboard-qr",
+      "title": "QR and onboarding",
+      "doc": "docs_and_changelog/html/choreboard/qr-and-onboarding.html",
+      "sources": [
+        "choreboard/web/src/kit/qr.ts",
+        "choreboard/web/src/components/QRBlock.tsx",
+        "choreboard/web/src/lib/memberSecrets.ts"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Optional: warn when committing source changes without doc updates (non-blocking).
+ROOT="$(git rev-parse --show-toplevel)"
+"$ROOT/scripts/check-html-docs-sync.sh" --staged || true

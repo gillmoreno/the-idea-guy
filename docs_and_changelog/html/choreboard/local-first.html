@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Local-first &amp; relay</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Business logic docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>ChoreBoard</h2>
+      <a href="overview.html">Product overview</a>
+      <a href="local-first.html" class="active">Local-first &amp; relay</a>
+      <a href="keys-and-access.html">Keys &amp; access</a>
+      <a href="permissions.html">Kid permissions</a>
+      <a href="flows.html">User flows</a>
+      <a href="qr-and-onboarding.html">QR &amp; onboarding</a>
+    </nav>
+    <main>
+      <article>
+        <h1>Local-first &amp; relay</h1>
+        <p class="lead">Serving the app is cheap; storing family data in the cloud is what we avoid.</p>
+
+        <h2>Principle</h2>
+        <p><strong>Serve the app centrally, own the data locally.</strong> The browser keeps the real copy (IndexedDB via Yjs). The relay only forwards ciphertext.</p>
+
+        <h2>On each device</h2>
+        <ul>
+          <li><strong>Yjs</strong> — one merged document (CRDT): members, catalog snapshot, completions, permissions, etc.</li>
+          <li><strong>IndexedDB</strong> — persists the doc offline.</li>
+          <li><strong>AES-GCM</strong> — every update encrypted before it leaves the device.</li>
+        </ul>
+
+        <h2>The relay (Go)</h2>
+        <p>Not a database. A mailbox.</p>
+        <ul>
+          <li>WebSocket per <strong>room</strong> (one room per channel: public vs admin).</li>
+          <li>Append-only log of opaque blobs for catch-up.</li>
+          <li>Optional <code>RELAY_DATA_DIR</code> so restart does not wipe history.</li>
+          <li>Cannot decrypt — never sees chore titles or dollar amounts.</li>
+        </ul>
+
+        <h2>Why not SQL on a server?</h2>
+        <ul>
+          <li>Provider breach would expose all families’ readable data.</li>
+          <li>Ops/liability for hosting kids’ information.</li>
+          <li>ChoreBoard scale is one family, few devices — CRDT + relay is enough.</li>
+        </ul>
+
+        <h2>Tradeoffs we accept</h2>
+        <ul>
+          <li>Lost invite code + all devices wiped + empty relay → data gone (mitigate: save codes, 2+ devices, persist relay).</li>
+          <li>Metadata on relay (IPs, timing) still exists.</li>
+          <li>UI permissions are policy, not crypto (see <a href="permissions.html">Kid permissions</a>).</li>
+        </ul>
+
+        <p>Code: <code>choreboard/web/src/kit/sync.ts</code>, <code>choreboard/relay/main.go</code>.</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

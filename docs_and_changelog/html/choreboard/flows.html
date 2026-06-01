@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>User flows</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Business logic docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>ChoreBoard</h2>
+      <a href="overview.html">Product overview</a>
+      <a href="local-first.html">Local-first &amp; relay</a>
+      <a href="keys-and-access.html">Keys &amp; access</a>
+      <a href="permissions.html">Kid permissions</a>
+      <a href="flows.html" class="active">User flows</a>
+      <a href="qr-and-onboarding.html">QR &amp; onboarding</a>
+    </nav>
+    <main>
+      <article>
+        <h1>User flows</h1>
+        <p class="lead">How a family gets from zero to kids earning allowance.</p>
+
+        <h2>1. Create family (parent)</h2>
+        <ol>
+          <li>Welcome → Create family → generates family code + parent secret (stored on device).</li>
+          <li>Setup: name, currency, payday, members, seed chores.</li>
+          <li>Publish catalog + permissions to public channel.</li>
+        </ol>
+
+        <h2>2. Kid joins</h2>
+        <ol>
+          <li>Join with <strong>family code only</strong> (QR or paste).</li>
+          <li>Wait for public data if parent still setting up.</li>
+          <li>Pick profile → optional device link paste → kid dashboard.</li>
+        </ol>
+
+        <h2>3. Daily use</h2>
+        <ul>
+          <li><strong>Kid</strong> — see chores (and rewards if allowed), tap done, balance updates after approval.</li>
+          <li><strong>Parent</strong> — Approvals tab: completions + chore proposals; Chores tab: catalog; Payday: mark paid.</li>
+        </ul>
+
+        <h2>4. Parent on second device</h2>
+        <p>Join with family code → pick parent profile → enter <strong>parent secret</strong> (ParentGate) → admin sync starts.</p>
+
+        <h2>5. Approvals logic</h2>
+        <ul>
+          <li>Chores with <code>requiresApproval</code> → completion stays <code>pending</code> until parent approves.</li>
+          <li>Otherwise auto-approved.</li>
+          <li>Penalties: parent-only, immediately approved negative amount.</li>
+        </ul>
+
+        <p>UI entry: <code>choreboard/web/src/app/page.tsx</code> routes Welcome → Setup → ProfilePicker → Kid/Parent views.</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>
