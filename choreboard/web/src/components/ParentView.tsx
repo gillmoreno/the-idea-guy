@@ -11,6 +11,7 @@ import { generateMemberSecret } from "@/kit/invite";
 import { qrFamilyJoin, qrMemberLink, qrParentUnlock } from "@/kit/qr";
 import { QRBlock } from "./QRBlock";
 import { PermissionsSettings } from "./PermissionsSettings";
+import { RelaySettings } from "./RelaySettings";
 import { Completion } from "@/lib/types";
 import { weekRange } from "@/lib/store";
 import { CATEGORY_META, MEMBER_COLORS, Role } from "@/lib/types";
@@ -407,6 +408,8 @@ function SettingsTab() {
       </div>
 
       <PermissionsSettings />
+
+      <RelaySettings />
 
       <div className="spread">
         <div className="section-title">Members</div>

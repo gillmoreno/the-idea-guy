@@ -44,7 +44,9 @@ choreboard/
 |----------|---------|-------------|
 | `RELAY_ADDR` | `:4500` | Go relay listen address |
 | `RELAY_DATA_DIR` | (empty) | If set, append-only encrypted blob log on disk |
-| `NEXT_PUBLIC_RELAY_URL` | `ws://localhost:4500` | WebSocket URL for the web app |
+| `NEXT_PUBLIC_RELAY_URL` | `wss://relay.the-idea-guy.com` (prod) / `ws://localhost:4500` (dev) | WebSocket URL for the web app |
+
+Self-hosters can override the relay in **Settings → Sync relay** without rebuilding the app.
 
 ## Production build
 
@@ -55,6 +57,18 @@ make build
 ```
 
 For production, set `NEXT_PUBLIC_RELAY_URL` to your `wss://` relay when building the web app.
+
+## Deploy to Cloudflare (chores.the-idea-guy.com)
+
+Static hosting on Cloudflare Pages — see [CLOUDFLARE_SUBDOMAIN_DEPLOY.md](../docs_and_changelog/CLOUDFLARE_SUBDOMAIN_DEPLOY.md).
+
+```bash
+cp deploy/.env.example deploy/.env   # set CLOUDFLARE_*
+./scripts/deploy-subdomain.sh chores --init   # first time
+./scripts/deploy-subdomain.sh chores          # rebuild + upload
+```
+
+Relay hosting: [CHOREBOARD_RELAY.md](../docs_and_changelog/CHOREBOARD_RELAY.md) (`wss://relay.the-idea-guy.com`, cloudflared on your server).
 
 ## v1 features
 

@@ -12,8 +12,7 @@ import { LocalFirstDoc, SyncState } from "@/kit/sync";
 import { adminKeyMaterial, publicKeyMaterial } from "@/kit/crypto";
 import { APP_ID, ChoreStore } from "@/lib/store";
 import { clearMemberSecrets } from "@/lib/memberSecrets";
-
-const RELAY_URL = process.env.NEXT_PUBLIC_RELAY_URL || "ws://localhost:4500";
+import { DEFAULT_RELAY_URL, getRelayUrl, setRelayUrlOverride as persistRelayOverride } from "@/lib/relayUrl";
 const LS_FAMILY = "choreboard.familyCode";
 const LS_PARENT = "choreboard.parentSecret";
 const LS_MEMBER = "choreboard.memberId";
@@ -40,6 +39,9 @@ interface ChoreBoardCtx {
   sync: SyncState;
   version: number;
   currentMemberId: string | null;
+  relayUrl: string;
+  defaultRelayUrl: string;
+  setRelayUrlOverride: (url: string | null) => void;
   join: (familyCode: string, opts?: JoinOpts) => void;
   unlockParent: (parentSecret: string) => void;
   leave: () => void;
@@ -57,6 +59,7 @@ export function ChoreBoardProvider({ children }: { children: React.ReactNode }) 
   const [sync, setSync] = useState<SyncState>({ localLoaded: false, connected: false });
   const [version, setVersion] = useState(0);
   const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
+  const [relayUrl, setRelayUrl] = useState(DEFAULT_RELAY_URL);
 
   const publicRef = useRef<LocalFirstDoc | null>(null);
   const adminRef = useRef<LocalFirstDoc | null>(null);
@@ -77,6 +80,7 @@ export function ChoreBoardProvider({ children }: { children: React.ReactNode }) 
     setParentSecret(localStorage.getItem(LS_PARENT));
     setCurrentMemberId(localStorage.getItem(LS_MEMBER));
     setIsCreator(localStorage.getItem(LS_CREATOR) === "1");
+    setRelayUrl(getRelayUrl());
   }, []);
 
   const teardown = () => {
@@ -87,7 +91,7 @@ export function ChoreBoardProvider({ children }: { children: React.ReactNode }) 
     setStore(null);
   };
 
-  const wireDocs = useCallback((code: string, parent: string | null) => {
+  const wireDocs = useCallback((code: string, parent: string | null, relay: string) => {
     teardown();
     setSync({ localLoaded: false, connected: false });
     pubSync.current = { localLoaded: false, connected: false };
@@ -98,7 +102,7 @@ export function ChoreBoardProvider({ children }: { children: React.ReactNode }) 
       familyCode: code,
       keyMaterial: publicKeyMaterial(code),
       scope: "public",
-      relayUrl: RELAY_URL,
+      relayUrl: relay,
       onChange: bump,
       onState: (s) => {
         pubSync.current = s;
@@ -114,7 +118,7 @@ export function ChoreBoardProvider({ children }: { children: React.ReactNode }) 
         familyCode: code,
         keyMaterial: adminKeyMaterial(code, parent),
         scope: "admin",
-        relayUrl: RELAY_URL,
+        relayUrl: relay,
         onChange: bump,
         onState: (s) => {
           admSync.current = s;
@@ -133,9 +137,14 @@ export function ChoreBoardProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (!familyCode) return;
-    wireDocs(familyCode, parentSecret);
+    wireDocs(familyCode, parentSecret, relayUrl);
     return teardown;
-  }, [familyCode, parentSecret, wireDocs]);
+  }, [familyCode, parentSecret, relayUrl, wireDocs]);
+
+  const setRelayUrlOverride = useCallback((url: string | null) => {
+    persistRelayOverride(url);
+    setRelayUrl(getRelayUrl());
+  }, []);
 
   const join = useCallback((code: string, opts?: JoinOpts) => {
     const trimmed = code.trim();
@@ -186,6 +195,9 @@ export function ChoreBoardProvider({ children }: { children: React.ReactNode }) 
         sync,
         version,
         currentMemberId,
+        relayUrl,
+        defaultRelayUrl: DEFAULT_RELAY_URL,
+        setRelayUrlOverride,
         join,
         unlockParent,
         leave,

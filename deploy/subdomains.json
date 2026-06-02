@@ -1,0 +1,16 @@
+{
+  "apex_domain": "the-idea-guy.com",
+  "sites": {
+    "chores": {
+      "title": "ChoreBoard — house chores",
+      "project_name": "the-idea-guy-chores",
+      "subdomain": "chores",
+      "build_dir": "choreboard/web",
+      "output_dir": "choreboard/web/out",
+      "build_command": "npm ci && npm run build",
+      "build_env": {
+        "NEXT_PUBLIC_RELAY_URL": "wss://relay.the-idea-guy.com"
+      }
+    }
+  }
+}
