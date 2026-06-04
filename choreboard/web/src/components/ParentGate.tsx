@@ -1,12 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useChoreBoard } from "@/lib/ChoreBoardContext";
+import { parseAppSearchParams, stripInviteParamsFromUrl } from "@/kit/qr";
 
 /** Parent profile selected but this device has no parent secret (kid join flow). */
 export function ParentGate() {
   const { unlockParent, setCurrentMember } = useChoreBoard();
   const [secret, setSecret] = useState("");
+
+  useEffect(() => {
+    const link = parseAppSearchParams(window.location.search);
+    if (link?.type === "parent") {
+      setSecret(link.value);
+      stripInviteParamsFromUrl();
+      unlockParent(link.value);
+    }
+  }, [unlockParent]);
 
   return (
     <div className="centered">

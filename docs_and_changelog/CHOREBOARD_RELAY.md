@@ -21,20 +21,59 @@ Priority:
 
 The relay is `choreboard/relay/` — a small Go WebSocket server. It cannot run on Cloudflare Pages; host it on a machine you control.
 
-### cloudflared tunnel (recommended to start)
+### DNS on the-idea-guy.com (not aigil.dev)
 
-On your server:
+`cloudflared tunnel route dns` uses your **login cert** zone. This machine logged in with **aigil.dev**, so CLI DNS for `relay.the-idea-guy.com` wrongly created `relay.the-idea-guy.com.aigil.dev`.
+
+Fix with **one** of:
+
+1. **API (easiest):** `./scripts/relay-route-dns.sh` (needs `deploy/.env` like Pages deploy)
+2. **Second cert:** `./scripts/cloudflared-login-the-idea-guy.sh` then route DNS with `TUNNEL_ORIGIN_CERT` — see [CLOUDFLARED_MULTI_ZONE.md](./CLOUDFLARED_MULTI_ZONE.md)
+3. **Dashboard:** Zero Trust → Tunnels → choreboard-relay → Public Hostname `relay.the-idea-guy.com` → `http://localhost:4500`
+
+### cloudflared tunnel (recommended — same flow as aigil.dev)
+
+This Mac already uses **`~/Infrastructure/deployer/deploy.sh`** for `*.aigil.dev` (Docker + cloudflared + launchd). The relay uses the same script with **`DEPLOY_DOMAIN=the-idea-guy.com`**.
+
+**One command** (from repo root; needs Docker running, `cloudflared tunnel login` once, and sudo for launchd):
 
 ```bash
-cd choreboard/relay
-go build -o bin/relay .
-RELAY_ADDR=:4500 RELAY_DATA_DIR=/var/lib/choreboard-relay ./bin/relay
+./scripts/deploy-relay.sh
 ```
 
-In Cloudflare Zero Trust → Tunnels, point **`relay.the-idea-guy.com`** at `http://localhost:4500`.
+That will:
 
-Health check: `GET /healthz` → `ok`  
-WebSocket: `wss://relay.the-idea-guy.com/sync?room=…`
+1. Build and run the relay in Docker on port **4500** (`choreboard/relay/docker-compose.yml`)
+2. Create tunnel **`choreboard-relay`** (if missing)
+3. Install a launchd service `com.cloudflare.cloudflared.choreboard-relay`
+4. Route DNS **`relay.the-idea-guy.com`** → the tunnel
+
+Manual equivalent:
+
+```bash
+DEPLOY_DOMAIN=the-idea-guy.com \
+  ~/Infrastructure/deployer/deploy.sh deploy choreboard-relay relay 4500 \
+  "$(pwd)/choreboard/relay"
+```
+
+**Verify** after deploy:
+
+```bash
+curl -s https://relay.the-idea-guy.com/healthz   # → ok
+```
+
+WebSocket sync: `wss://relay.the-idea-guy.com/sync?room=…` (matches `NEXT_PUBLIC_RELAY_URL` in `deploy/subdomains.json`).
+
+**Without Docker** (native binary on the same machine):
+
+```bash
+cd choreboard/relay && go build -o bin/relay .
+RELAY_ADDR=:4500 RELAY_DATA_DIR=~/.local/share/choreboard-relay ./bin/relay
+```
+
+Then run only the tunnel steps from `deploy.sh` (create tunnel `choreboard-relay`, config hostname `relay.the-idea-guy.com` → `http://localhost:4500`, launchd, `tunnel route dns`). Prefer `./scripts/deploy-relay.sh` so config matches other apps.
+
+Health check: `GET /healthz` → `ok`
 
 ### Environment
 

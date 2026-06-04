@@ -17,7 +17,7 @@ Static mini-apps (Next.js `output: "export"`) ship to **Cloudflare Pages** on su
 | Item | Location |
 |------|----------|
 | Site registry | `deploy/subdomains.json` |
-| Deploy script | `scripts/deploy-subdomain.sh` |
+| Deploy script | `scripts/deploy-chores.sh` (wraps `scripts/deploy-subdomain.sh`) |
 | Secrets template | `deploy/.env.example` → copy to `deploy/.env` |
 | Full guide | `docs_and_changelog/CLOUDFLARE_SUBDOMAIN_DEPLOY.md` |
 
@@ -31,9 +31,9 @@ Static mini-apps (Next.js `output: "export"`) ship to **Cloudflare Pages** on su
 ## Deploy ChoreBoard (chores subdomain)
 
 ```bash
-chmod +x scripts/deploy-subdomain.sh   # once
-./scripts/deploy-subdomain.sh chores --init   # first time: project + domain
-./scripts/deploy-subdomain.sh chores          # later: build + upload only
+chmod +x scripts/deploy-chores.sh   # once
+./scripts/deploy-chores.sh --init   # first time: project + domain
+./scripts/deploy-chores.sh          # later: build + upload only
 ```
 
 Result: **https://chores.the-idea-guy.com/**

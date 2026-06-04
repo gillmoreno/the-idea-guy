@@ -63,12 +63,12 @@ For production, set `NEXT_PUBLIC_RELAY_URL` to your `wss://` relay when building
 Static hosting on Cloudflare Pages — see [CLOUDFLARE_SUBDOMAIN_DEPLOY.md](../docs_and_changelog/CLOUDFLARE_SUBDOMAIN_DEPLOY.md).
 
 ```bash
-cp deploy/.env.example deploy/.env   # set CLOUDFLARE_*
-./scripts/deploy-subdomain.sh chores --init   # first time
-./scripts/deploy-subdomain.sh chores          # rebuild + upload
+cp deploy/.env.example deploy/.env   # CLOUDFLARE_API_TOKEN (+ ACCOUNT_ID for --init)
+./scripts/deploy-chores.sh --init    # first time only
+./scripts/deploy-chores.sh           # every UI release (build + upload)
 ```
 
-Relay hosting: [CHOREBOARD_RELAY.md](../docs_and_changelog/CHOREBOARD_RELAY.md) (`wss://relay.the-idea-guy.com`, cloudflared on your server).
+Relay hosting: [CHOREBOARD_RELAY.md](../docs_and_changelog/CHOREBOARD_RELAY.md). Deploy: `./scripts/deploy-relay.sh` (cloudflared + Docker → `wss://relay.the-idea-guy.com`).
 
 ## v1 features
 

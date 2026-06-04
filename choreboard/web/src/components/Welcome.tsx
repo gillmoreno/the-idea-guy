@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useChoreBoard } from "@/lib/ChoreBoardContext";
 import { generateFamilyCode, generateParentSecret } from "@/kit/invite";
-import { parseJoinFromUrl } from "@/kit/qr";
+import { parseJoinFromUrl, stripInviteParamsFromUrl } from "@/kit/qr";
 
 export function Welcome() {
   const { join } = useChoreBoard();
@@ -12,11 +12,10 @@ export function Welcome() {
 
   useEffect(() => {
     const fromUrl = parseJoinFromUrl(window.location.search);
-    if (fromUrl) {
-      setMode("join");
-      setCode(fromUrl);
-    }
-  }, []);
+    if (!fromUrl) return;
+    stripInviteParamsFromUrl();
+    join(fromUrl.trim());
+  }, [join]);
 
   if (mode === "join") {
     return (

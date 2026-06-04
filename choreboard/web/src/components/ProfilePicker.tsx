@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useChoreBoard } from "@/lib/ChoreBoardContext";
+import { parseAppSearchParams, stripInviteParamsFromUrl } from "@/kit/qr";
 import { Avatar } from "./ui";
 import {
   getMemberSecret,
@@ -13,6 +14,16 @@ export function ProfilePicker() {
   const { store, setCurrentMember } = useChoreBoard();
   const [linkingId, setLinkingId] = useState<string | null>(null);
   const [linkRaw, setLinkRaw] = useState("");
+
+  useEffect(() => {
+    const link = parseAppSearchParams(window.location.search);
+    if (link?.type !== "member") return;
+    stripInviteParamsFromUrl();
+    const parsed = parseMemberLink(link.value);
+    if (!parsed) return;
+    setMemberSecret(parsed.memberId, parsed.memberSecret);
+    setCurrentMember(parsed.memberId);
+  }, [setCurrentMember]);
 
   const family = store?.getFamily();
   const members = store?.listMembers() ?? [];

@@ -49,13 +49,20 @@ Wrangler reads `CLOUDFLARE_API_TOKEN` automatically.
 
 ## Deploy ChoreBoard (house chores)
 
-First deploy (creates Pages project + `chores.the-idea-guy.com`):
+Use the repo script (no GitHub Actions, no Docker for the frontend):
 
 ```bash
-./scripts/deploy-subdomain.sh chores --init
+chmod +x scripts/deploy-chores.sh   # once
+./scripts/deploy-chores.sh          # build + upload to Cloudflare Pages
 ```
 
-Subsequent deploys (build + upload):
+First deploy only (creates Pages project + `chores.the-idea-guy.com`):
+
+```bash
+./scripts/deploy-chores.sh --init
+```
+
+Equivalent low-level command:
 
 ```bash
 ./scripts/deploy-subdomain.sh chores

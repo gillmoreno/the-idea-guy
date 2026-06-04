@@ -9,6 +9,7 @@
       "output_dir": "choreboard/web/out",
       "build_command": "npm ci && npm run build",
       "build_env": {
+        "NEXT_PUBLIC_APP_URL": "https://chores.the-idea-guy.com",
         "NEXT_PUBLIC_RELAY_URL": "wss://relay.the-idea-guy.com"
       }
     }
