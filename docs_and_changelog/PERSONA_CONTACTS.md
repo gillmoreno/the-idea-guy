@@ -46,10 +46,15 @@ Messages (`friend_request`, `friend_accept`, `room_invite` later) are encrypted 
 ## Typical flow
 
 1. Gil creates persona, shares QR with Matt.
-2. Matt pastes Gil’s code → `pending_out` + `friend_request` sent.
-3. Matt shares his QR; Gil adds Matt → if both added, inbox auto-`mutual`; else Matt sees **Accept**.
+2. Matt scans Gil’s QR (or pastes code) → `pending_out` + `friend_request` sent.
+3. Matt shares his QR; Gil scans or pastes → if both added, inbox auto-`mutual`; else Matt sees **Accept**.
 4. Gil taps Accept → `mutual` + `friend_accept` sent.
-5. Only then: room invites from Gil to Matt (Fit Crew — next step).
+5. Only then: room invites from Gil to Matt (see [ROOM_INVITES.md](./ROOM_INVITES.md)).
+
+## Add contact UI
+
+- **Scan their QR code** — `ContactQRScanner` on `/contacts` (camera → `rooms1.…` payload)
+- **Paste** contact code — same `addContactByCard` path
 
 ---
 

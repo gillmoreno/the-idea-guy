@@ -269,8 +269,9 @@ export class ChoreStore {
     return this.members!.get(id);
   }
 
-  addMember(input: { name: string; role: Role; color: string; pin?: string }): Member {
-    const m: Member = { id: uid("m_"), createdAt: Date.now(), ...input };
+  addMember(input: { name: string; role: Role; color: string; pin?: string; id?: string }): Member {
+    const { id: presetId, ...rest } = input;
+    const m: Member = { id: presetId ?? uid("m_"), createdAt: Date.now(), ...rest };
     this.txPublic(() => this.members!.set(m.id, m));
     return m;
   }

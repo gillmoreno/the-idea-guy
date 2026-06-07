@@ -1,4 +1,10 @@
-import type { ContactRecord, DeviceVault, PersonaRecord, VaultRoom } from "./types";
+import type {
+  ContactRecord,
+  DeviceVault,
+  PersonaRecord,
+  RoomInviteRecord,
+  VaultRoom,
+} from "./types";
 import { CURRENT_VAULT_VERSION } from "./types";
 
 const VAULT_KEY = "rooms.vault.v1";
@@ -23,6 +29,7 @@ function migrateVault(parsed: DeviceVault): DeviceVault {
     version: CURRENT_VAULT_VERSION,
     contacts: parsed.contacts ?? {},
     inboxCursor: parsed.inboxCursor ?? {},
+    roomInvites: parsed.roomInvites ?? {},
   };
 }
 
@@ -115,4 +122,29 @@ export function setInboxCursor(
   const next = { ...vault, inboxCursor };
   saveVault(next);
   return next;
+}
+
+export function upsertRoomInvite(vault: DeviceVault, invite: RoomInviteRecord): DeviceVault {
+  const roomInvites = { ...(vault.roomInvites ?? {}), [invite.messageId]: invite };
+  const next = { ...vault, roomInvites };
+  saveVault(next);
+  return next;
+}
+
+export function removeRoomInvite(vault: DeviceVault, messageId: string): DeviceVault {
+  const roomInvites = { ...(vault.roomInvites ?? {}) };
+  delete roomInvites[messageId];
+  const next = { ...vault, roomInvites };
+  saveVault(next);
+  return next;
+}
+
+export function listPendingRoomInvites(vault: DeviceVault): RoomInviteRecord[] {
+  return Object.values(vault.roomInvites ?? {})
+    .filter((i) => i.status === "pending")
+    .sort((a, b) => b.sentAt - a.sentAt);
+}
+
+export function getRoomInvite(vault: DeviceVault, messageId: string): RoomInviteRecord | null {
+  return vault.roomInvites?.[messageId] ?? null;
 }

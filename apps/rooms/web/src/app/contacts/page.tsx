@@ -6,6 +6,9 @@ import { contactDisplayName } from "@the-idea-guy/room-kit";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { QRBlock } from "@/shell/QRBlock";
 import { PersonaAvatar } from "@/components/PersonaAvatar";
+import { RoomInvitesBanner } from "@/components/RoomInvitesBanner";
+import { ContactQRScanner } from "@/components/ContactQRScanner";
+import { normalizeContactCardInput } from "@/lib/contactCode";
 
 function statusLabel(status: string): string {
   switch (status) {
@@ -37,15 +40,24 @@ export default function ContactsPage() {
 
   const [paste, setPaste] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
+  const [scanning, setScanning] = useState(false);
 
-  const tryAdd = () => {
-    const result = addContactByCard(paste);
+  const tryAdd = (rawInput?: string) => {
+    const raw = (rawInput ?? paste).trim();
+    const card = normalizeContactCardInput(raw) ?? raw;
+    const result = addContactByCard(card);
     if (!result.ok) {
       setAddError(result.error ?? "Could not add");
       return;
     }
     setPaste("");
     setAddError(null);
+    setScanning(false);
+  };
+
+  const handleScan = (contactCard: string) => {
+    setScanning(false);
+    tryAdd(contactCard);
   };
 
   if (!persona || !myContactCard) return null;
@@ -100,21 +112,48 @@ export default function ContactsPage() {
 
         <div className="card stack-sm">
           <div className="section-title">Add someone</div>
-          <textarea
-            className="input"
-            rows={3}
-            placeholder="Paste their contact code"
-            value={paste}
-            onChange={(e) => setPaste(e.target.value)}
-          />
-          {addError && <p className="image-field__error">{addError}</p>}
-          <button className="btn btn-primary btn-block" type="button" onClick={tryAdd}>
-            Send connection request
-          </button>
-          <p className="muted" style={{ fontSize: 12 }}>
-            They must add you back (or accept your request) before you can invite them to rooms.
-          </p>
+          {scanning ? (
+            <ContactQRScanner onScan={handleScan} onClose={() => setScanning(false)} />
+          ) : (
+            <>
+              <button
+                type="button"
+                className="btn btn-block"
+                onClick={() => {
+                  setAddError(null);
+                  setScanning(true);
+                }}
+              >
+                Scan their QR code
+              </button>
+              <p className="muted" style={{ fontSize: 12, margin: 0, textAlign: "center" }}>
+                or paste their contact code
+              </p>
+              <textarea
+                className="input"
+                rows={3}
+                placeholder="Paste their contact code"
+                value={paste}
+                onChange={(e) => setPaste(e.target.value)}
+              />
+              {addError && <p className="image-field__error">{addError}</p>}
+              <button
+                className="btn btn-primary btn-block"
+                type="button"
+                onClick={() => tryAdd()}
+              >
+                Send connection request
+              </button>
+            </>
+          )}
+          {!scanning && (
+            <p className="muted" style={{ fontSize: 12 }}>
+              They must add you back (or accept your request) before you can invite them to rooms.
+            </p>
+          )}
         </div>
+
+        <RoomInvitesBanner compact />
 
         {pendingIncoming.length > 0 && (
           <div className="stack-sm">

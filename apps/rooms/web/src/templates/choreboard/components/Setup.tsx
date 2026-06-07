@@ -2,48 +2,70 @@
 
 import { useState } from "react";
 import { SetupTopbar } from "@/shell/SetupTopbar";
-import { useChoreStore } from "@/templates/choreboard/lib/useChoreStore";
-import { seedChores } from "@/templates/choreboard/lib/seed";
+import { useRoomSession } from "@/shell/RoomSessionProvider";
+import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
+import { RoomMemberInviteField } from "@/components/RoomMemberInviteField";
+import { buildInviteeSlots, buildOrganizerMember } from "@/lib/roomMemberInvites";
 import { CURRENCY_OPTIONS, WEEKDAY_OPTIONS } from "@/templates/choreboard/lib/format";
-import { MEMBER_COLORS, Role } from "@/templates/choreboard/lib/types";
-
-interface DraftMember {
-  name: string;
-  role: Role;
-  color: string;
-}
+import { seedChores } from "@/templates/choreboard/lib/seed";
+import { CHOREBOARD_TEMPLATE_ID } from "@/templates/choreboard/lib/store";
+import { MEMBER_COLORS } from "@/templates/choreboard/lib/types";
+import { useChoreStore } from "@/templates/choreboard/lib/useChoreStore";
 
 export function Setup() {
+  const { roomCode, currentMemberId, setCurrentMember } = useRoomSession();
+  const { persona, mutual, sendRoomInvites } = usePersonaContacts();
   const store = useChoreStore();
   const [name, setName] = useState("Our family");
   const [currency, setCurrency] = useState("USD");
   const [payday, setPayday] = useState(0);
-  const [members, setMembers] = useState<DraftMember[]>([
-    { name: "", role: "parent", color: MEMBER_COLORS[3] },
-  ]);
+  const [invited, setInvited] = useState<typeof mutual>([]);
+  const [busy, setBusy] = useState(false);
 
-  const addRow = () =>
-    setMembers((m) => [
-      ...m,
-      { name: "", role: "kid", color: MEMBER_COLORS[m.length % MEMBER_COLORS.length] },
-    ]);
+  const canFinish = !!store && !!persona && !!roomCode && name.trim() && !busy;
 
-  const update = (i: number, patch: Partial<DraftMember>) =>
-    setMembers((m) => m.map((row, idx) => (idx === i ? { ...row, ...patch } : row)));
+  const finish = async () => {
+    if (!store || !persona || !roomCode || !canFinish) return;
+    setBusy(true);
+    try {
+      store.initFamily({ name: name.trim(), currency, paydayWeekday: payday });
+      const organizer = buildOrganizerMember({
+        persona,
+        currentMemberId,
+        color: MEMBER_COLORS[3],
+      });
+      const self = store.addMember({
+        id: organizer.id,
+        name: organizer.name,
+        role: "parent",
+        color: organizer.color,
+      });
+      setCurrentMember(self.id);
 
-  const remove = (i: number) => setMembers((m) => m.filter((_, idx) => idx !== i));
+      const slots = buildInviteeSlots(invited, MEMBER_COLORS);
+      for (const slot of slots) {
+        store.addMember({
+          id: slot.slotId,
+          name: slot.name,
+          role: "parent",
+          color: slot.color,
+        });
+      }
 
-  const validMembers = members.filter((m) => m.name.trim());
-  const canFinish = !!store && name.trim() && validMembers.length > 0;
+      if (slots.length > 0) {
+        await sendRoomInvites({
+          roomCode,
+          roomName: name.trim(),
+          templateId: CHOREBOARD_TEMPLATE_ID,
+          invites: slots.map((s) => ({ contact: s.contact, memberSlotId: s.slotId })),
+        });
+      }
 
-  const finish = () => {
-    if (!store) return;
-    store.initFamily({ name: name.trim(), currency, paydayWeekday: payday });
-    seedChores(store);
-    for (const m of validMembers) {
-      store.addMember({ name: m.name.trim(), role: m.role, color: m.color });
+      seedChores(store);
+      store.publishAll();
+    } finally {
+      setBusy(false);
     }
-    store.publishAll();
   };
 
   return (
@@ -87,60 +109,31 @@ export function Setup() {
           </div>
         </div>
 
-        <div className="section-title">Family members</div>
+        <div className="section-title">Invite co-parents</div>
         <div className="card stack">
-          {members.map((m, i) => (
-            <div key={i} className="stack-sm">
-              <div className="grid-2">
-                <input
-                  className="input"
-                  placeholder="Name"
-                  value={m.name}
-                  onChange={(e) => update(i, { name: e.target.value })}
-                />
-                <select
-                  className="select"
-                  value={m.role}
-                  onChange={(e) => update(i, { role: e.target.value as Role })}
-                >
-                  <option value="parent">Parent</option>
-                  <option value="kid">Kid</option>
-                </select>
-              </div>
-              <div className="btn-row">
-                {MEMBER_COLORS.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => update(i, { color: c })}
-                    aria-label="color"
-                    style={{
-                      width: 26,
-                      height: 26,
-                      borderRadius: "50%",
-                      background: c,
-                      border: m.color === c ? "3px solid #1f2433" : "2px solid #fff",
-                      boxShadow: "0 0 0 1px var(--border)",
-                    }}
-                  />
-                ))}
-                {members.length > 1 && (
-                  <button className="btn btn-ghost btn-sm" onClick={() => remove(i)}>
-                    Remove
-                  </button>
-                )}
-              </div>
+          {persona && (
+            <div className="row gap-sm" style={{ alignItems: "center", fontSize: 14 }}>
+              <strong>You:</strong> {persona.displayName}
             </div>
-          ))}
-          <button className="btn btn-sm" onClick={addRow}>
-            + Add member
-          </button>
+          )}
+          <RoomMemberInviteField
+            mutual={mutual}
+            selected={invited}
+            onChange={setInvited}
+            minContacts={0}
+            hint="Invite other parents from your contacts. Add kids later from family settings with device links."
+          />
         </div>
 
         <p className="muted" style={{ fontSize: 13 }}>
           We&apos;ll add a starter set of chores you can edit later.
         </p>
-        <button className="btn btn-primary btn-block" disabled={!canFinish} onClick={finish}>
-          Finish setup
+        <button
+          className="btn btn-primary btn-block"
+          disabled={!canFinish}
+          onClick={() => void finish()}
+        >
+          {busy ? "Sending invites…" : "Finish setup"}
         </button>
       </div>
     </div>

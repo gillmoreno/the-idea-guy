@@ -7,6 +7,7 @@ import { useDevice } from "@/shell/DeviceProvider";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { PersonaAvatar } from "@/components/PersonaAvatar";
 import { ConfirmModal } from "@/components/ConfirmModal";
+import { RoomInvitesBanner } from "@/components/RoomInvitesBanner";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { roomUrl } from "@the-idea-guy/room-kit/links";
 import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
@@ -87,6 +88,8 @@ export default function HomePage() {
         <Link className="btn btn-block" href="/join">
           Join with invite code
         </Link>
+
+        <RoomInvitesBanner />
 
         {rooms.length > 0 && (
           <>

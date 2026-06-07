@@ -2,40 +2,45 @@
 
 import { useState } from "react";
 import { SetupTopbar } from "@/shell/SetupTopbar";
+import { useRoomSession } from "@/shell/RoomSessionProvider";
+import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
+import { RoomMemberInviteField } from "@/components/RoomMemberInviteField";
+import { finishRoomSetupWithInvites } from "@/lib/finishRoomSetup";
 import { MEMBER_COLORS } from "../lib/types";
+import { BOOKCLUB_TEMPLATE_ID } from "../lib/store";
 import { useBookClubStore } from "../lib/useBookClubStore";
 
-interface DraftMember {
-  name: string;
-  color: string;
-}
-
 export function Setup() {
+  const { roomCode, currentMemberId, setCurrentMember } = useRoomSession();
+  const { persona, mutual, sendRoomInvites } = usePersonaContacts();
   const store = useBookClubStore();
   const [name, setName] = useState("Our book club");
-  const [members, setMembers] = useState<DraftMember[]>([
-    { name: "", color: MEMBER_COLORS[0] },
-  ]);
+  const [invited, setInvited] = useState<typeof mutual>([]);
+  const [busy, setBusy] = useState(false);
 
-  const addRow = () =>
-    setMembers((rows) => [
-      ...rows,
-      { name: "", color: MEMBER_COLORS[rows.length % MEMBER_COLORS.length] },
-    ]);
+  const canFinish =
+    !!store && !!persona && !!roomCode && name.trim() && invited.length >= 1 && !busy;
 
-  const update = (i: number, patch: Partial<DraftMember>) =>
-    setMembers((rows) => rows.map((row, idx) => (idx === i ? { ...row, ...patch } : row)));
-
-  const remove = (i: number) => setMembers((rows) => rows.filter((_, idx) => idx !== i));
-
-  const validMembers = members.filter((m) => m.name.trim());
-  const canFinish = !!store && name.trim() && validMembers.length >= 2;
-
-  const finish = () => {
-    if (!store) return;
-    store.initClub({ name: name.trim() });
-    for (const m of validMembers) {
-      store.addMember({ name: m.name.trim(), color: m.color });
+  const finish = async () => {
+    if (!store || !persona || !roomCode || !canFinish) return;
+    setBusy(true);
+    try {
+      store.initClub({ name: name.trim() });
+      await finishRoomSetupWithInvites({
+        roomCode,
+        roomName: name.trim(),
+        templateId: BOOKCLUB_TEMPLATE_ID,
+        persona,
+        currentMemberId,
+        invited,
+        colors: MEMBER_COLORS,
+        setCurrentMember,
+        sendRoomInvites,
+        addOrganizer: (m) => store.addMember(m),
+        addInvitee: (m) => store.addMember(m),
+      });
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -58,54 +63,28 @@ export function Setup() {
             />
           </div>
 
-          <div className="section-title">Members</div>
-          <p className="muted" style={{ fontSize: 13 }}>
-            Add everyone in the group. You need at least two.
-          </p>
-          {members.map((m, i) => (
-            <div key={i} className="row gap-sm" style={{ alignItems: "flex-end" }}>
-              <div className="field" style={{ flex: 1 }}>
-                <label>{i === 0 ? "Name" : `Member ${i + 1}`}</label>
-                <input
-                  className="input"
-                  placeholder="Jordan"
-                  value={m.name}
-                  onChange={(e) => update(i, { name: e.target.value })}
-                />
-              </div>
-              <div className="field">
-                <label>Color</label>
-                <select
-                  className="select"
-                  value={m.color}
-                  onChange={(e) => update(i, { color: e.target.value })}
-                >
-                  {MEMBER_COLORS.map((c) => (
-                    <option key={c} value={c}>
-                      ●
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {members.length > 1 && (
-                <button className="btn btn-ghost btn-sm" type="button" onClick={() => remove(i)}>
-                  ✕
-                </button>
-              )}
+          <div className="section-title">Invite members</div>
+          {persona && (
+            <div className="row gap-sm" style={{ alignItems: "center", fontSize: 14 }}>
+              <strong>You:</strong> {persona.displayName}
             </div>
-          ))}
-          <button className="btn btn-ghost btn-block" type="button" onClick={addRow}>
-            + Add member
-          </button>
+          )}
+          <RoomMemberInviteField
+            mutual={mutual}
+            selected={invited}
+            onChange={setInvited}
+            minContacts={1}
+            hint="Pick friends to invite. You need at least one other reader besides yourself."
+          />
         </div>
 
         <button
           className="btn btn-primary btn-block"
           style={{ marginTop: 16 }}
           disabled={!canFinish}
-          onClick={finish}
+          onClick={() => void finish()}
         >
-          Open the club
+          {busy ? "Sending invites…" : "Open the club"}
         </button>
       </div>
     </div>

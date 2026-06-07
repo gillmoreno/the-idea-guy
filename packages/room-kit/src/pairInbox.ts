@@ -120,3 +120,37 @@ export function newFriendAccept(
     sentAt: Date.now(),
   };
 }
+
+export function newRoomInvite(input: {
+  fromPersonaId: string;
+  fromName: string;
+  fromAvatar?: string;
+  roomCode: string;
+  roomName: string;
+  templateId: string;
+  memberSlotId: string;
+  /** Invitee persona public key. */
+  memberBinding: string;
+}): RoomInviteMessage {
+  return {
+    id: "msg_" + crypto.randomUUID(),
+    type: "room_invite",
+    fromPersonaId: input.fromPersonaId,
+    fromName: input.fromName,
+    fromAvatar: input.fromAvatar,
+    sentAt: Date.now(),
+    roomCode: input.roomCode.trim(),
+    roomName: input.roomName.trim(),
+    templateId: input.templateId,
+    memberSlotId: input.memberSlotId,
+    memberBinding: input.memberBinding,
+  };
+}
+
+/** True when this device persona may accept the invite. */
+export function canAcceptRoomInvite(
+  invite: Pick<RoomInviteMessage, "memberBinding">,
+  myPublicKey: string,
+): boolean {
+  return invite.memberBinding === myPublicKey;
+}

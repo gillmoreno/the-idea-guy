@@ -16,21 +16,30 @@ import {
   type DeviceVault,
   type InboxMessage,
   type PersonaRecord,
+  type RoomInviteMessage,
+  type RoomInviteRecord,
+  canAcceptRoomInvite,
   canExchangeMessages,
   canSendFriendRequest,
   contactCardFromPersona,
   encodeContactCard,
   generatePersonaKeys,
   getContact,
+  getRoomInvite,
   listContacts,
+  listPendingRoomInvites,
   loadVault,
   newFriendAccept,
   newFriendRequest,
+  newRoomInvite,
   parseContactCard,
+  removeRoomInvite,
   savePersona,
   setInboxCursor,
   shouldSyncInbox,
   upsertContact,
+  upsertRoomInvite,
+  upsertVaultRoom,
 } from "@the-idea-guy/room-kit";
 import { useDevice } from "./DeviceProvider";
 import { InboxSyncManager } from "./contacts/inboxSyncManager";
@@ -50,6 +59,15 @@ interface PersonaContactsCtx {
   addContactByCard: (raw: string) => { ok: boolean; error?: string };
   acceptContact: (personaId: string) => Promise<void>;
   blockContact: (personaId: string) => void;
+  pendingRoomInvites: RoomInviteRecord[];
+  sendRoomInvites: (input: {
+    roomCode: string;
+    roomName: string;
+    templateId: string;
+    invites: { contact: ContactRecord; memberSlotId: string }[];
+  }) => Promise<void>;
+  acceptRoomInvite: (messageId: string) => Promise<string | null>;
+  declineRoomInvite: (messageId: string) => void;
   refresh: () => void;
 }
 
@@ -64,7 +82,7 @@ function contactFromMessage(
 
 function applyIncomingMessage(
   vault: DeviceVault,
-  personaId: string,
+  myPublicKey: string,
   msg: InboxMessage,
 ): DeviceVault {
   if (msg.fromPersonaId === vault.persona?.personaId) return vault;
@@ -125,7 +143,24 @@ function applyIncomingMessage(
 
   if (msg.type === "room_invite") {
     if (!canExchangeMessages(existing ?? undefined)) return v;
-    // Room invite handling wired in a follow-up — requires mutual first.
+    const invite = msg as RoomInviteMessage;
+    if (!myPublicKey || invite.memberBinding !== myPublicKey) return v;
+    const record: RoomInviteRecord = {
+      messageId: invite.id,
+      roomCode: invite.roomCode,
+      roomName: invite.roomName,
+      templateId: invite.templateId,
+      memberSlotId: invite.memberSlotId,
+      memberBinding: invite.memberBinding,
+      fromPersonaId: invite.fromPersonaId,
+      fromName: invite.fromName,
+      fromAvatar: invite.fromAvatar,
+      status: "pending",
+      sentAt: invite.sentAt,
+    };
+    const prior = v.roomInvites?.[invite.id];
+    if (prior?.status === "declined") return v;
+    return upsertRoomInvite(v, record);
   }
 
   return v;
@@ -148,6 +183,10 @@ export function PersonaContactsProvider({ children }: { children: React.ReactNod
   const pendingOutgoing = contacts.filter((c) => c.status === "pending_out");
   const mutual = contacts.filter((c) => c.status === "mutual");
   const blocked = contacts.filter((c) => c.status === "blocked");
+  const pendingRoomInvites = useMemo(
+    () => listPendingRoomInvites(localVault),
+    [localVault],
+  );
 
   const myContactCard = persona
     ? encodeContactCard(
@@ -175,7 +214,7 @@ export function PersonaContactsProvider({ children }: { children: React.ReactNod
         }
         const before = getContact(v, msg.fromPersonaId);
         const prev = v;
-        v = applyIncomingMessage(v, contactPersonaId, msg);
+        v = applyIncomingMessage(v, persona?.publicKey ?? "", msg);
         if (v !== prev) changed = true;
         const after = getContact(v, msg.fromPersonaId);
         if (
@@ -317,6 +356,78 @@ export function PersonaContactsProvider({ children }: { children: React.ReactNod
     [persona, refresh],
   );
 
+  const sendRoomInvites = useCallback(
+    async (input: {
+      roomCode: string;
+      roomName: string;
+      templateId: string;
+      invites: { contact: ContactRecord; memberSlotId: string }[];
+    }) => {
+      if (!persona) return;
+      const mgr = inboxRef.current;
+      if (!mgr) return;
+      for (const inv of input.invites) {
+        if (inv.contact.status !== "mutual") continue;
+        await mgr.send(
+          inv.contact,
+          newRoomInvite({
+            fromPersonaId: persona.personaId,
+            fromName: persona.displayName,
+            fromAvatar: persona.avatar,
+            roomCode: input.roomCode,
+            roomName: input.roomName,
+            templateId: input.templateId,
+            memberSlotId: inv.memberSlotId,
+            memberBinding: inv.contact.publicKey,
+          }),
+        );
+      }
+    },
+    [persona],
+  );
+
+  const acceptRoomInvite = useCallback(
+    async (messageId: string): Promise<string | null> => {
+      if (!persona) return null;
+      let v = loadVault();
+      const invite = getRoomInvite(v, messageId);
+      if (!invite || invite.status !== "pending") return null;
+      if (!canAcceptRoomInvite(invite, persona.publicKey)) return null;
+
+      const existing = v.rooms[invite.roomCode];
+      const templateKind =
+        invite.templateId === "declarative" || invite.templateId === "_pending"
+          ? "declarative"
+          : "builtin";
+      v = upsertVaultRoom(v, {
+        roomCode: invite.roomCode,
+        templateKind,
+        templateId: invite.templateId,
+        roomName: invite.roomName,
+        memberId: invite.memberSlotId,
+        displayName: persona.displayName,
+        lastOpenedAt: Date.now(),
+        isOwner: existing?.isOwner,
+        adminSecret: existing?.adminSecret,
+      });
+      v = removeRoomInvite(v, messageId);
+      refresh();
+      return invite.roomCode;
+    },
+    [persona, refresh],
+  );
+
+  const declineRoomInvite = useCallback(
+    (messageId: string) => {
+      let v = loadVault();
+      const invite = getRoomInvite(v, messageId);
+      if (!invite) return;
+      v = upsertRoomInvite(v, { ...invite, status: "declined" });
+      refresh();
+    },
+    [refresh],
+  );
+
   const blockContact = useCallback(
     (personaId: string) => {
       let v = loadVault();
@@ -349,6 +460,10 @@ export function PersonaContactsProvider({ children }: { children: React.ReactNod
       addContactByCard,
       acceptContact,
       blockContact,
+      pendingRoomInvites,
+      sendRoomInvites,
+      acceptRoomInvite,
+      declineRoomInvite,
       refresh,
     }),
     [
@@ -363,6 +478,10 @@ export function PersonaContactsProvider({ children }: { children: React.ReactNod
       addContactByCard,
       acceptContact,
       blockContact,
+      pendingRoomInvites,
+      sendRoomInvites,
+      acceptRoomInvite,
+      declineRoomInvite,
       refresh,
     ],
   );

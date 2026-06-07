@@ -77,12 +77,30 @@ export interface ContactRecord {
 /** Last processed inbox message id per contact persona. */
 export type InboxCursor = Record<string, string>;
 
+export type RoomInviteStatus = "pending" | "declined";
+
+export interface RoomInviteRecord {
+  messageId: string;
+  roomCode: string;
+  roomName: string;
+  templateId: string;
+  memberSlotId: string;
+  /** Invitee persona public key — only they may accept. */
+  memberBinding: string;
+  fromPersonaId: string;
+  fromName: string;
+  fromAvatar?: string;
+  status: RoomInviteStatus;
+  sentAt: number;
+}
+
 export interface DeviceVault {
   version: 1 | 2;
   relayUrlOverride?: string;
   persona?: PersonaRecord;
   contacts?: Record<string, ContactRecord>;
   inboxCursor?: InboxCursor;
+  roomInvites?: Record<string, RoomInviteRecord>;
   rooms: Record<string, VaultRoom>;
 }
 

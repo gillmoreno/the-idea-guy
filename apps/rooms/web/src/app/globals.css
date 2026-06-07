@@ -1437,6 +1437,63 @@ textarea.input {
   cursor: pointer;
 }
 
+/* ---------- room contact invites (shared brick) ---------- */
+.room-invite-field__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.room-invite-field__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  color: inherit;
+  text-align: left;
+}
+.room-invite-field__row.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.room-invite-field__check {
+  width: 20px;
+  font-weight: 700;
+  color: var(--primary);
+}
+.room-invite-card {
+  flex-wrap: wrap;
+}
+
+/* ---------- contact QR scanner ---------- */
+.contact-qr-scanner__viewport {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #000;
+  min-height: 260px;
+}
+.contact-qr-scanner__reader video {
+  width: 100%;
+  display: block;
+}
+.contact-qr-scanner__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+}
+
 /* ---------- themes: paper (classic-adjacent) ---------- */
 [data-theme="paper"] {
   --bg: #fafaf9;

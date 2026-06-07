@@ -1,37 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { DECLARATIVE_TEMPLATE_ID } from "@the-idea-guy/room-kit";
 import { SetupTopbar } from "@/shell/SetupTopbar";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
+import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
+import { RoomMemberInviteField } from "@/components/RoomMemberInviteField";
+import { finishRoomSetupWithInvites } from "@/lib/finishRoomSetup";
+import { SETUP_MEMBER_COLORS } from "@/lib/roomMemberInvites";
 import { peekPendingSchema, takePendingSchema } from "@/schema/pending";
 import { useSchemaStore } from "@/schema/useSchemaStore";
 
-const MEMBER_COLORS = [
-  "#6366f1",
-  "#ec4899",
-  "#14b8a6",
-  "#f59e0b",
-  "#8b5cf6",
-  "#06b6d4",
-  "#ef4444",
-  "#84cc16",
-];
-
-interface DraftMember {
-  name: string;
-  color: string;
-}
-
 export function DeclarativeSetup() {
   const { roomCode, roomSchema, currentMemberId, setCurrentMember } = useRoomSession();
+  const { persona, mutual, sendRoomInvites } = usePersonaContacts();
   const store = useSchemaStore();
   const pending = roomCode ? peekPendingSchema(roomCode) : null;
   const schema = roomSchema ?? pending;
 
   const [name, setName] = useState(schema?.name ?? "My room");
-  const [members, setMembers] = useState<DraftMember[]>([
-    { name: "", color: MEMBER_COLORS[0] },
-  ]);
+  const [invited, setInvited] = useState<typeof mutual>([]);
+  const [busy, setBusy] = useState(false);
 
   if (!schema || !store) {
     return (
@@ -41,33 +30,32 @@ export function DeclarativeSetup() {
     );
   }
 
-  const addRow = () =>
-    setMembers((rows) => [
-      ...rows,
-      { name: "", color: MEMBER_COLORS[rows.length % MEMBER_COLORS.length] },
-    ]);
+  const canFinish = !!persona && !!roomCode && name.trim() && !busy;
 
-  const update = (i: number, patch: Partial<DraftMember>) =>
-    setMembers((rows) => rows.map((row, idx) => (idx === i ? { ...row, ...patch } : row)));
-
-  const remove = (i: number) => setMembers((rows) => rows.filter((_, idx) => idx !== i));
-
-  const validMembers = members.filter((m) => m.name.trim());
-  const canFinish = name.trim() && validMembers.length >= 1;
-
-  const finish = () => {
-    if (!canFinish || !roomCode) return;
-    takePendingSchema(roomCode);
-    const first = store.addMember({
-      name: validMembers[0].name.trim(),
-      color: validMembers[0].color,
-      id: currentMemberId ?? undefined,
-    });
-    store.initRoom({ roomName: name.trim(), schema }, first.id);
-    for (const m of validMembers.slice(1)) {
-      store.addMember({ name: m.name.trim(), color: m.color });
+  const finish = async () => {
+    if (!persona || !roomCode || !canFinish) return;
+    setBusy(true);
+    try {
+      await finishRoomSetupWithInvites({
+        roomCode,
+        roomName: name.trim(),
+        templateId: DECLARATIVE_TEMPLATE_ID,
+        persona,
+        currentMemberId,
+        invited,
+        colors: SETUP_MEMBER_COLORS,
+        setCurrentMember,
+        sendRoomInvites,
+        onOrganizerReady: (org) => {
+          takePendingSchema(roomCode);
+          store.initRoom({ roomName: name.trim(), schema }, org.id);
+        },
+        addOrganizer: (m) => store.addMember(m),
+        addInvitee: (m) => store.addMember(m),
+      });
+    } finally {
+      setBusy(false);
     }
-    setCurrentMember(first.id);
   };
 
   return (
@@ -88,57 +76,30 @@ export function DeclarativeSetup() {
           )}
           <div className="field">
             <label>Room name</label>
-            <input
-              className="input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
 
-          <div className="section-title">Members</div>
-          {members.map((m, i) => (
-            <div key={i} className="row gap-sm" style={{ alignItems: "flex-end" }}>
-              <div className="field" style={{ flex: 1 }}>
-                <label>{i === 0 ? "Your name" : `Member ${i + 1}`}</label>
-                <input
-                  className="input"
-                  value={m.name}
-                  onChange={(e) => update(i, { name: e.target.value })}
-                />
-              </div>
-              <div className="field">
-                <label>Color</label>
-                <select
-                  className="select"
-                  value={m.color}
-                  onChange={(e) => update(i, { color: e.target.value })}
-                >
-                  {MEMBER_COLORS.map((c) => (
-                    <option key={c} value={c}>
-                      ●
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {members.length > 1 && (
-                <button className="btn btn-ghost btn-sm" type="button" onClick={() => remove(i)}>
-                  ✕
-                </button>
-              )}
+          <div className="section-title">Invite members</div>
+          {persona && (
+            <div className="row gap-sm" style={{ alignItems: "center", fontSize: 14 }}>
+              <strong>You:</strong> {persona.displayName}
             </div>
-          ))}
-          <button className="btn btn-ghost btn-block" type="button" onClick={addRow}>
-            + Add member
-          </button>
+          )}
+          <RoomMemberInviteField
+            mutual={mutual}
+            selected={invited}
+            onChange={setInvited}
+            minContacts={0}
+          />
         </div>
 
         <button
           className="btn btn-primary btn-block"
           style={{ marginTop: 16 }}
           disabled={!canFinish}
-          onClick={finish}
+          onClick={() => void finish()}
         >
-          Open room
+          {busy ? "Sending invites…" : "Open room"}
         </button>
       </div>
     </div>
