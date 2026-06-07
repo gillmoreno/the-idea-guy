@@ -9,7 +9,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import * as Y from "yjs";
+import { Y } from "@the-idea-guy/room-kit";
 import {
   APP_ID,
   LocalFirstDoc,
@@ -133,12 +133,14 @@ export function RoomSessionProvider({
   const refreshStore = useCallback(() => {
     const p = publicRef.current;
     const a = adminRef.current;
-    if (p) {
-      const fromDoc = readTemplateFromDoc(p.doc);
-      if (fromDoc) setTemplateId(fromDoc);
-      setStore(new ChoreStore(p.doc, a?.doc ?? null));
-    }
-    bump();
+    queueMicrotask(() => {
+      if (p) {
+        const fromDoc = readTemplateFromDoc(p.doc);
+        if (fromDoc) setTemplateId(fromDoc);
+        setStore(new ChoreStore(p.doc, a?.doc ?? null));
+      }
+      bump();
+    });
   }, []);
 
   const wireDocs = useCallback(

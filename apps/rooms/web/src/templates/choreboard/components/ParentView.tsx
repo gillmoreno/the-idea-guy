@@ -12,6 +12,7 @@ import { qrFamilyJoin, qrMemberLink, qrParentUnlock } from "@the-idea-guy/room-k
 import { QRBlock } from "./QRBlock";
 import { PermissionsSettings } from "./PermissionsSettings";
 import { RelaySettings } from "./RelaySettings";
+import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { Completion } from "@/templates/choreboard/lib/types";
 import { weekRange } from "@/templates/choreboard/lib/store";
 import { resolveFrequencyLimit } from "@/templates/choreboard/lib/frequency";
@@ -442,6 +443,12 @@ function SettingsTab() {
 
       <div className="section-title">Family</div>
       <FamilySettings />
+
+      <RoomLocalStorage
+        roomCode={familyCode}
+        includeAdmin={hasParentAccess}
+        variant="card"
+      />
 
       <ResetHistorySection />
 

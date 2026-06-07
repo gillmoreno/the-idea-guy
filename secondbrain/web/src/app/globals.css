@@ -922,6 +922,12 @@ a { color: var(--primary); }
   min-width: 4px;
 }
 .storage-footnote { font-size: 11px; line-height: 1.45; margin-top: 4px; }
+.storage-compact-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
 
 @media (max-width: 480px) {
   .storage-summary { grid-template-columns: 1fr; }

@@ -41,6 +41,7 @@ interface SecondBrainCtx {
   leave: () => void;
   setActiveNoteId: (id: string | null) => void;
   refreshSearch: () => void;
+  compactVault: () => Promise<{ before: number; after: number } | null>;
 }
 
 const Ctx = createContext<SecondBrainCtx | null>(null);
@@ -121,6 +122,17 @@ export function SecondBrainProvider({ children }: { children: React.ReactNode })
     setActiveNoteIdState(id);
   }, []);
 
+  const compactVault = useCallback(async () => {
+    const lf = lfRef.current;
+    if (!lf) return null;
+    const result = await lf.compactStorage();
+    if (result.after > 0 || result.before > 0) {
+      setVersion((v) => v + 1);
+      refreshSearch();
+    }
+    return result;
+  }, [refreshSearch]);
+
   const value = useMemo(
     () => ({
       mounted,
@@ -135,6 +147,7 @@ export function SecondBrainProvider({ children }: { children: React.ReactNode })
       leave,
       setActiveNoteId,
       refreshSearch,
+      compactVault,
     }),
     [
       mounted,
@@ -148,6 +161,7 @@ export function SecondBrainProvider({ children }: { children: React.ReactNode })
       leave,
       setActiveNoteId,
       refreshSearch,
+      compactVault,
     ],
   );
 

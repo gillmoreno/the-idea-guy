@@ -3,8 +3,9 @@
 // It knows nothing about ChoreBoard or any app. Clients connect to a "room"
 // (one room per family) and exchange opaque, end-to-end-encrypted CRDT updates.
 // The relay only broadcasts those blobs to other peers in the same room and
-// keeps an append-only log so a device that was offline can catch up. It can
-// never read the contents — privacy and data ownership stay with the family.
+// keeps a replay log so a device that was offline can catch up. Clients may
+// send checkpoint frames to compact the log to a single merged snapshot.
+// It can never read the contents — privacy and data ownership stay with the family.
 package main
 
 import (
@@ -136,6 +137,13 @@ func (h *hub) handleSync(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Signal backlog complete so the client can send a merged checkpoint.
+	select {
+	case p.send <- []byte{msgSyncEnd}:
+	case <-ctx.Done():
+		return
+	}
+
 	for {
 		typ, data, err := conn.Read(ctx)
 		if err != nil {
@@ -144,27 +152,62 @@ func (h *hub) handleSync(w http.ResponseWriter, r *http.Request) {
 		if typ != websocket.MessageBinary || len(data) == 0 {
 			continue
 		}
-		h.appendAndBroadcast(roomName, rm, p, data)
+		switch frameType(data) {
+		case msgCheckpoint:
+			h.compactAndBroadcast(roomName, rm, p, data)
+		default:
+			h.appendAndBroadcast(roomName, rm, p, data)
+		}
 	}
 }
 
 func (h *hub) appendAndBroadcast(roomName string, rm *room, from *peer, blob []byte) {
 	rm.mu.Lock()
 	rm.log = append(rm.log, blob)
+	targets := h.peerTargets(rm, from)
+	rm.mu.Unlock()
+
+	if h.dataDir != "" {
+		if err := h.persistAppend(roomName, blob); err != nil {
+			log.Printf("relay: persist failed for room: %v", err)
+		}
+	}
+
+	h.fanout(targets, blob)
+}
+
+// compactAndBroadcast replaces the room log with one checkpoint frame (log compaction).
+func (h *hub) compactAndBroadcast(roomName string, rm *room, from *peer, frame []byte) {
+	rm.mu.Lock()
+	prev := len(rm.log)
+	rm.log = [][]byte{append([]byte(nil), frame...)}
+	targets := h.peerTargets(rm, from)
+	rm.mu.Unlock()
+
+	if h.dataDir != "" {
+		if err := h.persistRoom(roomName, rm); err != nil {
+			log.Printf("relay: compact persist failed for room: %v", err)
+		}
+	}
+
+	if prev > 1 {
+		log.Printf("relay: compacted room %s (%d → 1 entries)", roomName, prev)
+	}
+
+	h.fanout(targets, frame)
+}
+
+func (h *hub) peerTargets(rm *room, from *peer) []*peer {
 	targets := make([]*peer, 0, len(rm.peers))
 	for p := range rm.peers {
 		if p != from {
 			targets = append(targets, p)
 		}
 	}
-	rm.mu.Unlock()
+	return targets
+}
 
-	if h.dataDir != "" {
-		if err := h.persist(roomName, blob); err != nil {
-			log.Printf("relay: persist failed for room: %v", err)
-		}
-	}
-
+func (h *hub) fanout(targets []*peer, blob []byte) {
 	for _, p := range targets {
 		select {
 		case p.send <- blob:
@@ -198,7 +241,7 @@ func (h *hub) roomFile(roomName string) string {
 	return filepath.Join(h.dataDir, safe+".log")
 }
 
-func (h *hub) persist(roomName string, blob []byte) error {
+func (h *hub) persistAppend(roomName string, blob []byte) error {
 	if err := os.MkdirAll(h.dataDir, 0o755); err != nil {
 		return err
 	}
@@ -209,6 +252,20 @@ func (h *hub) persist(roomName string, blob []byte) error {
 	defer f.Close()
 	_, err = f.WriteString(base64.StdEncoding.EncodeToString(blob) + "\n")
 	return err
+}
+
+func (h *hub) persistRoom(roomName string, rm *room) error {
+	if err := os.MkdirAll(h.dataDir, 0o755); err != nil {
+		return err
+	}
+	rm.mu.Lock()
+	lines := make([]byte, 0, len(rm.log)*128)
+	for _, blob := range rm.log {
+		lines = append(lines, base64.StdEncoding.EncodeToString(blob)...)
+		lines = append(lines, '\n')
+	}
+	rm.mu.Unlock()
+	return os.WriteFile(h.roomFile(roomName), lines, 0o644)
 }
 
 func (h *hub) load() error {

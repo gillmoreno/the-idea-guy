@@ -22,7 +22,9 @@ apps/rooms/web/        Meta PWA (Next.js static export)
 
 ```bash
 cd apps/rooms
-make dev              # Go relay + Next dev (default)
+make dev              # Stop old dev processes, then relay + Next dev
+make dev-restart      # Same as make dev
+make dev-stop         # Kill only (ports 4500 + 3300)
 make dev-docker       # Docker relay + Next dev
 ```
 

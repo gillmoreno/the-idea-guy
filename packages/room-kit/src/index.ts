@@ -1,3 +1,4 @@
+export { Y, isYMap } from "./yjs";
 export { APP_ID, DEFAULT_APP_URL, DEFAULT_RELAY_URL } from "./constants";
 export {
   adminKeyMaterial,
@@ -57,6 +58,15 @@ export {
   touchVaultRoom,
   upsertVaultRoom,
 } from "./vault";
+export { deleteIdbDatabase, ensureIdbReady, idbHasValidSchema } from "./persistence";
+export {
+  deleteRoomLocalData,
+  formatBytes,
+  measureIndexedDbDatabase,
+  measureRoomLocalBytes,
+  persistenceDbName,
+  roomPersistenceDbNames,
+} from "./storageSize";
 export type {
   AdminMemberRecord,
   AdminRoomMeta,

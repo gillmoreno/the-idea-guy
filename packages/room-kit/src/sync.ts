@@ -1,7 +1,8 @@
 // LocalFirstDoc — Yjs + IndexedDB + E2E-encrypted sync over the relay.
-import * as Y from "yjs";
+import { Y } from "./yjs";
 import { IndexeddbPersistence } from "y-indexeddb";
 import { deriveKey, deriveRoom, encrypt, decrypt, type SyncScope } from "./crypto";
+import { deleteIdbDatabase, ensureIdbReady } from "./persistence";
 import {
   frameCheckpoint,
   frameUpdate,
@@ -72,12 +73,36 @@ export class LocalFirstDoc {
     this.room = await deriveRoom(this.roomCode, this.appId, this.scope);
     if (this.destroyed) return;
 
-    this.idb = new IndexeddbPersistence(
-      `${this.appId}:${this.scope}:${this.room}`,
-      this.doc,
-    );
-    this.idb.on("synced", () => this.setState({ localLoaded: true }));
+    await this.initPersistence(`${this.appId}:${this.scope}:${this.room}`);
+    if (this.destroyed) return;
     this.connect();
+  }
+
+  private async initPersistence(dbName: string, attempt = 0): Promise<void> {
+    await ensureIdbReady(dbName);
+    if (this.destroyed) return;
+
+    const persistence = new IndexeddbPersistence(dbName, this.doc);
+    this.idb = persistence;
+    persistence.on("synced", () => this.setState({ localLoaded: true }));
+
+    try {
+      type IdbPersistence = IndexeddbPersistence & { _db: Promise<IDBDatabase> };
+      await (persistence as IdbPersistence)._db;
+      await persistence.whenSynced;
+    } catch {
+      try {
+        await persistence.clearData();
+      } catch {
+        await deleteIdbDatabase(dbName);
+      }
+      this.idb = null;
+      if (attempt < 1) {
+        await this.initPersistence(dbName, attempt + 1);
+        return;
+      }
+      this.setState({ localLoaded: true });
+    }
   }
 
   private connect() {

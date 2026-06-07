@@ -1,16 +1,32 @@
-.PHONY: dev dev-relay dev-relay-docker dev-docker dev-web build relay-build web-build web-build-local preview preview-all deploy
+.PHONY: dev dev-fresh dev-stop dev-restart dev-relay dev-relay-docker dev-docker dev-web build relay-build web-build web-build-local preview preview-all deploy
 
 RELAY_ADDR ?= :4500
+RELAY_PORT ?= 4500
 WEB_PORT ?= 3300
 PREVIEW_PORT ?= 3300
 PREVIEW_URL ?= http://localhost:$(PREVIEW_PORT)
 
-dev:
+# Stop anything already bound to the dev ports (safe if nothing is running).
+dev-stop:
+	@echo "Stopping existing Rooms dev processes on :$(RELAY_PORT) and :$(WEB_PORT)…"
+	@lsof -ti :$(RELAY_PORT) | xargs kill -9 2>/dev/null || true
+	@lsof -ti :$(WEB_PORT) | xargs kill -9 2>/dev/null || true
+	@cd ../../relay && docker compose down 2>/dev/null || true
+
+# Restart = stop old processes, then start relay + Next dev.
+dev: dev-stop
 	@echo "Starting relay on $(RELAY_ADDR) and Rooms web on :$(WEB_PORT)…"
 	@trap 'kill 0' EXIT; \
 		(cd ../../relay && RELAY_ADDR=$(RELAY_ADDR) go run .) & \
-		(cd web && NEXT_PUBLIC_RELAY_URL=ws://localhost:4500 npm run dev -- -p $(WEB_PORT)) & \
+		(cd web && NEXT_PUBLIC_RELAY_URL=ws://localhost:$(RELAY_PORT) npm run dev -- -p $(WEB_PORT)) & \
 		wait
+
+dev-restart: dev
+
+# Use when the UI is stuck on "Starting Rooms…" or chunks 404 — clears Next cache.
+dev-fresh: dev-stop
+	@rm -rf web/.next
+	@$(MAKE) dev
 
 dev-relay:
 	cd ../../relay && RELAY_ADDR=$(RELAY_ADDR) go run .

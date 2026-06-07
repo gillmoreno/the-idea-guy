@@ -1,5 +1,15 @@
 import * as Y from "yjs";
-import { AiSettings, DEFAULT_AI_MODEL, Folder, LinkEntry, Note, VaultMeta } from "./types";
+import { imageBytesInHtml } from "./imageInsert";
+import {
+  AiSettings,
+  DEFAULT_AI_MODEL,
+  DEFAULT_OLLAMA_BASE_URL,
+  DEFAULT_OLLAMA_MODEL,
+  Folder,
+  LinkEntry,
+  Note,
+  VaultMeta,
+} from "./types";
 import { extractNoteLinks, htmlToPlainText, noteContentField } from "./html";
 import { utf8ByteLength } from "./storageStats";
 
@@ -68,26 +78,33 @@ export class NoteStore {
   // --- AI settings (per vault, E2E-synced) ---
   getAiSettings(): AiSettings {
     const raw = this.settings.get("ai") as Partial<AiSettings> | undefined;
+    const provider = raw?.provider === "ollama" ? "ollama" : "openai";
     return {
-      provider: "openai",
+      provider,
       apiKey: raw?.apiKey ?? "",
-      model: raw?.model ?? DEFAULT_AI_MODEL,
+      baseUrl: raw?.baseUrl ?? DEFAULT_OLLAMA_BASE_URL,
+      model:
+        raw?.model ??
+        (provider === "ollama" ? DEFAULT_OLLAMA_MODEL : DEFAULT_AI_MODEL),
     };
   }
 
-  setAiSettings(patch: Partial<Pick<AiSettings, "apiKey" | "model">>) {
+  setAiSettings(patch: Partial<Pick<AiSettings, "provider" | "apiKey" | "baseUrl" | "model">>) {
     const current = this.getAiSettings();
     this.tx(() => {
       this.settings.set("ai", {
-        provider: "openai" as const,
+        provider: patch.provider ?? current.provider,
         apiKey: patch.apiKey ?? current.apiKey,
+        baseUrl: patch.baseUrl ?? current.baseUrl,
         model: patch.model ?? current.model,
       });
     });
   }
 
-  hasAiKey(): boolean {
-    return this.getAiSettings().apiKey.trim().length > 0;
+  hasAiConfigured(): boolean {
+    const s = this.getAiSettings();
+    if (s.provider === "ollama") return s.baseUrl.trim().length > 0 && s.model.trim().length > 0;
+    return s.apiKey.trim().length > 0;
   }
 
   // --- folders ---
@@ -164,9 +181,13 @@ export class NoteStore {
   }
 
   /** Sync html/plainText from editor and rebuild link index. */
-  syncNoteContent(id: string, html: string) {
+  syncNoteContent(id: string, html: string): { freedImageBytes: number } {
     const existing = this.notes.get(id);
-    if (!existing) return;
+    if (!existing) return { freedImageBytes: 0 };
+    const freedImageBytes = Math.max(
+      0,
+      imageBytesInHtml(existing.html) - imageBytesInHtml(html),
+    );
     const plainText = htmlToPlainText(html);
     this.tx(() => {
       this.notes.set(id, {
@@ -177,6 +198,7 @@ export class NoteStore {
       });
     });
     this.rebuildLinkIndex(id, html);
+    return { freedImageBytes };
   }
 
   deleteNote(id: string) {

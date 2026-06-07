@@ -9,6 +9,7 @@
 // `.doc`, and subscribe to `onChange`. No app logic lives here.
 import * as Y from "yjs";
 import { IndexeddbPersistence } from "y-indexeddb";
+import { encodeCompactedState } from "@/lib/compactDoc";
 import { deriveKey, deriveRoom, encrypt, decrypt } from "./crypto";
 import {
   frameCheckpoint,
@@ -33,8 +34,28 @@ export interface LocalFirstOptions {
   onState?: (state: SyncState) => void;
 }
 
+export interface CompactResult {
+  before: number;
+  after: number;
+}
+
+function waitForIdbSync(idb: IndexeddbPersistence): Promise<void> {
+  return new Promise((resolve) => {
+    const idbAny = idb as IndexeddbPersistence & { synced?: boolean };
+    if (idbAny.synced) {
+      resolve();
+      return;
+    }
+    const onSynced = () => {
+      idb.off("synced", onSynced);
+      resolve();
+    };
+    idb.on("synced", onSynced);
+  });
+}
+
 export class LocalFirstDoc {
-  readonly doc: Y.Doc;
+  private _doc: Y.Doc;
   private readonly appId: string;
   private readonly inviteCode: string;
   private readonly relayUrl: string;
@@ -49,6 +70,7 @@ export class LocalFirstDoc {
   private syncEndFallbackTimer: ReturnType<typeof setTimeout> | null = null;
   private destroyed = false;
   private checkpointSent = false;
+  private compacting = false;
   private state: SyncState = { localLoaded: false, connected: false };
 
   constructor(opts: LocalFirstOptions) {
@@ -57,10 +79,27 @@ export class LocalFirstDoc {
     this.relayUrl = opts.relayUrl;
     this.onChange = opts.onChange;
     this.onState = opts.onState;
-    this.doc = new Y.Doc();
-    this.doc.on("afterTransaction", () => this.onChange?.());
-    this.doc.on("update", this.handleLocalUpdate);
+    this._doc = new Y.Doc({ gc: true });
+    this.bindDoc(this._doc);
     void this.start();
+  }
+
+  get doc(): Y.Doc {
+    return this._doc;
+  }
+
+  private onAfterTransaction = () => {
+    this.onChange?.();
+  };
+
+  private bindDoc(doc: Y.Doc) {
+    doc.on("afterTransaction", this.onAfterTransaction);
+    doc.on("update", this.handleLocalUpdate);
+  }
+
+  private unbindDoc(doc: Y.Doc) {
+    doc.off("afterTransaction", this.onAfterTransaction);
+    doc.off("update", this.handleLocalUpdate);
   }
 
   private setState(patch: Partial<SyncState>) {
@@ -73,7 +112,7 @@ export class LocalFirstDoc {
     this.room = await deriveRoom(this.inviteCode);
     if (this.destroyed) return;
 
-    this.idb = new IndexeddbPersistence(`${this.appId}:${this.room}`, this.doc);
+    this.idb = new IndexeddbPersistence(`${this.appId}:${this.room}`, this._doc);
     this.idb.on("synced", () => this.setState({ localLoaded: true }));
 
     this.connect();
@@ -122,7 +161,7 @@ export class LocalFirstDoc {
   }
 
   private handleLocalUpdate = (update: Uint8Array, origin: unknown) => {
-    if (origin === REMOTE_ORIGIN) return;
+    if (origin === REMOTE_ORIGIN || this.compacting) return;
     void this.send(update);
   };
 
@@ -135,14 +174,14 @@ export class LocalFirstDoc {
   }
 
   private async sendCheckpoint() {
-    if (this.checkpointSent || this.destroyed || !this.key) return;
+    if (this.checkpointSent || this.destroyed || !this.key || this.compacting) return;
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
     this.checkpointSent = true;
     if (this.syncEndFallbackTimer) {
       clearTimeout(this.syncEndFallbackTimer);
       this.syncEndFallbackTimer = null;
     }
-    const update = Y.encodeStateAsUpdate(this.doc);
+    const update = encodeCompactedState(this._doc);
     const blob = await encrypt(this.key, update);
     if (this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(frameCheckpoint(blob));
@@ -165,7 +204,50 @@ export class LocalFirstDoc {
     const encrypted = legacy ? bytes : payload;
     const plain = await decrypt(this.key, encrypted);
     if (!plain) return;
-    Y.applyUpdate(this.doc, plain, REMOTE_ORIGIN);
+    Y.applyUpdate(this._doc, plain, REMOTE_ORIGIN);
+  }
+
+  /**
+   * Drop CRDT edit history (e.g. after removing large inline images) by
+   * rehydrating the vault into a fresh Y.Doc and rewriting IndexedDB.
+   */
+  async compactStorage(): Promise<CompactResult> {
+    if (this.destroyed || this.compacting || !this.room) {
+      return { before: 0, after: 0 };
+    }
+
+    this.compacting = true;
+    const before = Y.encodeStateAsUpdate(this._doc).byteLength;
+    const compacted = encodeCompactedState(this._doc);
+
+    try {
+      const oldDoc = this._doc;
+      this.unbindDoc(oldDoc);
+
+      if (this.idb) {
+        await this.idb.destroy();
+        this.idb = null;
+      }
+
+      const newDoc = new Y.Doc({ gc: true });
+      Y.applyUpdate(newDoc, compacted);
+      this.bindDoc(newDoc);
+      oldDoc.destroy();
+      this._doc = newDoc;
+
+      this.idb = new IndexeddbPersistence(`${this.appId}:${this.room}`, this._doc);
+      this.idb.on("synced", () => this.setState({ localLoaded: true }));
+      await waitForIdbSync(this.idb);
+
+      const after = Y.encodeStateAsUpdate(this._doc).byteLength;
+      this.checkpointSent = false;
+      await this.sendCheckpoint();
+      this.onChange?.();
+
+      return { before, after };
+    } finally {
+      this.compacting = false;
+    }
   }
 
   getState(): SyncState {
@@ -176,9 +258,9 @@ export class LocalFirstDoc {
     this.destroyed = true;
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
     if (this.syncEndFallbackTimer) clearTimeout(this.syncEndFallbackTimer);
-    this.doc.off("update", this.handleLocalUpdate);
+    this.unbindDoc(this._doc);
     this.ws?.close();
     void this.idb?.destroy();
-    this.doc.destroy();
+    this._doc.destroy();
   }
 }

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { DeviceProvider } from "@/shell/DeviceProvider";
+import { ThemeProvider } from "@/shell/ThemeProvider";
 import { ServiceWorker } from "@/templates/choreboard/components/ServiceWorker";
 
 export const metadata: Metadata = {
@@ -21,7 +22,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <DeviceProvider>{children}</DeviceProvider>
+        <ThemeProvider>
+          <DeviceProvider>{children}</DeviceProvider>
+        </ThemeProvider>
         <ServiceWorker />
       </body>
     </html>

@@ -16,7 +16,10 @@
     "plugins": [{ "name": "next" }],
     "paths": {
       "@/*": ["./src/*"],
-      "@the-idea-guy/room-kit": ["../../../packages/room-kit/src/index.ts"]
+      "@the-idea-guy/room-kit": ["../../../packages/room-kit/src/index.ts"],
+      "@the-idea-guy/room-kit/constants": ["../../../packages/room-kit/src/constants.ts"],
+      "@the-idea-guy/room-kit/storage": ["../../../packages/room-kit/src/storageSize.ts"],
+      "@the-idea-guy/room-kit/links": ["../../../packages/room-kit/src/links.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

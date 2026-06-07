@@ -45,10 +45,12 @@ make dev
 
 Open **http://localhost:3300**
 
-This starts:
+`make dev` **restarts** the stack: it stops anything on ports **4500** and **3300** (and a leftover `choreboard-relay` Docker container), then starts:
 
 1. `go run .` in `relay/` on `:4500`
 2. `npm run dev` in `apps/rooms/web` on `:3300`
+
+Aliases: `make dev-restart` (same as `make dev`), `make dev-stop` (kill only).
 
 ---
 
@@ -124,7 +126,7 @@ See `docs_and_changelog/ROOM_KIT.md` — dev mode vs preview.
 | Symptom | Fix |
 |---------|-----|
 | Sync never connects | Relay down — `curl localhost:4500/healthz` |
-| `EADDRINUSE :4500` | Kill old relay: `lsof -i :4500` or `docker stop choreboard-relay` |
+| `EADDRINUSE :4500` | Run `make dev` (auto-restarts) or `make dev-stop` then `make dev` |
 | Web starts but wrong relay | Must use `make dev-web` or export `NEXT_PUBLIC_RELAY_URL=ws://localhost:4500` |
 | Empty `/` after code changes | Hard refresh; check `apps/rooms/web` not old `choreboard/web` |
 | Docker relay won't build | Docker daemon running; `cd relay && docker compose up --build` |

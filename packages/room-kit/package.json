@@ -4,13 +4,17 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./yjs": "./src/yjs.ts",
+    "./constants": "./src/constants.ts",
+    "./storage": "./src/storageSize.ts",
+    "./links": "./src/links.ts"
   },
-  "dependencies": {
+  "peerDependencies": {
     "y-indexeddb": "^9.0.12",
     "yjs": "^13.6.20"
   },
-  "peerDependencies": {
+  "devDependencies": {
     "y-indexeddb": "^9.0.12",
     "yjs": "^13.6.20"
   }

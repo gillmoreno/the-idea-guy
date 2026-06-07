@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { SetupTopbar } from "@/shell/SetupTopbar";
 import { useChoreBoard } from "@/shell/RoomSessionProvider";
 import { seedChores } from "@/templates/choreboard/lib/seed";
 import { CURRENCY_OPTIONS, WEEKDAY_OPTIONS } from "@/templates/choreboard/lib/format";
@@ -47,9 +48,7 @@ export function Setup() {
 
   return (
     <div className="app">
-      <div className="topbar">
-        <h1>Set up your family</h1>
-      </div>
+      <SetupTopbar title="Set up your family" />
       <div className="app-main">
         <div className="card stack">
           <div className="field">

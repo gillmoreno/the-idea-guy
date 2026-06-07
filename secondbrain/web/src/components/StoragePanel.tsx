@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Database, HardDrive, ImageIcon } from "lucide-react";
+import { Database, HardDrive, ImageIcon, Scissors } from "lucide-react";
+import { useSecondBrain } from "@/lib/SecondBrainContext";
 import { NoteStore } from "@/lib/store";
 import {
   computeVaultStorage,
@@ -16,7 +17,10 @@ interface StoragePanelProps {
 }
 
 export function StoragePanel({ store, version }: StoragePanelProps) {
+  const { compactVault } = useSecondBrain();
   const [origin, setOrigin] = useState<OriginStorageEstimate | null>(null);
+  const [compacting, setCompacting] = useState(false);
+  const [compactMsg, setCompactMsg] = useState<string | null>(null);
 
   const stats = useMemo(() => computeVaultStorage(store), [store, version]);
 
@@ -25,6 +29,30 @@ export function StoragePanel({ store, version }: StoragePanelProps) {
   }, [version]);
 
   const maxNoteBytes = stats.notes[0]?.bytes ?? 1;
+  const showCompactHint = stats.crdtBytes > stats.contentBytes * 1.15;
+
+  const runCompact = async () => {
+    setCompacting(true);
+    setCompactMsg(null);
+    try {
+      const result = await compactVault();
+      if (!result) {
+        setCompactMsg("Could not compact right now.");
+        return;
+      }
+      if (result.before <= result.after) {
+        setCompactMsg("Already compact — sync data matches current content.");
+        return;
+      }
+      setCompactMsg(
+        `Reclaimed ${formatBytes(result.before - result.after)} (${formatBytes(result.before)} → ${formatBytes(result.after)})`,
+      );
+    } catch {
+      setCompactMsg("Compaction failed. Try again while synced.");
+    } finally {
+      setCompacting(false);
+    }
+  };
 
   return (
     <div className="storage-panel stack-sm">
@@ -53,7 +81,7 @@ export function StoragePanel({ store, version }: StoragePanelProps) {
             On-device sync data
           </span>
           <span className="storage-stat-value">{formatBytes(stats.crdtBytes)}</span>
-          <span className="storage-stat-hint">CRDT + IndexedDB</span>
+          <span className="storage-stat-hint">CRDT + IndexedDB history</span>
         </div>
         {origin && (
           <div className="storage-stat storage-stat-wide">
@@ -65,6 +93,23 @@ export function StoragePanel({ store, version }: StoragePanelProps) {
                 : "Total for this origin"}
             </span>
           </div>
+        )}
+      </div>
+
+      <div className="storage-compact-row">
+        <button className="btn btn-sm" onClick={runCompact} disabled={compacting}>
+          <Scissors size={14} />
+          {compacting ? "Compacting…" : "Compact sync data"}
+        </button>
+        {showCompactHint && !compactMsg && (
+          <span className="muted" style={{ fontSize: 11 }}>
+            Sync data is larger than content — compaction can prune removed image history.
+          </span>
+        )}
+        {compactMsg && (
+          <span className="muted" style={{ fontSize: 11 }}>
+            {compactMsg}
+          </span>
         )}
       </div>
 
@@ -96,8 +141,9 @@ export function StoragePanel({ store, version }: StoragePanelProps) {
       )}
 
       <p className="muted storage-footnote">
-        Content size is your note text and metadata. Sync data includes CRDT history kept for
-        offline editing and multi-device merge.
+        Vault content is what your notes contain today. Sync data can stay larger after
+        edits (especially removed images) until compaction prunes CRDT history. Large image
+        removals auto-compact; use the button above anytime.
       </p>
     </div>
   );

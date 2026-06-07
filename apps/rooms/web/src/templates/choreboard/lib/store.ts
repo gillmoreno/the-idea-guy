@@ -1,4 +1,10 @@
-import * as Y from "yjs";
+import { Y } from "@the-idea-guy/room-kit";
+import {
+  ensureNestedMap,
+  ensureTemplateBranch,
+  readNestedMap,
+  readTemplateBranch,
+} from "@/lib/yjsTemplate";
 import {
   Chore,
   ChoreFrequencyLimit,
@@ -23,25 +29,6 @@ import {
 
 export const CHOREBOARD_TEMPLATE_ID = "choreboard";
 
-function templateBranch(doc: Y.Doc): Y.Map<unknown> {
-  const root = doc.getMap("template");
-  let branch = root.get(CHOREBOARD_TEMPLATE_ID);
-  if (!(branch instanceof Y.Map)) {
-    branch = new Y.Map();
-    doc.transact(() => root.set(CHOREBOARD_TEMPLATE_ID, branch));
-  }
-  return branch as Y.Map<unknown>;
-}
-
-function nestedMap<T>(parent: Y.Map<unknown>, key: string): Y.Map<T> {
-  let m = parent.get(key);
-  if (!(m instanceof Y.Map)) {
-    m = new Y.Map();
-    parent.set(key, m);
-  }
-  return m as Y.Map<T>;
-}
-
 export function uid(prefix = ""): string {
   return prefix + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 }
@@ -63,71 +50,122 @@ export class ChoreStore {
   readonly adminDoc: Y.Doc | null;
   readonly canAdmin: boolean;
 
-  private readonly family: Y.Map<unknown>;
-  private readonly members: Y.Map<Member>;
-  private readonly catalog: Y.Map<Chore>;
-  private readonly completions: Y.Map<Completion>;
-  private readonly proposals: Y.Map<ChoreProposal>;
-  private readonly permDefaults: Y.Map<unknown>;
-  private readonly permOverrides: Y.Map<Partial<KidPermissions>>;
+  private family: Y.Map<unknown> | null = null;
+  private members: Y.Map<Member> | null = null;
+  private catalog: Y.Map<Chore> | null = null;
+  private completions: Y.Map<Completion> | null = null;
+  private proposals: Y.Map<ChoreProposal> | null = null;
+  private permDefaults: Y.Map<unknown> | null = null;
+  private permOverrides: Y.Map<Partial<KidPermissions>> | null = null;
 
-  private readonly adminFamily: Y.Map<unknown> | null;
-  private readonly adminPermDefaults: Y.Map<unknown> | null;
-  private readonly adminPermOverrides: Y.Map<Partial<KidPermissions>> | null;
-  private readonly chores: Y.Map<Chore> | null;
-  private readonly payments: Y.Map<Payment> | null;
+  private adminFamily: Y.Map<unknown> | null = null;
+  private adminPermDefaults: Y.Map<unknown> | null = null;
+  private adminPermOverrides: Y.Map<Partial<KidPermissions>> | null = null;
+  private chores: Y.Map<Chore> | null = null;
+  private payments: Y.Map<Payment> | null = null;
 
   constructor(publicDoc: Y.Doc, adminDoc: Y.Doc | null) {
     this.publicDoc = publicDoc;
     this.adminDoc = adminDoc;
     this.canAdmin = adminDoc != null;
+    this.bindPublicRefs();
+    this.bindAdminRefs();
+  }
 
-    const pub = templateBranch(publicDoc);
-    this.family = nestedMap(pub, "family");
-    this.members = nestedMap(pub, "members");
-    this.catalog = nestedMap(pub, "catalog");
-    this.completions = nestedMap(pub, "completions");
-    this.proposals = nestedMap(pub, "proposals");
-    this.permDefaults = nestedMap(pub, "permDefaults");
-    this.permOverrides = nestedMap(pub, "permOverrides");
+  private bindPublicRefs() {
+    const pub = readTemplateBranch(this.publicDoc, CHOREBOARD_TEMPLATE_ID);
+    if (!pub) {
+      this.family = null;
+      this.members = null;
+      this.catalog = null;
+      this.completions = null;
+      this.proposals = null;
+      this.permDefaults = null;
+      this.permOverrides = null;
+      return;
+    }
+    this.family = readNestedMap(pub, "family");
+    this.members = readNestedMap<Member>(pub, "members");
+    this.catalog = readNestedMap<Chore>(pub, "catalog");
+    this.completions = readNestedMap<Completion>(pub, "completions");
+    this.proposals = readNestedMap<ChoreProposal>(pub, "proposals");
+    this.permDefaults = readNestedMap(pub, "permDefaults");
+    this.permOverrides = readNestedMap<Partial<KidPermissions>>(pub, "permOverrides");
+  }
 
-    if (adminDoc) {
-      const adm = templateBranch(adminDoc);
-      this.adminFamily = nestedMap(adm, "family");
-      this.chores = nestedMap(adm, "chores");
-      this.payments = nestedMap(adm, "payments");
-      this.adminPermDefaults = nestedMap(adm, "permDefaults");
-      this.adminPermOverrides = nestedMap(adm, "permOverrides");
-    } else {
+  private bindAdminRefs() {
+    if (!this.adminDoc) {
       this.adminFamily = null;
       this.chores = null;
       this.payments = null;
       this.adminPermDefaults = null;
       this.adminPermOverrides = null;
+      return;
     }
+    const adm = readTemplateBranch(this.adminDoc, CHOREBOARD_TEMPLATE_ID);
+    if (!adm) {
+      this.adminFamily = null;
+      this.chores = null;
+      this.payments = null;
+      this.adminPermDefaults = null;
+      this.adminPermOverrides = null;
+      return;
+    }
+    this.adminFamily = readNestedMap(adm, "family");
+    this.chores = readNestedMap<Chore>(adm, "chores");
+    this.payments = readNestedMap<Payment>(adm, "payments");
+    this.adminPermDefaults = readNestedMap(adm, "permDefaults");
+    this.adminPermOverrides = readNestedMap<Partial<KidPermissions>>(adm, "permOverrides");
+  }
+
+  private ensurePublicRefs() {
+    const pub = ensureTemplateBranch(this.publicDoc, CHOREBOARD_TEMPLATE_ID);
+    this.family = ensureNestedMap(pub, "family");
+    this.members = ensureNestedMap<Member>(pub, "members");
+    this.catalog = ensureNestedMap<Chore>(pub, "catalog");
+    this.completions = ensureNestedMap<Completion>(pub, "completions");
+    this.proposals = ensureNestedMap<ChoreProposal>(pub, "proposals");
+    this.permDefaults = ensureNestedMap(pub, "permDefaults");
+    this.permOverrides = ensureNestedMap<Partial<KidPermissions>>(pub, "permOverrides");
+  }
+
+  private ensureAdminRefs() {
+    if (!this.adminDoc) return;
+    const adm = ensureTemplateBranch(this.adminDoc, CHOREBOARD_TEMPLATE_ID);
+    this.adminFamily = ensureNestedMap(adm, "family");
+    this.chores = ensureNestedMap<Chore>(adm, "chores");
+    this.payments = ensureNestedMap<Payment>(adm, "payments");
+    this.adminPermDefaults = ensureNestedMap(adm, "permDefaults");
+    this.adminPermOverrides = ensureNestedMap<Partial<KidPermissions>>(adm, "permOverrides");
   }
 
   private txPublic(fn: () => void) {
-    this.publicDoc.transact(fn);
+    this.publicDoc.transact(() => {
+      this.ensurePublicRefs();
+      fn();
+    });
   }
 
   private txAdmin(fn: () => void) {
     if (!this.adminDoc) return;
-    this.adminDoc.transact(fn);
+    this.adminDoc.transact(() => {
+      this.ensureAdminRefs();
+      fn();
+    });
   }
 
   // --- family ---
   isInitialized(): boolean {
-    return this.family.get("createdAt") != null;
+    return this.family?.get("createdAt") != null;
   }
 
   getFamily(): Family | null {
-    if (!this.isInitialized()) return null;
+    if (!this.isInitialized() || !this.family) return null;
     return {
-      name: (this.family.get("name") as string) ?? "Our family",
-      currency: (this.family.get("currency") as string) ?? "USD",
-      paydayWeekday: (this.family.get("paydayWeekday") as number) ?? 0,
-      createdAt: this.family.get("createdAt") as number,
+      name: (this.family!.get("name") as string) ?? "Our family",
+      currency: (this.family!.get("currency") as string) ?? "USD",
+      paydayWeekday: (this.family!.get("paydayWeekday") as number) ?? 0,
+      createdAt: this.family!.get("createdAt") as number,
     };
   }
 
@@ -139,10 +177,10 @@ export class ChoreStore {
       meta.set("templateId", CHOREBOARD_TEMPLATE_ID);
       meta.set("roomName", input.name);
       meta.set("createdAt", stamp);
-      this.family.set("name", input.name);
-      this.family.set("currency", input.currency);
-      this.family.set("paydayWeekday", input.paydayWeekday);
-      if (this.family.get("createdAt") == null) this.family.set("createdAt", stamp);
+      this.family!.set("name", input.name);
+      this.family!.set("currency", input.currency);
+      this.family!.set("paydayWeekday", input.paydayWeekday);
+      if (this.family!.get("createdAt") == null) this.family!.set("createdAt", stamp);
     });
     this.txAdmin(() => {
       if (!this.adminFamily) return;
@@ -155,7 +193,7 @@ export class ChoreStore {
 
   updateFamily(patch: Partial<Family>) {
     this.txPublic(() => {
-      for (const [k, v] of Object.entries(patch)) this.family.set(k, v);
+      for (const [k, v] of Object.entries(patch)) this.family!.set(k, v);
     });
     this.txAdmin(() => {
       if (!this.adminFamily) return;
@@ -164,12 +202,12 @@ export class ChoreStore {
   }
 
   getKidDefaults(): KidPermissions {
-    const raw = this.permDefaults.get("kid") as KidPermissions | undefined;
+    const raw = this.permDefaults!.get("kid") as KidPermissions | undefined;
     return raw ? mergePermissions(DEFAULT_KID_PERMISSIONS, raw) : DEFAULT_KID_PERMISSIONS;
   }
 
   getKidOverride(memberId: string): Partial<KidPermissions> | undefined {
-    return this.permOverrides.get(memberId);
+    return this.permOverrides!.get(memberId);
   }
 
   setKidDefaults(perms: KidPermissions) {
@@ -192,7 +230,7 @@ export class ChoreStore {
   }
 
   listKidOverrides(): { memberId: string; patch: Partial<KidPermissions> }[] {
-    return [...this.permOverrides.entries()].map(([memberId, patch]) => ({
+    return [...this.permOverrides!.entries()].map(([memberId, patch]) => ({
       memberId,
       patch,
     }));
@@ -204,9 +242,9 @@ export class ChoreStore {
     const kid = this.adminPermDefaults.get("kid") as KidPermissions | undefined;
     const overrides = [...this.adminPermOverrides.entries()];
     this.txPublic(() => {
-      if (kid) this.permDefaults.set("kid", kid);
-      for (const id of [...this.permOverrides.keys()]) this.permOverrides.delete(id);
-      for (const [id, patch] of overrides) this.permOverrides.set(id, patch);
+      if (kid) this.permDefaults!.set("kid", kid);
+      for (const id of [...this.permOverrides!.keys()]) this.permOverrides!.delete(id);
+      for (const [id, patch] of overrides) this.permOverrides!.set(id, patch);
     });
   }
 
@@ -215,34 +253,34 @@ export class ChoreStore {
     if (!this.chores) return;
     const active = [...this.chores.values()].filter((c) => c.status === "active");
     this.txPublic(() => {
-      this.catalog.forEach((_, id) => this.catalog.delete(id));
-      for (const c of active) this.catalog.set(c.id, { ...c });
+      for (const id of [...this.catalog!.keys()]) this.catalog!.delete(id);
+      for (const c of active) this.catalog!.set(c.id, { ...c });
     });
   }
 
   // --- members (public) ---
   listMembers(): Member[] {
-    return [...this.members.values()].sort((a, b) => a.createdAt - b.createdAt);
+    return [...this.members!.values()].sort((a, b) => a.createdAt - b.createdAt);
   }
 
   getMember(id: string): Member | undefined {
-    return this.members.get(id);
+    return this.members!.get(id);
   }
 
   addMember(input: { name: string; role: Role; color: string; pin?: string }): Member {
     const m: Member = { id: uid("m_"), createdAt: Date.now(), ...input };
-    this.txPublic(() => this.members.set(m.id, m));
+    this.txPublic(() => this.members!.set(m.id, m));
     return m;
   }
 
   updateMember(id: string, patch: Partial<Member>) {
-    const existing = this.members.get(id);
+    const existing = this.members!.get(id);
     if (!existing) return;
-    this.txPublic(() => this.members.set(id, { ...existing, ...patch }));
+    this.txPublic(() => this.members!.set(id, { ...existing, ...patch }));
   }
 
   removeMember(id: string) {
-    this.txPublic(() => this.members.delete(id));
+    this.txPublic(() => this.members!.delete(id));
   }
 
   // --- chores (admin) / catalog (everyone reads) ---
@@ -252,15 +290,15 @@ export class ChoreStore {
       if (opts?.status) list = list.filter((c) => c.status === opts.status);
       return list.sort((a, b) => a.createdAt - b.createdAt);
     }
-    return [...this.catalog.values()].sort((a, b) => a.createdAt - b.createdAt);
+    return [...this.catalog!.values()].sort((a, b) => a.createdAt - b.createdAt);
   }
 
   listProposals(): ChoreProposal[] {
-    return [...this.proposals.values()].sort((a, b) => b.createdAt - a.createdAt);
+    return [...this.proposals!.values()].sort((a, b) => b.createdAt - a.createdAt);
   }
 
   getChore(id: string): Chore | undefined {
-    return this.catalog.get(id) ?? this.chores?.get(id);
+    return this.catalog!.get(id) ?? this.chores?.get(id);
   }
 
   addChore(input: {
@@ -316,12 +354,12 @@ export class ChoreStore {
       proposedBy: input.proposedBy,
       createdAt: Date.now(),
     };
-    this.txPublic(() => this.proposals.set(p.id, p));
+    this.txPublic(() => this.proposals!.set(p.id, p));
     return p;
   }
 
   approveProposal(proposalId: string): Chore | null {
-    const p = this.proposals.get(proposalId);
+    const p = this.proposals!.get(proposalId);
     if (!p || !this.chores) return null;
     const c = this.addChore({
       title: p.title,
@@ -332,12 +370,12 @@ export class ChoreStore {
       frequencyLimit: DEFAULT_FREQUENCY_LIMIT,
       requiresApproval: true,
     });
-    this.txPublic(() => this.proposals.delete(proposalId));
+    this.txPublic(() => this.proposals!.delete(proposalId));
     return c;
   }
 
   dismissProposal(proposalId: string) {
-    this.txPublic(() => this.proposals.delete(proposalId));
+    this.txPublic(() => this.proposals!.delete(proposalId));
   }
 
   updateChore(id: string, patch: Partial<Chore> & { frequencyLimit?: ChoreFrequencyLimit }) {
@@ -361,16 +399,16 @@ export class ChoreStore {
     memberId?: string;
     status?: Completion["status"];
   }): Completion[] {
-    let list = [...this.completions.values()];
+    let list = [...this.completions!.values()];
     if (filter?.memberId) list = list.filter((c) => c.memberId === filter.memberId);
     if (filter?.status) list = list.filter((c) => c.status === filter.status);
     return list.sort((a, b) => b.createdAt - a.createdAt);
   }
 
   canMarkDone(choreId: string, memberId: string) {
-    const chore = this.catalog.get(choreId);
+    const chore = this.catalog!.get(choreId);
     if (!chore) return { ok: false, remaining: 0, used: 0, limit: null as ChoreFrequencyLimit | null };
-    return canMarkChoreDone(chore, memberId, [...this.completions.values()]);
+    return canMarkChoreDone(chore, memberId, [...this.completions!.values()]);
   }
 
   async markDone(
@@ -378,7 +416,7 @@ export class ChoreStore {
     memberId: string,
     memberSecret: string | null,
   ): Promise<Completion | null> {
-    const chore = this.catalog.get(choreId);
+    const chore = this.catalog!.get(choreId);
     if (!chore) return null;
     if (!this.canMarkDone(choreId, memberId).ok) return null;
     const comp: Completion = {
@@ -399,7 +437,7 @@ export class ChoreStore {
         completionSignPayload(comp),
       );
     }
-    this.txPublic(() => this.completions.set(comp.id, comp));
+    this.txPublic(() => this.completions!.set(comp.id, comp));
     return comp;
   }
 
@@ -429,15 +467,15 @@ export class ChoreStore {
       approvedBy: input.by,
       createdAt: Date.now(),
     };
-    this.txPublic(() => this.completions.set(comp.id, comp));
+    this.txPublic(() => this.completions!.set(comp.id, comp));
     return comp;
   }
 
   setCompletionStatus(id: string, status: Completion["status"], by?: string) {
-    const existing = this.completions.get(id);
+    const existing = this.completions!.get(id);
     if (!existing) return;
     this.txPublic(() =>
-      this.completions.set(id, {
+      this.completions!.set(id, {
         ...existing,
         status,
         approvedBy: by ?? existing.approvedBy,
@@ -487,7 +525,7 @@ export class ChoreStore {
     this.txAdmin(() => this.payments!.set(payment.id, payment));
     this.txPublic(() => {
       for (const c of approved) {
-        this.completions.set(c.id, { ...c, status: "paid" });
+        this.completions!.set(c.id, { ...c, status: "paid" });
       }
     });
     return payment;
@@ -504,8 +542,8 @@ export class ChoreStore {
   resetHistory(): boolean {
     if (!this.canAdmin) return false;
     this.txPublic(() => {
-      for (const id of [...this.completions.keys()]) this.completions.delete(id);
-      for (const id of [...this.proposals.keys()]) this.proposals.delete(id);
+      for (const id of [...this.completions!.keys()]) this.completions!.delete(id);
+      for (const id of [...this.proposals!.keys()]) this.proposals!.delete(id);
     });
     this.txAdmin(() => {
       if (!this.payments) return;

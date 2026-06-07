@@ -14,10 +14,13 @@ import { NoteStore } from "@/lib/store";
 import { htmlToPlainText } from "@/lib/html";
 import { formatBytes, noteStorageBytes } from "@/lib/storageStats";
 import { Note } from "@/lib/types";
+import { useSecondBrain } from "@/lib/SecondBrainContext";
 import { Callout } from "@/lib/calloutExtension";
 import { ImagePasteDrop } from "@/lib/imagePasteExtension";
 import { imageBytesInHtml } from "@/lib/imageInsert";
 import { EditorToolbar } from "./EditorToolbar";
+
+const AUTO_COMPACT_IMAGE_FREED = 48 * 1024;
 
 const InternalLink = Link.extend({
   addAttributes() {
@@ -53,6 +56,7 @@ function formatDate(ts: number) {
 }
 
 export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
+  const { compactVault } = useSecondBrain();
   const note = store.getNote(noteId);
   const [title, setTitle] = useState(note?.title ?? "");
   const [liveBytes, setLiveBytes] = useState(0);
@@ -86,10 +90,13 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
     (html: string) => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => {
-        store.syncNoteContent(noteId, html);
+        const { freedImageBytes } = store.syncNoteContent(noteId, html);
+        if (freedImageBytes >= AUTO_COMPACT_IMAGE_FREED) {
+          void compactVault();
+        }
       }, 400);
     },
-    [store, noteId],
+    [store, noteId, compactVault],
   );
 
   const editor = useEditor(

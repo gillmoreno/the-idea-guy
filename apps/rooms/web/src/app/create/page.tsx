@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   generateAdminSecret,
   generateMemberId,
@@ -10,7 +10,15 @@ import {
   roomUrl,
 } from "@the-idea-guy/room-kit";
 import { useDevice } from "@/shell/DeviceProvider";
-import { TEMPLATES } from "@/templates/registry";
+import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
+import { TEMPLATES, getTemplate } from "@/templates/registry";
+
+const PLACEHOLDERS: Record<string, string> = {
+  choreboard: "Our family",
+  tripsplit: "Barcelona 2026",
+  bookclub: "Tuesday Night Readers",
+  backlog: "Rooms ideas",
+};
 
 export default function CreatePage() {
   const router = useRouter();
@@ -18,11 +26,13 @@ export default function CreatePage() {
   const [templateId, setTemplateId] = useState(TEMPLATES[0].id);
   const [roomName, setRoomName] = useState("");
 
+  const selected = useMemo(() => getTemplate(templateId), [templateId]);
+
   const create = () => {
     const roomCode = generateRoomCode();
     const adminSecret = generateAdminSecret();
     const memberId = generateMemberId();
-    const name = roomName.trim() || "My room";
+    const name = roomName.trim() || selected?.name || "My room";
 
     saveRoom({
       roomCode,
@@ -38,7 +48,7 @@ export default function CreatePage() {
   };
 
   return (
-    <div className="app">
+    <div className="app" style={selected ? ({ "--template-accent": selected.accent } as React.CSSProperties) : undefined}>
       <div className="topbar">
         <Link href="/" className="btn btn-ghost btn-sm">
           ← Back
@@ -46,15 +56,22 @@ export default function CreatePage() {
         <h1>Create a room</h1>
       </div>
       <div className="app-main stack">
+        <ThemeSwitcher compact />
+
         <div className="section-title">Pick a template</div>
         {TEMPLATES.map((t) => (
           <button
             key={t.id}
             type="button"
             className={`card row-link template-pick${templateId === t.id ? " selected" : ""}`}
+            style={
+              templateId === t.id
+                ? ({ "--template-accent": t.accent } as React.CSSProperties)
+                : undefined
+            }
             onClick={() => setTemplateId(t.id)}
           >
-            <span style={{ fontSize: 28 }}>{t.emoji}</span>
+            <span className="emoji-orb sm">{t.emoji}</span>
             <div style={{ textAlign: "left" }}>
               <strong>{t.name}</strong>
               <div className="muted" style={{ fontSize: 13 }}>
@@ -68,7 +85,7 @@ export default function CreatePage() {
           <label>Room name</label>
           <input
             className="input"
-            placeholder="Our family"
+            placeholder={PLACEHOLDERS[templateId] ?? "My room"}
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
           />

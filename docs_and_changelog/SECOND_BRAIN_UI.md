@@ -42,6 +42,8 @@ Users can see how much local space their vault uses:
 
 Sizes are UTF-8 byte estimates of note text and metadata; sync data reflects the full Yjs document persisted to IndexedDB.
 
+**Compaction** — deleting large inline images can leave CRDT edit history behind, so sync data may stay bigger than vault content. Removing ≥48 KB of image data auto-compacts; you can also use **Settings → Storage → Compact sync data** to prune history and push a fresh checkpoint to the relay.
+
 ## Changelog
 
 - **2026-06-07** — Storage stats in settings, sidebar, and editor

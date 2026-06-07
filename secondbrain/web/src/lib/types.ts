@@ -25,20 +25,34 @@ export interface VaultMeta {
   createdAt: number;
 }
 
+export type AiProvider = "openai" | "ollama";
+
 /** Per-vault AI config — stored in Yjs, synced E2E encrypted (not on the relay). */
 export interface AiSettings {
-  provider: "openai";
+  provider: AiProvider;
   apiKey: string;
+  /** Ollama base URL, e.g. http://127.0.0.1:11434 */
+  baseUrl: string;
   model: string;
 }
 
 export const DEFAULT_AI_MODEL = "gpt-4o-mini";
+export const DEFAULT_OLLAMA_BASE_URL = "http://127.0.0.1:11434";
+export const DEFAULT_OLLAMA_MODEL = "llama3.2";
 
 export const AI_MODEL_OPTIONS = [
   "gpt-4o-mini",
   "gpt-4o",
   "gpt-4.1-mini",
   "gpt-4.1",
+] as const;
+
+export const OLLAMA_MODEL_SUGGESTIONS = [
+  "llama3.2",
+  "llama3.1",
+  "mistral",
+  "qwen2.5",
+  "phi3",
 ] as const;
 
 export interface SearchResult {

@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { RoomSessionProvider } from "@/shell/RoomSessionProvider";
-import { ChoreBoardApp } from "@/templates/choreboard/ChoreBoardApp";
+import { TemplateApp } from "@/templates/TemplateApp";
 
 function RoomInner() {
   const params = useSearchParams();
@@ -23,7 +23,7 @@ function RoomInner() {
 
   return (
     <RoomSessionProvider roomCode={roomCode}>
-      <ChoreBoardApp />
+      <TemplateApp />
     </RoomSessionProvider>
   );
 }
