@@ -5,10 +5,10 @@ import { useChoreBoard } from "@/lib/ChoreBoardContext";
 import { getMemberSecret } from "@/lib/memberSecrets";
 import { getEffectivePermissions } from "@/lib/permissions";
 import { weekRange } from "@/lib/store";
-import { formatFrequencyStatus } from "@/lib/frequency";
+import { resolveFrequencyLimit } from "@/lib/frequency";
 import { CATEGORY_META, Category, Difficulty } from "@/lib/types";
 import { formatMoney, formatDate } from "@/lib/format";
-import { Avatar, DiffPill, Money, SyncBadge } from "./ui";
+import { Avatar, CadencePill, DiffPill, Money, SyncBadge } from "./ui";
 
 export function KidView({ memberId }: { memberId: string }) {
   const { store, sync, version, setCurrentMember } = useChoreBoard();
@@ -97,19 +97,15 @@ export function KidView({ memberId }: { memberId: string }) {
         <div className="stack-sm">
           {chores.map((c) => {
             const avail = store.canMarkDone(c.id, memberId);
-            const status =
-              avail.limit && avail.used > 0
-                ? formatFrequencyStatus(avail.limit, avail.used)
-                : "";
+            const cadence = resolveFrequencyLimit(c);
             return (
               <div key={c.id} className="chore">
                 <span className="emoji">{CATEGORY_META[c.category].emoji}</span>
                 <div className="body">
                   <div className="title">{c.title}</div>
                   <div className="desc">
-                    <DiffPill difficulty={c.difficulty} />{" "}
-                    {c.requiresApproval ? "needs a parent's OK" : "auto-approved"}
-                    {status ? ` · ${status}` : ""}
+                    <DiffPill difficulty={c.difficulty} />
+                    <CadencePill limit={cadence} />
                   </div>
                 </div>
                 {perms.seeChoreRewards && (
@@ -118,7 +114,7 @@ export function KidView({ memberId }: { memberId: string }) {
                 {perms.canMarkDone && (
                   <button
                     className="btn-done"
-                    aria-label={avail.ok ? "Mark done" : status || "Done for now"}
+                    aria-label={avail.ok ? "Mark done" : "Already done"}
                     disabled={!avail.ok}
                     onClick={() =>
                       void store.markDone(c.id, memberId, getMemberSecret(memberId))

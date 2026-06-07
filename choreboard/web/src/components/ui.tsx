@@ -1,6 +1,7 @@
 "use client";
 
-import { DIFFICULTY_META, Difficulty, Member } from "@/lib/types";
+import { formatFrequencyCadence } from "@/lib/frequency";
+import { ChoreFrequencyLimit, DIFFICULTY_META, Difficulty, Member } from "@/lib/types";
 import { formatMoney } from "@/lib/format";
 
 export function Money({ amount, currency }: { amount: number; currency: string }) {
@@ -12,6 +13,10 @@ export function DiffPill({ difficulty }: { difficulty: Difficulty }) {
   return (
     <span className={`diff-pill diff-${difficulty}`}>{DIFFICULTY_META[difficulty].label}</span>
   );
+}
+
+export function CadencePill({ limit }: { limit: ChoreFrequencyLimit | null }) {
+  return <span className="cadence-pill">{formatFrequencyCadence(limit)}</span>;
 }
 
 export function SyncBadge({ connected, localLoaded }: { connected: boolean; localLoaded: boolean }) {

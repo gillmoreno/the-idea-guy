@@ -108,6 +108,32 @@ export function formatFrequencyLimit(limit: ChoreFrequencyLimit): string {
   return `${limit.maxCompletions}× per ${periodWord}`;
 }
 
+/** Short label for kid-facing cadence badges. */
+export function formatFrequencyCadence(limit: ChoreFrequencyLimit | null): string {
+  if (!limit) return "Anytime";
+  if (limit.maxCompletions === 1) {
+    switch (limit.period) {
+      case "day":
+        return "Daily";
+      case "week":
+        return "Weekly";
+      case "month":
+        return "Monthly";
+      case "ever":
+        return "One-time";
+    }
+  }
+  const short =
+    limit.period === "day"
+      ? "day"
+      : limit.period === "week"
+        ? "week"
+        : limit.period === "month"
+          ? "month"
+          : "total";
+  return `${limit.maxCompletions}× / ${short}`;
+}
+
 export function formatFrequencyStatus(
   limit: ChoreFrequencyLimit,
   used: number,
