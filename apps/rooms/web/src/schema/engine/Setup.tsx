@@ -6,6 +6,7 @@ import { SetupTopbar } from "@/shell/SetupTopbar";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { RoomMemberInviteField } from "@/components/RoomMemberInviteField";
+import { TemplateIcon } from "@/components/TemplateIcon";
 import { finishRoomSetupWithInvites } from "@/lib/finishRoomSetup";
 import { SETUP_MEMBER_COLORS } from "@/lib/roomMemberInvites";
 import { peekPendingSchema, takePendingSchema } from "@/schema/pending";
@@ -68,7 +69,15 @@ export function DeclarativeSetup() {
       <SetupTopbar title={`Set up ${schema.name}`} />
       <div className="app-main">
         <div className="card stack">
-          <div className="emoji-orb sm">{schema.emoji}</div>
+          <TemplateIcon
+            emoji={schema.emoji}
+            size="sm"
+            style={
+              schema.accent
+                ? ({ "--template-accent": schema.accent } as React.CSSProperties)
+                : undefined
+            }
+          />
           {schema.description && (
             <p className="muted" style={{ fontSize: 14 }}>
               {schema.description}

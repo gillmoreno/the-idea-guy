@@ -9,6 +9,7 @@ import { useSchemaStore } from "@/schema/useSchemaStore";
 import { DeclarativeSetup } from "./Setup";
 import { DeclarativeProfilePicker } from "./ProfilePicker";
 import { CollectionView } from "./CollectionView";
+import { TemplateIcon } from "@/components/TemplateIcon";
 
 export function DeclarativeApp() {
   const {
@@ -27,8 +28,18 @@ export function DeclarativeApp() {
   const emoji = roomSchema?.emoji ?? "📋";
   const name = roomSchema?.name ?? "Room";
 
-  if (!mounted) return <RoomLoading emoji={emoji} message={`Starting ${name}…`} />;
-  if (!roomCode || !sync.localLoaded) return <RoomLoading emoji={emoji} message="Loading your data…" />;
+  if (!mounted)
+    return (
+      <RoomLoading
+        emoji={emoji}
+        accent={roomSchema?.accent}
+        message={`Starting ${name}…`}
+      />
+    );
+  if (!roomCode || !sync.localLoaded)
+    return (
+      <RoomLoading emoji={emoji} accent={roomSchema?.accent} message="Loading your data…" />
+    );
 
   if (!roomSchema) {
     return (
@@ -85,7 +96,7 @@ export function DeclarativeApp() {
             <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
           </div>
         </div>
-        <span className="emoji-orb sm">{roomSchema.emoji}</span>
+        <TemplateIcon emoji={roomSchema.emoji} size="sm" />
       </div>
       <div className="app-main stack">
         {roomSchema.collections.map((col) => (

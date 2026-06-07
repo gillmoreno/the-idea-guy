@@ -6,7 +6,10 @@ import { RoomLoading } from "@/shell/RoomLoading";
 import { Setup } from "./components/Setup";
 import { ProfilePicker } from "./components/ProfilePicker";
 import { TripView } from "./components/TripView";
+import { getBuiltinTemplate } from "../registry";
 import { useTripSplitStore } from "./lib/useTripSplitStore";
+
+const TEMPLATE = getBuiltinTemplate("tripsplit");
 
 export function TripSplitApp() {
   const { mounted, roomCode, hasAdminAccess, isOwner, sync, currentMemberId, version } =
@@ -14,8 +17,22 @@ export function TripSplitApp() {
   const store = useTripSplitStore();
   void version;
 
-  if (!mounted) return <RoomLoading emoji="✈️💸" message="Starting Trip Split…" />;
-  if (!roomCode || !store || !sync.localLoaded) return <RoomLoading emoji="✈️💸" message="Loading trip…" />;
+  if (!mounted)
+    return (
+      <RoomLoading
+        emoji={TEMPLATE?.emoji ?? "✈️"}
+        accent={TEMPLATE?.accent}
+        message="Starting Trip Split…"
+      />
+    );
+  if (!roomCode || !store || !sync.localLoaded)
+    return (
+      <RoomLoading
+        emoji={TEMPLATE?.emoji ?? "✈️"}
+        accent={TEMPLATE?.accent}
+        message="Loading trip…"
+      />
+    );
 
   if (!store.isInitialized()) {
     if (isOwner && hasAdminAccess) return <Setup />;

@@ -9,6 +9,9 @@ import { KidView } from "@/templates/choreboard/components/KidView";
 import { ParentView } from "@/templates/choreboard/components/ParentView";
 import { ParentGate } from "@/templates/choreboard/components/ParentGate";
 import { useChoreStore } from "@/templates/choreboard/lib/useChoreStore";
+import { getBuiltinTemplate } from "@/templates/registry";
+
+const TEMPLATE = getBuiltinTemplate("choreboard");
 
 export function ChoreBoardApp() {
   const {
@@ -23,9 +26,22 @@ export function ChoreBoardApp() {
   const store = useChoreStore();
   void version;
 
-  if (!mounted) return <RoomLoading emoji="🧹💰" message="Starting ChoreBoard…" />;
+  if (!mounted)
+    return (
+      <RoomLoading
+        emoji={TEMPLATE?.emoji ?? "🧹"}
+        accent={TEMPLATE?.accent}
+        message="Starting ChoreBoard…"
+      />
+    );
   if (!roomCode || !store || !sync.localLoaded) {
-    return <RoomLoading emoji="🧹💰" message="Loading your data…" />;
+    return (
+      <RoomLoading
+        emoji={TEMPLATE?.emoji ?? "🧹"}
+        accent={TEMPLATE?.accent}
+        message="Loading your data…"
+      />
+    );
   }
 
   if (!store.isInitialized()) {

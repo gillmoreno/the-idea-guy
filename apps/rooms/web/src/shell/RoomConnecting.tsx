@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { TemplateIcon } from "@/components/TemplateIcon";
 import { useRoomSession } from "./RoomSessionProvider";
 
 export function RoomConnecting({
@@ -16,7 +17,7 @@ export function RoomConnecting({
 
   return (
     <div className="centered" style={{ textAlign: "center" }}>
-      <div className="hero-logo emoji-orb lg">{emoji}</div>
+      <TemplateIcon emoji={emoji} size="lg" />
       <h1>{title}</h1>
       <p className="muted" style={{ marginTop: 8, maxWidth: 360, marginInline: "auto" }}>
         {sync.connected

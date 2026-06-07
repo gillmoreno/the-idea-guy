@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { RoomInviteRecord } from "@the-idea-guy/room-kit";
 import { roomUrl } from "@the-idea-guy/room-kit/links";
 import { getBuiltinTemplate } from "@/templates/registry";
+import { TemplateIcon } from "@/components/TemplateIcon";
 import { DECLARATIVE_TEMPLATE_ID } from "@the-idea-guy/room-kit";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 
@@ -26,10 +27,19 @@ function InviteCard({
 }) {
   const router = useRouter();
   const working = busy === invite.messageId;
+  const builtin = getBuiltinTemplate(invite.templateId);
 
   return (
     <div className="card room-invite-card row gap-sm" style={{ alignItems: "center" }}>
-      <span className="emoji-orb sm">{inviteEmoji(invite.templateId)}</span>
+      <TemplateIcon
+        emoji={inviteEmoji(invite.templateId)}
+        size="sm"
+        style={
+          builtin?.accent
+            ? ({ "--template-accent": builtin.accent } as React.CSSProperties)
+            : undefined
+        }
+      />
       <div style={{ flex: 1, minWidth: 0 }}>
         <strong>{invite.fromName}</strong>
         <div style={{ fontSize: 14 }}>

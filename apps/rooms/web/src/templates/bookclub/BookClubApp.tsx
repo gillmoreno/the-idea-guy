@@ -6,7 +6,10 @@ import { RoomLoading } from "@/shell/RoomLoading";
 import { Setup } from "./components/Setup";
 import { ProfilePicker } from "./components/ProfilePicker";
 import { ClubView } from "./components/ClubView";
+import { getBuiltinTemplate } from "../registry";
 import { useBookClubStore } from "./lib/useBookClubStore";
+
+const TEMPLATE = getBuiltinTemplate("bookclub");
 
 export function BookClubApp() {
   const { mounted, roomCode, hasAdminAccess, isOwner, sync, currentMemberId, version } =
@@ -14,8 +17,22 @@ export function BookClubApp() {
   const store = useBookClubStore();
   void version;
 
-  if (!mounted) return <RoomLoading emoji="📚☕" message="Starting Book Club…" />;
-  if (!roomCode || !store || !sync.localLoaded) return <RoomLoading emoji="📚☕" message="Loading club…" />;
+  if (!mounted)
+    return (
+      <RoomLoading
+        emoji={TEMPLATE?.emoji ?? "📚"}
+        accent={TEMPLATE?.accent}
+        message="Starting Book Club…"
+      />
+    );
+  if (!roomCode || !store || !sync.localLoaded)
+    return (
+      <RoomLoading
+        emoji={TEMPLATE?.emoji ?? "📚"}
+        accent={TEMPLATE?.accent}
+        message="Loading club…"
+      />
+    );
 
   if (!store.isInitialized()) {
     if (isOwner && hasAdminAccess) return <Setup />;

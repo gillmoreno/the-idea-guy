@@ -21,7 +21,6 @@ const BookClubApp = lazy(() =>
 const BacklogApp = lazy(() =>
   import("./backlog/BacklogApp").then((m) => ({ default: m.BacklogApp })),
 );
-
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
     <div className="centered stack" style={{ textAlign: "center" }}>
@@ -60,7 +59,15 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
   if (!App) return <UnknownTemplate templateId={templateId} />;
 
   return (
-    <Suspense fallback={<RoomLoading emoji={emoji} message={`Loading ${name}…`} />}>
+    <Suspense
+      fallback={
+        <RoomLoading
+          emoji={emoji}
+          accent={def?.accent}
+          message={`Loading ${name}…`}
+        />
+      }
+    >
       <App />
     </Suspense>
   );

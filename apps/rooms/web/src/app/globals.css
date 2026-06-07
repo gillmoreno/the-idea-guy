@@ -848,43 +848,117 @@ textarea.input {
   width: 100%;
   border: 2px solid transparent;
   cursor: pointer;
+  gap: 14px;
+  padding: 14px 16px;
 }
-
 .template-pick.selected {
   border-color: var(--template-accent, var(--primary));
-  background: color-mix(in srgb, var(--template-accent, var(--primary)) 12%, var(--surface));
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--template-accent, var(--primary)) 25%, transparent);
+  background: color-mix(in srgb, var(--template-accent, var(--primary)) 10%, var(--surface));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--template-accent, var(--primary)) 22%, transparent),
+    0 4px 16px color-mix(in srgb, var(--template-accent, var(--primary)) 8%, transparent);
 }
 
-/* ---------- emoji orbs (zero-weight icons) ---------- */
+/* ---------- template icons (app tiles) ---------- */
+.template-icon {
+  --ti-size: 48px;
+  --ti-glyph: 24px;
+  --ti-badge: 20px;
+  --ti-badge-glyph: 12px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ti-size);
+  height: var(--ti-size);
+  flex-shrink: 0;
+  border-radius: calc(var(--ti-size) * 0.26);
+  background: linear-gradient(
+    152deg,
+    color-mix(in srgb, var(--template-accent, var(--primary)) 24%, var(--surface)) 0%,
+    color-mix(in srgb, var(--template-accent, var(--primary)) 10%, var(--surface-2)) 55%,
+    var(--surface-2) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 55%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--template-accent, var(--primary)) 16%, var(--border)),
+    0 4px 14px color-mix(in srgb, var(--template-accent, var(--primary)) 12%, transparent);
+}
+.template-icon--sm {
+  --ti-size: 48px;
+  --ti-glyph: 24px;
+  --ti-badge: 20px;
+  --ti-badge-glyph: 11px;
+}
+.template-icon--md {
+  --ti-size: 56px;
+  --ti-glyph: 28px;
+  --ti-badge: 22px;
+  --ti-badge-glyph: 12px;
+}
+.template-icon--lg {
+  --ti-size: 72px;
+  --ti-glyph: 34px;
+  --ti-badge: 26px;
+  --ti-badge-glyph: 14px;
+  margin-inline: auto;
+}
+.template-icon__glyph {
+  font-size: var(--ti-glyph);
+  line-height: 1;
+  user-select: none;
+}
+.template-icon--duo .template-icon__glyph--primary {
+  transform: translate(-1px, -2px);
+}
+.template-icon__badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: var(--ti-badge);
+  height: var(--ti-badge);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(var(--ti-badge) * 0.3);
+  background: var(--surface);
+  border: 2px solid color-mix(in srgb, var(--template-accent, var(--primary)) 28%, var(--border));
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 2px 8px color-mix(in srgb, var(--template-accent, var(--primary)) 10%, transparent);
+}
+.template-icon__glyph--secondary {
+  font-size: var(--ti-badge-glyph);
+}
+
+/* ---------- emoji orbs (single-glyph accents) ---------- */
 .emoji-orb {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
-  background: radial-gradient(
-    circle at 35% 30%,
-    color-mix(in srgb, var(--template-accent, var(--primary)) 18%, var(--surface)),
-    var(--surface-2)
+  border-radius: calc(var(--emoji-orb-size, 44px) * 0.26);
+  background: linear-gradient(
+    152deg,
+    color-mix(in srgb, var(--template-accent, var(--primary)) 20%, var(--surface)) 0%,
+    var(--surface-2) 100%
   );
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--template-accent, var(--primary)) 20%, transparent),
-    0 6px 18px color-mix(in srgb, var(--template-accent, var(--primary)) 12%, transparent);
-  font-size: 28px;
+    inset 0 1px 0 color-mix(in srgb, #fff 50%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--template-accent, var(--primary)) 14%, var(--border)),
+    0 4px 12px color-mix(in srgb, var(--template-accent, var(--primary)) 10%, transparent);
+  font-size: 22px;
   line-height: 1;
-  width: 52px;
-  height: 52px;
+  width: var(--emoji-orb-size, 44px);
+  height: var(--emoji-orb-size, 44px);
   flex-shrink: 0;
 }
 .emoji-orb.sm {
-  font-size: 22px;
-  width: 44px;
-  height: 44px;
+  --emoji-orb-size: 40px;
+  font-size: 20px;
 }
 .emoji-orb.lg {
-  font-size: 36px;
-  width: 72px;
-  height: 72px;
+  --emoji-orb-size: 72px;
+  font-size: 34px;
   margin-inline: auto;
 }
 

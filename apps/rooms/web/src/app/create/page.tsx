@@ -24,6 +24,7 @@ import {
   templateIdForPick,
   templateKindForPick,
 } from "@/templates/registry";
+import { TemplateIcon } from "@/components/TemplateIcon";
 
 type CreateMode = "builtin" | "official" | "custom";
 
@@ -180,14 +181,10 @@ export default function CreatePage() {
                 key={t.id}
                 type="button"
                 className={`card row-link template-pick${builtinId === t.id ? " selected" : ""}`}
-                style={
-                  builtinId === t.id
-                    ? ({ "--template-accent": t.accent } as React.CSSProperties)
-                    : undefined
-                }
+                style={{ "--template-accent": t.accent } as React.CSSProperties}
                 onClick={() => setBuiltinId(t.id)}
               >
-                <span className="emoji-orb sm">{t.emoji}</span>
+                <TemplateIcon emoji={t.emoji} size="sm" />
                 <div style={{ textAlign: "left" }}>
                   <strong>{t.name}</strong>
                   <div className="muted" style={{ fontSize: 13 }}>
@@ -212,14 +209,10 @@ export default function CreatePage() {
                 key={t.id}
                 type="button"
                 className={`card row-link template-pick${catalogId === t.id ? " selected" : ""}`}
-                style={
-                  catalogId === t.id
-                    ? ({ "--template-accent": t.accent } as React.CSSProperties)
-                    : undefined
-                }
+                style={{ "--template-accent": t.accent } as React.CSSProperties}
                 onClick={() => setCatalogId(t.id)}
               >
-                <span className="emoji-orb sm">{t.emoji}</span>
+                <TemplateIcon emoji={t.emoji} size="sm" />
                 <div style={{ textAlign: "left" }}>
                   <strong>{t.name}</strong>
                   <div className="muted" style={{ fontSize: 13 }}>

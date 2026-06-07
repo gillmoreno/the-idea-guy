@@ -6,7 +6,10 @@ import { RoomLoading } from "@/shell/RoomLoading";
 import { Setup } from "./components/Setup";
 import { ProfilePicker } from "./components/ProfilePicker";
 import { BacklogView } from "./components/BacklogView";
+import { getBuiltinTemplate } from "../registry";
 import { useBacklogStore } from "./lib/useBacklogStore";
+
+const TEMPLATE = getBuiltinTemplate("backlog");
 
 export function BacklogApp() {
   const { mounted, roomCode, hasAdminAccess, isOwner, sync, currentMemberId, version } =
@@ -14,8 +17,22 @@ export function BacklogApp() {
   const store = useBacklogStore();
   void version;
 
-  if (!mounted) return <RoomLoading emoji="💡🗳️" message="Starting Backlog…" />;
-  if (!roomCode || !store || !sync.localLoaded) return <RoomLoading emoji="💡🗳️" message="Loading ideas…" />;
+  if (!mounted)
+    return (
+      <RoomLoading
+        emoji={TEMPLATE?.emoji ?? "💡"}
+        accent={TEMPLATE?.accent}
+        message="Starting Backlog…"
+      />
+    );
+  if (!roomCode || !store || !sync.localLoaded)
+    return (
+      <RoomLoading
+        emoji={TEMPLATE?.emoji ?? "💡"}
+        accent={TEMPLATE?.accent}
+        message="Loading ideas…"
+      />
+    );
 
   if (!store.isInitialized()) {
     if (isOwner && hasAdminAccess) return <Setup />;

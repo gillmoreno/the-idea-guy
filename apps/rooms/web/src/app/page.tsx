@@ -13,6 +13,7 @@ import { roomUrl } from "@the-idea-guy/room-kit/links";
 import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
 import { DECLARATIVE_TEMPLATE_ID } from "@the-idea-guy/room-kit";
 import { getBuiltinTemplate } from "@/templates/registry";
+import { TemplateIcon } from "@/components/TemplateIcon";
 
 function roomLabel(room: VaultRoom): string {
   if (room.roomName) return room.roomName;
@@ -52,7 +53,7 @@ export default function HomePage() {
       </div>
       <div className="app-main stack">
         <div className="card stack hero-card" style={{ textAlign: "center" }}>
-          <div className="hero-logo emoji-orb lg">🏠</div>
+          <TemplateIcon emoji="🏠" size="lg" />
           <p className="muted">
             Local-first rooms for small groups. Your data stays on your devices — the relay only
             syncs encrypted blobs.
@@ -115,7 +116,7 @@ export default function HomePage() {
                     }
                   >
                     <Link className="room-card__link row-link" href={roomUrl(r.roomCode)}>
-                      <span className="emoji-orb sm">{t?.emoji ?? "📦"}</span>
+                      <TemplateIcon emoji={t?.emoji ?? "📦"} size="sm" />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong>{r.roomName ?? t?.name ?? "Room"}</strong>
                         <div className="muted" style={{ fontSize: 13, wordBreak: "break-all" }}>
