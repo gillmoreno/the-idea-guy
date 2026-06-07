@@ -27,7 +27,7 @@
 | `text` | string | Single-line input |
 | `textarea` | string | Multi-line |
 | `tags` | `string[]` | Comma-separated input → pills |
-| `emoji` | string | Short input; shown as record icon |
+| `emoji` | string | Shared `EmojiPicker` (full Unicode set, search, categories, recents); shown as record icon tile |
 
 Future v2 candidates: `number`, `date`, `select`, `money`, `member` — not valid in v1 AI output.
 

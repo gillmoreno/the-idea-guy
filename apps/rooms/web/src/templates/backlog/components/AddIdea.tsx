@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { EmojiPicker } from "@/components/EmojiPicker";
 import { useBacklogStore } from "../lib/useBacklogStore";
 
 export function AddIdea({ memberId, onDone }: { memberId: string; onDone: () => void }) {
@@ -32,13 +33,7 @@ export function AddIdea({ memberId, onDone }: { memberId: string; onDone: () => 
         </div>
         <div className="field">
           <label>Emoji</label>
-          <input
-            className="input"
-            placeholder="🎁✨"
-            value={emoji}
-            onChange={(e) => setEmoji(e.target.value)}
-            maxLength={8}
-          />
+          <EmojiPicker value={emoji} onChange={setEmoji} fallback="💡" />
         </div>
       </div>
       <div className="field">
