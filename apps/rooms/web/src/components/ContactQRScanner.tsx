@@ -1,8 +1,27 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import { Html5Qrcode, Html5QrcodeScannerState } from "html5-qrcode";
 import { normalizeContactCardInput } from "@/lib/contactCode";
+
+async function releaseScanner(scanner: Html5Qrcode) {
+  try {
+    const state = scanner.getState();
+    if (
+      state === Html5QrcodeScannerState.SCANNING ||
+      state === Html5QrcodeScannerState.PAUSED
+    ) {
+      await scanner.stop();
+    }
+  } catch {
+    /* already stopped or never started */
+  }
+  try {
+    scanner.clear();
+  } catch {
+    /* ignore */
+  }
+}
 
 export function ContactQRScanner({
   onScan,
@@ -13,7 +32,6 @@ export function ContactQRScanner({
 }) {
   const reactId = useId().replace(/:/g, "");
   const elementId = `contact-qr-scanner-${reactId}`;
-  const scannerRef = useRef<Html5Qrcode | null>(null);
   const onScanRef = useRef(onScan);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(true);
@@ -24,34 +42,41 @@ export function ContactQRScanner({
 
   useEffect(() => {
     const scanner = new Html5Qrcode(elementId);
-    scannerRef.current = scanner;
-    let stopped = false;
+    let disposed = false;
+    let scanHandled = false;
 
-    scanner
+    const startTask = scanner
       .start(
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 220, height: 220 }, aspectRatio: 1 },
         (decoded) => {
+          if (scanHandled || disposed) return;
           const card = normalizeContactCardInput(decoded);
-          if (!card || stopped) return;
-          stopped = true;
-          void scanner.stop().then(() => onScanRef.current(card));
+          if (!card) return;
+          scanHandled = true;
+          void releaseScanner(scanner).then(() => {
+            if (!disposed) onScanRef.current(card);
+          });
         },
         () => {
           /* no QR in frame */
         },
       )
-      .then(() => setStarting(false))
+      .then(() => {
+        if (disposed) {
+          return releaseScanner(scanner);
+        }
+        setStarting(false);
+      })
       .catch((e: unknown) => {
+        if (disposed) return;
         setStarting(false);
         setError(e instanceof Error ? e.message : "Could not open camera");
       });
 
     return () => {
-      stopped = true;
-      void scanner.stop().catch(() => {});
-      scanner.clear();
-      scannerRef.current = null;
+      disposed = true;
+      void startTask.finally(() => releaseScanner(scanner));
     };
   }, [elementId]);
 
