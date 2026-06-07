@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatDate } from "@/templates/choreboard/lib/format";
-import { SyncBadge } from "@/templates/choreboard/components/ui";
+import { SyncBadge } from "@/shell/SyncBadge";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
+import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { useTripSplitStore } from "../lib/useTripSplitStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
@@ -14,7 +15,7 @@ import { Avatar, MoneyCents } from "./ui";
 type Tab = "expenses" | "balances";
 
 export function TripView({ memberId }: { memberId: string }) {
-  const { sync, setCurrentMember, leave, roomCode, hasAdminAccess } = useRoomSession();
+  const { sync, setCurrentMember, leaveRoom, roomCode, hasAdminAccess } = useRoomSession();
   const store = useTripSplitStore();
   const [tab, setTab] = useState<Tab>("expenses");
   const [adding, setAdding] = useState(false);
@@ -108,16 +109,14 @@ export function TripView({ memberId }: { memberId: string }) {
 
         <div className="card stack" style={{ marginTop: 8 }}>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
-          <div className="muted" style={{ fontSize: 12, wordBreak: "break-all" }}>
-            Room code: {roomCode}
-          </div>
-          <p className="muted" style={{ fontSize: 12 }}>
-            Share the room code so friends can join and add expenses from their phones.
-          </p>
+          <RoomCodeShare
+            roomCode={roomCode}
+            hint="Share the room code so friends can join and add expenses from their phones."
+          />
           <Link className="btn btn-ghost btn-block" href="/">
             Home
           </Link>
-          <button className="btn btn-ghost btn-block" onClick={leave}>
+          <button className="btn btn-ghost btn-block" onClick={leaveRoom}>
             Leave room
           </button>
         </div>

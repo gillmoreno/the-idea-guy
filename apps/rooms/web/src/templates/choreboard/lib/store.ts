@@ -5,6 +5,7 @@ import {
   readNestedMap,
   readTemplateBranch,
 } from "@/lib/yjsTemplate";
+import { writeRoomMeta } from "@/shell/roomMeta";
 import {
   Chore,
   ChoreFrequencyLimit,
@@ -173,10 +174,11 @@ export class ChoreStore {
     const stamp = Date.now();
     this.setKidDefaults(DEFAULT_KID_PERMISSIONS);
     this.txPublic(() => {
-      const meta = this.publicDoc.getMap("meta");
-      meta.set("templateId", CHOREBOARD_TEMPLATE_ID);
-      meta.set("roomName", input.name);
-      meta.set("createdAt", stamp);
+      writeRoomMeta(this.publicDoc, {
+        templateKind: "builtin",
+        templateId: CHOREBOARD_TEMPLATE_ID,
+        roomName: input.name,
+      });
       this.family!.set("name", input.name);
       this.family!.set("currency", input.currency);
       this.family!.set("paydayWeekday", input.paydayWeekday);

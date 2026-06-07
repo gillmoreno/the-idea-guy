@@ -13,18 +13,29 @@ import { Y } from "@the-idea-guy/room-kit";
 import {
   APP_ID,
   LocalFirstDoc,
+  DECLARATIVE_TEMPLATE_ID,
+  PENDING_TEMPLATE_ID,
   SyncState,
   TemplateId,
+  TemplateKind,
   adminKeyMaterial,
   loadVault,
   publicKeyMaterial,
   touchVaultRoom,
 } from "@the-idea-guy/room-kit";
 import { useDevice } from "./DeviceProvider";
-import { ChoreStore } from "@/templates/choreboard/lib/store";
 import { clearMemberSecrets } from "@/templates/choreboard/lib/memberSecrets";
+import { readRoomMeta, writeRoomMeta, type ResolvedRoomMeta } from "./roomMeta";
+import { inferTemplateFromDoc } from "./resolveRoomType";
+import type { RoomSchema } from "@/schema/types";
+import { peekPendingSchema } from "@/schema/pending";
 
 const LS_MEMBER = "rooms.currentMemberId";
+
+function vaultSnapshot(code: string | null) {
+  if (!code) return null;
+  return loadVault().rooms[code] ?? null;
+}
 
 function mergeSync(a: SyncState, b: SyncState): SyncState {
   return {
@@ -33,9 +44,15 @@ function mergeSync(a: SyncState, b: SyncState): SyncState {
   };
 }
 
+export interface RoomDocs {
+  publicDoc: Y.Doc;
+  adminDoc: Y.Doc | null;
+}
+
 interface JoinOpts {
   asOwner?: boolean;
   adminSecret?: string;
+  templateKind?: TemplateKind;
   templateId: TemplateId;
   roomName?: string;
   memberId?: string;
@@ -45,10 +62,14 @@ interface JoinOpts {
 interface RoomSessionCtx {
   mounted: boolean;
   roomCode: string | null;
+  templateKind: TemplateKind | null;
   templateId: TemplateId | null;
+  roomSchema: RoomSchema | null;
+  roomName: string | null;
+  roomMeta: ResolvedRoomMeta | null;
+  docs: RoomDocs | null;
   hasAdminAccess: boolean;
   isOwner: boolean;
-  store: ChoreStore | null;
   sync: SyncState;
   version: number;
   currentMemberId: string | null;
@@ -57,16 +78,6 @@ interface RoomSessionCtx {
   unlockAdmin: (adminSecret: string) => void;
   leaveRoom: () => void;
   setCurrentMember: (id: string | null) => void;
-  /** ChoreBoard-compat aliases */
-  familyCode: string | null;
-  hasParentAccess: boolean;
-  isCreator: boolean;
-  unlockParent: (secret: string) => void;
-  join: (
-    code: string,
-    opts?: { asCreator?: boolean; parentSecret?: string; templateId?: TemplateId },
-  ) => void;
-  leave: () => void;
 }
 
 const Ctx = createContext<RoomSessionCtx | null>(null);
@@ -81,10 +92,22 @@ export function RoomSessionProvider({
   const { relayUrl, saveRoom, forgetRoom } = useDevice();
   const [mounted, setMounted] = useState(false);
   const [roomCode, setRoomCode] = useState<string | null>(initialRoomCode);
-  const [templateId, setTemplateId] = useState<TemplateId | null>(null);
-  const [adminSecret, setAdminSecret] = useState<string | null>(null);
-  const [isOwner, setIsOwner] = useState(false);
-  const [store, setStore] = useState<ChoreStore | null>(null);
+  const [templateKind, setTemplateKind] = useState<TemplateKind | null>(() => {
+    const v = vaultSnapshot(initialRoomCode);
+    return v?.templateKind ?? (v?.templateId === DECLARATIVE_TEMPLATE_ID ? "declarative" : v ? "builtin" : null);
+  });
+  const [templateId, setTemplateId] = useState<TemplateId | null>(
+    () => vaultSnapshot(initialRoomCode)?.templateId ?? null,
+  );
+  const [roomSchema, setRoomSchema] = useState<RoomSchema | null>(null);
+  const [roomName, setRoomName] = useState<string | null>(
+    () => vaultSnapshot(initialRoomCode)?.roomName ?? null,
+  );
+  const [adminSecret, setAdminSecret] = useState<string | null>(
+    () => vaultSnapshot(initialRoomCode)?.adminSecret ?? null,
+  );
+  const [isOwner, setIsOwner] = useState(() => !!vaultSnapshot(initialRoomCode)?.isOwner);
+  const [docs, setDocs] = useState<RoomDocs | null>(null);
   const [sync, setSync] = useState<SyncState>({ localLoaded: false, connected: false });
   const [version, setVersion] = useState(0);
   const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
@@ -109,9 +132,11 @@ export function RoomSessionProvider({
     if (!initialRoomCode) return;
     const vaultRoom = loadVault().rooms[initialRoomCode];
     if (vaultRoom) {
+      setTemplateKind(vaultRoom.templateKind ?? "builtin");
       setTemplateId(vaultRoom.templateId);
       setAdminSecret(vaultRoom.adminSecret ?? null);
       setIsOwner(!!vaultRoom.isOwner);
+      setRoomName(vaultRoom.roomName ?? null);
       setCurrentMemberId(vaultRoom.memberId ?? localStorage.getItem(LS_MEMBER));
       touchVaultRoom(loadVault(), initialRoomCode);
     }
@@ -122,26 +147,94 @@ export function RoomSessionProvider({
     adminRef.current?.destroy();
     publicRef.current = null;
     adminRef.current = null;
-    setStore(null);
+    setDocs(null);
   };
 
-  const readTemplateFromDoc = (doc: Y.Doc): TemplateId | null => {
-    const id = doc.getMap("meta").get("templateId");
-    return typeof id === "string" ? id : null;
-  };
+  const applyMetaFromDoc = useCallback(
+    (code: string) => {
+      const pub = publicRef.current;
+      if (!pub) return;
+      const doc = pub.doc;
+      let meta = readRoomMeta(doc);
+      const vaultRoom = loadVault().rooms[code];
+      const inferred = inferTemplateFromDoc(doc);
 
-  const refreshStore = useCallback(() => {
+      const resolvedId =
+        (meta.templateId && meta.templateId !== PENDING_TEMPLATE_ID
+          ? meta.templateId
+          : null) ??
+        (vaultRoom?.templateId && vaultRoom.templateId !== PENDING_TEMPLATE_ID
+          ? vaultRoom.templateId
+          : null) ??
+        inferred;
+
+      if (
+        resolvedId &&
+        resolvedId !== PENDING_TEMPLATE_ID &&
+        (!meta.templateId || meta.templateId === PENDING_TEMPLATE_ID)
+      ) {
+        const kind: TemplateKind =
+          vaultRoom?.templateKind ??
+          (resolvedId === DECLARATIVE_TEMPLATE_ID ? "declarative" : "builtin");
+        const pendingSchema =
+          kind === "declarative" ? peekPendingSchema(code) : null;
+        doc.transact(() => {
+          writeRoomMeta(doc, {
+            templateKind: kind,
+            templateId: resolvedId,
+            roomName: vaultRoom?.roomName ?? meta.roomName ?? "My room",
+            schema: pendingSchema ?? meta.schema,
+          });
+        });
+        meta = readRoomMeta(doc);
+      }
+
+      const effectiveId = meta.templateId || resolvedId;
+      if (effectiveId && effectiveId !== PENDING_TEMPLATE_ID) setTemplateId(effectiveId);
+      else if (inferred) setTemplateId(inferred);
+      else if (vaultRoom?.templateId) setTemplateId(vaultRoom.templateId);
+
+      if (meta.templateKind) setTemplateKind(meta.templateKind);
+      else if (vaultRoom?.templateKind) setTemplateKind(vaultRoom.templateKind);
+      else if (effectiveId === DECLARATIVE_TEMPLATE_ID) setTemplateKind("declarative");
+
+      if (meta.schema) setRoomSchema(meta.schema);
+      if (meta.roomName) setRoomName(meta.roomName);
+
+      const syncId = meta.templateId && meta.templateId !== PENDING_TEMPLATE_ID
+        ? meta.templateId
+        : resolvedId && resolvedId !== PENDING_TEMPLATE_ID
+          ? resolvedId
+          : null;
+
+      if (syncId && vaultRoom && vaultRoom.templateId !== syncId) {
+        saveRoom({
+          ...vaultRoom,
+          templateId: syncId,
+          templateKind:
+            meta.templateKind ??
+            vaultRoom.templateKind ??
+            (syncId === DECLARATIVE_TEMPLATE_ID ? "declarative" : "builtin"),
+          roomName: meta.roomName ?? vaultRoom.roomName,
+        });
+      }
+    },
+    [saveRoom],
+  );
+
+  const refreshDocs = useCallback(() => {
     const p = publicRef.current;
     const a = adminRef.current;
     queueMicrotask(() => {
       if (p) {
-        const fromDoc = readTemplateFromDoc(p.doc);
-        if (fromDoc) setTemplateId(fromDoc);
-        setStore(new ChoreStore(p.doc, a?.doc ?? null));
+        setDocs({ publicDoc: p.doc, adminDoc: a?.doc ?? null });
+        if (roomCode) applyMetaFromDoc(roomCode);
+      } else {
+        setDocs(null);
       }
       bump();
     });
-  }, []);
+  }, [applyMetaFromDoc, roomCode]);
 
   const wireDocs = useCallback(
     (code: string, admin: string | null, relay: string) => {
@@ -156,11 +249,11 @@ export function RoomSessionProvider({
         keyMaterial: publicKeyMaterial(code),
         scope: "public",
         relayUrl: relay,
-        onChange: refreshStore,
+        onChange: refreshDocs,
         onState: (s) => {
           pubSync.current = s;
           applySyncState();
-          if (s.localLoaded) refreshStore();
+          if (s.localLoaded) refreshDocs();
         },
       });
       publicRef.current = pub;
@@ -172,7 +265,7 @@ export function RoomSessionProvider({
           keyMaterial: adminKeyMaterial(code, admin),
           scope: "admin",
           relayUrl: relay,
-          onChange: refreshStore,
+          onChange: refreshDocs,
           onState: (s) => {
             admSync.current = s;
             applySyncState();
@@ -184,9 +277,9 @@ export function RoomSessionProvider({
         admSync.current = { localLoaded: true, connected: false };
       }
 
-      refreshStore();
+      refreshDocs();
     },
-    [refreshStore],
+    [refreshDocs],
   );
 
   useEffect(() => {
@@ -207,6 +300,7 @@ export function RoomSessionProvider({
 
       saveRoom({
         roomCode: trimmed,
+        templateKind: opts.templateKind ?? "builtin",
         templateId: opts.templateId,
         roomName: opts.roomName,
         memberId,
@@ -218,7 +312,9 @@ export function RoomSessionProvider({
 
       if (secret) setAdminSecret(secret);
       setIsOwner(!!opts.asOwner);
+      setTemplateKind(opts.templateKind ?? "builtin");
       setTemplateId(opts.templateId);
+      setRoomName(opts.roomName ?? null);
       setCurrentMemberId(memberId);
       localStorage.setItem(LS_MEMBER, memberId);
       setRoomCode(trimmed);
@@ -243,7 +339,10 @@ export function RoomSessionProvider({
     localStorage.removeItem(LS_MEMBER);
     setAdminSecret(null);
     setIsOwner(false);
+    setTemplateKind(null);
     setTemplateId(null);
+    setRoomSchema(null);
+    setRoomName(null);
     setCurrentMemberId(null);
     setRoomCode(null);
     teardown();
@@ -262,28 +361,26 @@ export function RoomSessionProvider({
     [roomCode, saveRoom],
   );
 
-  const joinCompat = useCallback(
-    (
-      code: string,
-      opts?: { asCreator?: boolean; parentSecret?: string; templateId?: TemplateId },
-    ) => {
-      joinRoom(code, {
-        asOwner: opts?.asCreator,
-        adminSecret: opts?.parentSecret,
-        templateId: opts?.templateId ?? "choreboard",
-      });
-    },
-    [joinRoom],
+  const roomMeta = useMemo(
+    () =>
+      docs
+        ? readRoomMeta(docs.publicDoc)
+        : null,
+    [docs, version],
   );
 
   const value = useMemo(
     () => ({
       mounted,
       roomCode,
+      templateKind,
       templateId,
+      roomSchema,
+      roomName,
+      roomMeta,
+      docs,
       hasAdminAccess: !!adminSecret,
       isOwner,
-      store,
       sync,
       version,
       currentMemberId,
@@ -292,20 +389,18 @@ export function RoomSessionProvider({
       unlockAdmin,
       leaveRoom,
       setCurrentMember,
-      familyCode: roomCode,
-      hasParentAccess: !!adminSecret,
-      isCreator: isOwner,
-      unlockParent: unlockAdmin,
-      join: joinCompat,
-      leave: leaveRoom,
     }),
     [
       mounted,
       roomCode,
+      templateKind,
       templateId,
+      roomSchema,
+      roomName,
+      roomMeta,
+      docs,
       adminSecret,
       isOwner,
-      store,
       sync,
       version,
       currentMemberId,
@@ -314,7 +409,6 @@ export function RoomSessionProvider({
       unlockAdmin,
       leaveRoom,
       setCurrentMember,
-      joinCompat,
     ],
   );
 
@@ -325,8 +419,4 @@ export function useRoomSession(): RoomSessionCtx {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error("useRoomSession must be used within RoomSessionProvider");
   return ctx;
-}
-
-export function useChoreBoard(): RoomSessionCtx {
-  return useRoomSession();
 }

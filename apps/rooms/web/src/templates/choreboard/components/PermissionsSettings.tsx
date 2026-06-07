@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useChoreBoard } from "@/shell/RoomSessionProvider";
+import { useChoreStore } from "@/templates/choreboard/lib/useChoreStore";
 import {
   DEFAULT_KID_PERMISSIONS,
   getEffectivePermissions,
@@ -12,7 +12,7 @@ import { KidPermissions } from "@/templates/choreboard/lib/types";
 const KEYS = Object.keys(DEFAULT_KID_PERMISSIONS) as (keyof KidPermissions)[];
 
 export function PermissionsSettings() {
-  const { store } = useChoreBoard();
+  const store = useChoreStore();
   const [selectedKid, setSelectedKid] = useState<string | "defaults">("defaults");
   if (!store?.canAdmin) return null;
 

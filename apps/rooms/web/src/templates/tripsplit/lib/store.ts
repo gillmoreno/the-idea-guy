@@ -5,6 +5,7 @@ import {
   readNestedMap,
   readTemplateBranch,
 } from "@/lib/yjsTemplate";
+import { writeRoomMeta } from "@/shell/roomMeta";
 import type { Expense, Traveler, TripSettings } from "./types";
 
 export const TRIPSPLIT_TEMPLATE_ID = "tripsplit";
@@ -62,6 +63,11 @@ export class TripSplitStore {
 
   initTrip(settings: { name: string; currency: string }) {
     this.publicDoc.transact(() => {
+      writeRoomMeta(this.publicDoc, {
+        templateKind: "builtin",
+        templateId: TRIPSPLIT_TEMPLATE_ID,
+        roomName: settings.name,
+      });
       const pub = ensureTemplateBranch(this.publicDoc, TRIPSPLIT_TEMPLATE_ID);
       const trip = ensureNestedMap(pub, "trip");
       trip.set("name", settings.name.trim());

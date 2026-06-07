@@ -5,16 +5,16 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { BacklogStore } from "./store";
 
 export function useBacklogStore(): BacklogStore | null {
-  const { store, version } = useRoomSession();
+  const { docs, version } = useRoomSession();
   const [backlogStore, setBacklogStore] = useState<BacklogStore | null>(null);
 
   useEffect(() => {
-    if (!store) {
+    if (!docs) {
       setBacklogStore(null);
       return;
     }
-    setBacklogStore(new BacklogStore(store.publicDoc, store.adminDoc));
-  }, [store, version]);
+    setBacklogStore(new BacklogStore(docs.publicDoc, docs.adminDoc));
+  }, [docs, version]);
 
   return backlogStore;
 }

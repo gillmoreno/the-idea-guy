@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useChoreBoard } from "@/shell/RoomSessionProvider";
+import { useRoomSession } from "@/shell/RoomSessionProvider";
+import { useChoreStore } from "@/templates/choreboard/lib/useChoreStore";
 import {
   formatMemberLink,
   getMemberSecret,
@@ -9,7 +10,7 @@ import {
 } from "@/templates/choreboard/lib/memberSecrets";
 import { generateMemberSecret } from "@the-idea-guy/room-kit";
 import { qrFamilyJoin, qrMemberLink, qrParentUnlock } from "@the-idea-guy/room-kit";
-import { QRBlock } from "./QRBlock";
+import { QRBlock } from "@/shell/QRBlock";
 import { PermissionsSettings } from "./PermissionsSettings";
 import { RelaySettings } from "./RelaySettings";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
@@ -25,7 +26,8 @@ import { ConfirmModal } from "./ConfirmModal";
 type Tab = "home" | "approvals" | "chores" | "payday" | "settings";
 
 export function ParentView({ memberId }: { memberId: string }) {
-  const { store, sync, setCurrentMember } = useChoreBoard();
+  const { sync, setCurrentMember } = useRoomSession();
+  const store = useChoreStore();
   const [tab, setTab] = useState<Tab>("home");
   if (!store) return null;
   const family = store.getFamily()!;
@@ -87,7 +89,7 @@ function NavBtn({ label, ico, active, onClick }: { label: string; ico: string; a
 }
 
 function HomeTab() {
-  const { store } = useChoreBoard();
+  const store = useChoreStore();
   if (!store) return null;
   const currency = store.getFamily()!.currency;
   const kids = store.listMembers().filter((m) => m.role === "kid");
@@ -135,7 +137,7 @@ function HomeTab() {
 }
 
 function ApprovalsTab({ byId }: { byId: string }) {
-  const { store } = useChoreBoard();
+  const store = useChoreStore();
   const [verifyNote, setVerifyNote] = useState<Record<string, string>>({});
   if (!store) return null;
   const currency = store.getFamily()!.currency;
@@ -238,7 +240,7 @@ function ApprovalsTab({ byId }: { byId: string }) {
 }
 
 function ChoresTab() {
-  const { store } = useChoreBoard();
+  const store = useChoreStore();
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<string | null>(null);
   if (!store) return null;
@@ -310,7 +312,7 @@ function ChoresTab() {
 }
 
 function PaydayTab({ byId }: { byId: string }) {
-  const { store } = useChoreBoard();
+  const store = useChoreStore();
   if (!store) return null;
   const currency = store.getFamily()!.currency;
   const kids = store.listMembers().filter((m) => m.role === "kid");
@@ -365,7 +367,8 @@ function PaydayTab({ byId }: { byId: string }) {
 }
 
 function SettingsTab() {
-  const { store, familyCode, hasParentAccess, leave } = useChoreBoard();
+  const { roomCode, hasAdminAccess, leaveRoom } = useRoomSession();
+  const store = useChoreStore();
   const parentSecret =
     typeof window !== "undefined" ? localStorage.getItem("choreboard.parentSecret") : null;
   const [addingMember, setAddingMember] = useState(false);
@@ -375,9 +378,9 @@ function SettingsTab() {
   const members = store.listMembers();
 
   const copy = async () => {
-    if (!familyCode) return;
+    if (!roomCode) return;
     try {
-      await navigator.clipboard.writeText(familyCode);
+      await navigator.clipboard.writeText(roomCode);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -394,14 +397,14 @@ function SettingsTab() {
           pick their name on the next screen. Finish Setup here first or their device
           stays on &quot;Connecting…&quot;.
         </p>
-        <div className="code-box">{familyCode}</div>
-        {familyCode && (
-          <QRBlock value={qrFamilyJoin(familyCode)} label="Scan to join (kid device)" />
+        <div className="code-box">{roomCode}</div>
+        {roomCode && (
+          <QRBlock value={qrFamilyJoin(roomCode)} label="Scan to join (kid device)" />
         )}
         <button className="btn btn-block" onClick={copy}>
           {copied ? "Copied!" : "Copy family code"}
         </button>
-        {hasParentAccess && parentSecret && (
+        {hasAdminAccess && parentSecret && (
           <>
             <p className="muted" style={{ fontSize: 13, marginTop: 12 }}>
               <strong>Parent secret</strong> — only for parents. Unlocks chore catalog,
@@ -445,14 +448,14 @@ function SettingsTab() {
       <FamilySettings />
 
       <RoomLocalStorage
-        roomCode={familyCode}
-        includeAdmin={hasParentAccess}
+        roomCode={roomCode ?? ""}
+        includeAdmin={hasAdminAccess}
         variant="card"
       />
 
       <ResetHistorySection />
 
-      <button className="btn btn-danger btn-block" style={{ marginTop: 8 }} onClick={leave}>
+      <button className="btn btn-danger btn-block" style={{ marginTop: 8 }} onClick={leaveRoom}>
         Sign out of this device
       </button>
       <p className="muted" style={{ fontSize: 12, textAlign: "center" }}>
@@ -463,7 +466,7 @@ function SettingsTab() {
 }
 
 function ResetHistorySection() {
-  const { store } = useChoreBoard();
+  const store = useChoreStore();
   const [step, setStep] = useState<0 | 1 | 2>(0);
   if (!store) return null;
 
@@ -541,7 +544,7 @@ function ResetHistorySection() {
 }
 
 function FamilySettings() {
-  const { store } = useChoreBoard();
+  const store = useChoreStore();
   if (!store) return null;
   const family = store.getFamily()!;
   return (
@@ -571,7 +574,7 @@ function FamilySettings() {
 }
 
 function AddMember({ onDone }: { onDone: () => void }) {
-  const { store } = useChoreBoard();
+  const store = useChoreStore();
   const [name, setName] = useState("");
   const [role, setRole] = useState<Role>("kid");
   const [color, setColor] = useState(MEMBER_COLORS[2]);

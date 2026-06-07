@@ -71,7 +71,7 @@ Four CSS-only themes (no images) — switch on Home or Create:
 | Theme | Vibe |
 |-------|------|
 | **Classic** | Current minimal baseline |
-| **Aurora** | Soft gradients, emoji pulse, purple CTAs |
+| **Paper** | Warm stone neutrals, flat cards (classic-adjacent) |
 | **Signal** | Dot grid, cyan accent, sharp panels |
 | **Glow** | Dark glass, gradient buttons |
 

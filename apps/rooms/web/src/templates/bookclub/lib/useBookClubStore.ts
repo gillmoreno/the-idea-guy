@@ -5,16 +5,16 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { BookClubStore } from "./store";
 
 export function useBookClubStore(): BookClubStore | null {
-  const { store, version } = useRoomSession();
+  const { docs, version } = useRoomSession();
   const [clubStore, setClubStore] = useState<BookClubStore | null>(null);
 
   useEffect(() => {
-    if (!store) {
+    if (!docs) {
       setClubStore(null);
       return;
     }
-    setClubStore(new BookClubStore(store.publicDoc, store.adminDoc));
-  }, [store, version]);
+    setClubStore(new BookClubStore(docs.publicDoc, docs.adminDoc));
+  }, [docs, version]);
 
   return clubStore;
 }

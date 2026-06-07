@@ -5,7 +5,8 @@ import { useDevice } from "@/shell/DeviceProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { roomUrl } from "@the-idea-guy/room-kit/links";
 import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
-import { getTemplate } from "@/templates/registry";
+import { DECLARATIVE_TEMPLATE_ID } from "@the-idea-guy/room-kit";
+import { getBuiltinTemplate } from "@/templates/registry";
 
 export default function HomePage() {
   const { mounted, rooms } = useDevice();
@@ -46,7 +47,14 @@ export default function HomePage() {
             <div className="section-title">Your rooms</div>
             <div className="stack-sm">
               {rooms.map((r) => {
-                const t = getTemplate(r.templateId);
+                const t =
+                  r.templateId === DECLARATIVE_TEMPLATE_ID
+                    ? {
+                        emoji: "📋",
+                        name: r.roomName ?? "Custom room",
+                        accent: "#6366f1",
+                      }
+                    : getBuiltinTemplate(r.templateId);
                 return (
                   <Link
                     key={r.roomCode}

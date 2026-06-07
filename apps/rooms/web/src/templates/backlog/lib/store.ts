@@ -5,6 +5,7 @@ import {
   readNestedMap,
   readTemplateBranch,
 } from "@/lib/yjsTemplate";
+import { writeRoomMeta } from "@/shell/roomMeta";
 import type { BacklogIdea, BoardSettings, IdeaStatus, Member } from "./types";
 import { SEED_BACKLOG_IDEAS } from "./seed";
 
@@ -60,6 +61,11 @@ export class BacklogStore {
 
   initBoard(settings: { name: string }, organizerId: string) {
     this.publicDoc.transact(() => {
+      writeRoomMeta(this.publicDoc, {
+        templateKind: "builtin",
+        templateId: BACKLOG_TEMPLATE_ID,
+        roomName: settings.name,
+      });
       const pub = ensureTemplateBranch(this.publicDoc, BACKLOG_TEMPLATE_ID);
       const board = ensureNestedMap(pub, "board");
       board.set("name", settings.name.trim());

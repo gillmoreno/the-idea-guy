@@ -1,9 +1,18 @@
-export type TemplateId = "choreboard" | string;
+export type TemplateId = string;
+
+/** `declarative` = JSON schema room; anything else = built-in compiled template. */
+export type TemplateKind = "builtin" | "declarative";
+
+export const DECLARATIVE_TEMPLATE_ID = "declarative";
+
+/** Vault placeholder until the CRDT doc reveals the real template. */
+export const PENDING_TEMPLATE_ID = "_pending";
 
 export type MemberRole = "owner" | "admin" | "member";
 
 export interface PublicRoomMeta {
   roomName: string;
+  templateKind: TemplateKind;
   templateId: TemplateId;
   createdAt: number;
 }
@@ -33,6 +42,7 @@ export interface AdminMemberRecord {
 
 export interface VaultRoom {
   roomCode: string;
+  templateKind?: TemplateKind;
   templateId: TemplateId;
   roomName?: string;
   memberId: string;

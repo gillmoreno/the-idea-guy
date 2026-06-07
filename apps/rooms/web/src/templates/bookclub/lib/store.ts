@@ -5,6 +5,7 @@ import {
   readNestedMap,
   readTemplateBranch,
 } from "@/lib/yjsTemplate";
+import { writeRoomMeta } from "@/shell/roomMeta";
 import type { Book, BookStatus, ClubSettings, Member, Note } from "./types";
 
 export const BOOKCLUB_TEMPLATE_ID = "bookclub";
@@ -59,6 +60,11 @@ export class BookClubStore {
 
   initClub(settings: { name: string }) {
     this.publicDoc.transact(() => {
+      writeRoomMeta(this.publicDoc, {
+        templateKind: "builtin",
+        templateId: BOOKCLUB_TEMPLATE_ID,
+        roomName: settings.name,
+      });
       const pub = ensureTemplateBranch(this.publicDoc, BOOKCLUB_TEMPLATE_ID);
       const club = ensureNestedMap(pub, "club");
       club.set("name", settings.name.trim());

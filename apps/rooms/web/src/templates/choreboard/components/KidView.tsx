@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useChoreBoard } from "@/shell/RoomSessionProvider";
+import { useRoomSession } from "@/shell/RoomSessionProvider";
+import { useChoreStore } from "@/templates/choreboard/lib/useChoreStore";
 import { getMemberSecret } from "@/templates/choreboard/lib/memberSecrets";
 import { getEffectivePermissions } from "@/templates/choreboard/lib/permissions";
 import { weekRange } from "@/templates/choreboard/lib/store";
@@ -11,7 +12,8 @@ import { formatMoney, formatDate } from "@/templates/choreboard/lib/format";
 import { Avatar, CadencePill, DiffPill, Money, SyncBadge } from "./ui";
 
 export function KidView({ memberId }: { memberId: string }) {
-  const { store, sync, version, setCurrentMember } = useChoreBoard();
+  const { sync, version, setCurrentMember } = useRoomSession();
+  const store = useChoreStore();
   const [suggesting, setSuggesting] = useState(false);
   if (!store) return null;
   void version;
@@ -169,7 +171,7 @@ function SuggestChore({
   showRewards: boolean;
   onDone: () => void;
 }) {
-  const { store } = useChoreBoard();
+  const store = useChoreStore();
   const [title, setTitle] = useState("");
   const [reward, setReward] = useState("1");
   const [category, setCategory] = useState<Category>("general");

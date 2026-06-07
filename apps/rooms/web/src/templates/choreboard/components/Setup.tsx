@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SetupTopbar } from "@/shell/SetupTopbar";
-import { useChoreBoard } from "@/shell/RoomSessionProvider";
+import { useChoreStore } from "@/templates/choreboard/lib/useChoreStore";
 import { seedChores } from "@/templates/choreboard/lib/seed";
 import { CURRENCY_OPTIONS, WEEKDAY_OPTIONS } from "@/templates/choreboard/lib/format";
 import { MEMBER_COLORS, Role } from "@/templates/choreboard/lib/types";
@@ -14,7 +14,7 @@ interface DraftMember {
 }
 
 export function Setup() {
-  const { store } = useChoreBoard();
+  const store = useChoreStore();
   const [name, setName] = useState("Our family");
   const [currency, setCurrency] = useState("USD");
   const [payday, setPayday] = useState(0);

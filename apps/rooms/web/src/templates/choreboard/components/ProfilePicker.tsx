@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useChoreBoard } from "@/shell/RoomSessionProvider";
+import { useRoomSession } from "@/shell/RoomSessionProvider";
+import { useChoreStore } from "@/templates/choreboard/lib/useChoreStore";
 import { parseAppSearchParams, stripInviteParamsFromUrl } from "@the-idea-guy/room-kit";
 import { Avatar } from "./ui";
 import {
@@ -11,7 +12,8 @@ import {
 } from "@/templates/choreboard/lib/memberSecrets";
 
 export function ProfilePicker() {
-  const { store, setCurrentMember } = useChoreBoard();
+  const { setCurrentMember } = useRoomSession();
+  const store = useChoreStore();
   const [linkingId, setLinkingId] = useState<string | null>(null);
   const [linkRaw, setLinkRaw] = useState("");
 

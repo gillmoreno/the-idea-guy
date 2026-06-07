@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "templates": [
+    {
+      "id": "potluck",
+      "name": "Potluck",
+      "description": "Who brings what — dietary tags and headcount for shared meals.",
+      "emoji": "🥗",
+      "accent": "#22c55e",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "potluck",
+        "name": "Potluck",
+        "description": "Plan a shared meal — claim dishes and note dietary needs.",
+        "emoji": "🥗",
+        "accent": "#22c55e",
+        "collections": [
+          {
+            "id": "dishes",
+            "label": "Dishes",
+            "singular": "dish",
+            "fields": [
+              { "key": "title", "label": "Dish", "type": "text", "required": true },
+              { "key": "notes", "label": "Notes", "type": "textarea" },
+              { "key": "dietary", "label": "Dietary tags", "type": "tags" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "dishes",
+            "values": [
+              { "id": "needed", "label": "Needed" },
+              { "id": "claimed", "label": "Claimed" },
+              { "id": "brought", "label": "Brought" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
+    },
+    {
+      "id": "idea-pool",
+      "name": "Idea Pool",
+      "description": "Propose ideas and vote — a lightweight backlog for any group.",
+      "emoji": "💡",
+      "accent": "#f59e0b",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "idea-pool",
+        "name": "Idea Pool",
+        "description": "Collect proposals and vote on what to do next.",
+        "emoji": "💡",
+        "accent": "#f59e0b",
+        "collections": [
+          {
+            "id": "ideas",
+            "label": "Ideas",
+            "singular": "idea",
+            "fields": [
+              { "key": "title", "label": "Title", "type": "text", "required": true },
+              { "key": "pitch", "label": "Pitch", "type": "textarea", "required": true }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member" }
+          }
+        ],
+        "features": [
+          { "type": "votes", "collection": "ideas", "onePerMember": true },
+          {
+            "type": "status",
+            "collection": "ideas",
+            "values": [
+              { "id": "proposed", "label": "Proposed" },
+              { "id": "building", "label": "Building" },
+              { "id": "shipped", "label": "Shipped" },
+              { "id": "parked", "label": "Parked" }
+            ],
+            "setBy": "owner"
+          }
+        ]
+      }
+    }
+  ]
+}

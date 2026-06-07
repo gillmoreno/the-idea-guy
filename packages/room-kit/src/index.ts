@@ -67,6 +67,10 @@ export {
   persistenceDbName,
   roomPersistenceDbNames,
 } from "./storageSize";
+export {
+  DECLARATIVE_TEMPLATE_ID,
+  PENDING_TEMPLATE_ID,
+} from "./types";
 export type {
   AdminMemberRecord,
   AdminRoomMeta,
@@ -75,5 +79,6 @@ export type {
   PublicMemberRecord,
   PublicRoomMeta,
   TemplateId,
+  TemplateKind,
   VaultRoom,
 } from "./types";

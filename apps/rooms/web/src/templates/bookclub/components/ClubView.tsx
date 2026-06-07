@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatDate } from "@/templates/choreboard/lib/format";
-import { SyncBadge } from "@/templates/choreboard/components/ui";
+import { SyncBadge } from "@/shell/SyncBadge";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
+import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import type { Book } from "../lib/types";
 import { useBookClubStore } from "../lib/useBookClubStore";
 import { AddBook } from "./AddBook";
@@ -45,7 +46,7 @@ function BookRow({
 }
 
 export function ClubView({ memberId }: { memberId: string }) {
-  const { sync, setCurrentMember, leave, roomCode, hasAdminAccess, version } = useRoomSession();
+  const { sync, setCurrentMember, leaveRoom, roomCode, hasAdminAccess, version } = useRoomSession();
   const store = useBookClubStore();
   const [tab, setTab] = useState<Tab>("reading");
   const [adding, setAdding] = useState<"queue" | "current" | null>(null);
@@ -229,16 +230,14 @@ export function ClubView({ memberId }: { memberId: string }) {
 
         <div className="card stack" style={{ marginTop: 8 }}>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
-          <div className="muted" style={{ fontSize: 12, wordBreak: "break-all" }}>
-            Room code: {roomCode}
-          </div>
-          <p className="muted" style={{ fontSize: 12 }}>
-            Share the code so members can join from their own devices.
-          </p>
+          <RoomCodeShare
+            roomCode={roomCode}
+            hint="Share the code so members can join from their own devices."
+          />
           <Link className="btn btn-ghost btn-block" href="/">
             Home
           </Link>
-          <button className="btn btn-ghost btn-block" onClick={leave}>
+          <button className="btn btn-ghost btn-block" onClick={leaveRoom}>
             Leave room
           </button>
         </div>

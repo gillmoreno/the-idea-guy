@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useChoreBoard } from "@/shell/RoomSessionProvider";
+import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { parseAppSearchParams, stripInviteParamsFromUrl } from "@the-idea-guy/room-kit";
 
 /** Parent profile selected but this device has no parent secret (kid join flow). */
 export function ParentGate() {
-  const { unlockParent, setCurrentMember } = useChoreBoard();
+  const { unlockAdmin, setCurrentMember } = useRoomSession();
   const [secret, setSecret] = useState("");
 
   useEffect(() => {
@@ -14,9 +14,9 @@ export function ParentGate() {
     if (link?.type === "parent") {
       setSecret(link.value);
       stripInviteParamsFromUrl();
-      unlockParent(link.value);
+      unlockAdmin(link.value);
     }
-  }, [unlockParent]);
+  }, [unlockAdmin]);
 
   return (
     <div className="centered">
@@ -42,7 +42,7 @@ export function ParentGate() {
       <button
         className="btn btn-primary btn-block"
         disabled={!secret.trim()}
-        onClick={() => unlockParent(secret)}
+        onClick={() => unlockAdmin(secret)}
       >
         Unlock parent mode
       </button>

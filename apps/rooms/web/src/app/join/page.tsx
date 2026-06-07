@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import {
   generateMemberId,
+  PENDING_TEMPLATE_ID,
   parseJoinLocation,
   roomUrl,
   stripInviteParamsFromUrl,
@@ -24,14 +25,14 @@ function JoinInner() {
     setCode(parsed.roomCode);
     if (parsed.adminSecret) setAdminSecret(parsed.adminSecret);
     if (parsed.roomCode) {
-      finishJoin(parsed.roomCode, parsed.adminSecret, parsed.templateId ?? "choreboard", true);
+      finishJoin(parsed.roomCode, parsed.adminSecret, parsed.templateId, true);
     }
   }, []);
 
   const finishJoin = (
     roomCode: string,
     secret: string | undefined,
-    templateId: string,
+    templateId: string | undefined,
     autoNavigate = false,
   ) => {
     const trimmed = roomCode.trim();
@@ -40,7 +41,7 @@ function JoinInner() {
 
     saveRoom({
       roomCode: trimmed,
-      templateId,
+      templateId: templateId ?? PENDING_TEMPLATE_ID,
       memberId,
       adminSecret: secret?.trim(),
       isOwner: !!secret,
@@ -86,7 +87,7 @@ function JoinInner() {
         <button
           className="btn btn-primary btn-block"
           disabled={!code.trim()}
-          onClick={() => finishJoin(code, adminSecret || undefined, "choreboard", true)}
+          onClick={() => finishJoin(code, adminSecret || undefined, undefined, true)}
         >
           Join room
         </button>

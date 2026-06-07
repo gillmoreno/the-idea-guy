@@ -345,6 +345,17 @@ a {
 .btn-block {
   width: 100%;
 }
+a.btn {
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+a.btn-primary {
+  color: #fff;
+}
+a.btn:not(.btn-primary):not(.btn-ghost) {
+  color: var(--text);
+}
 .btn-done {
   background: var(--success);
   color: #fff;
@@ -933,28 +944,27 @@ textarea.input {
   animation: fadeUp 0.2s ease both;
 }
 
-/* ---------- themes: aurora ---------- */
-[data-theme="aurora"] {
-  --bg: #f4f6fc;
-  --primary: #5b5fe8;
-  --primary-soft: #eceeff;
+/* ---------- themes: paper (classic-adjacent) ---------- */
+[data-theme="paper"] {
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --surface-2: #f5f5f4;
+  --border: #e7e5e4;
+  --text: #1c1917;
+  --muted: #78716c;
+  --primary: #4f46e5;
+  --primary-dark: #4338ca;
+  --primary-soft: #eef2ff;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: none;
+  --shadow-sm: none;
 }
-[data-theme="aurora"] body {
-  background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, #dde4ff 0%, transparent 55%),
-    radial-gradient(ellipse 70% 45% at 90% 110%, #d9f7f2 0%, transparent 55%),
-    var(--bg);
-}
-[data-theme="aurora"] .card,
-[data-theme="aurora"] .topbar {
-  border-color: color-mix(in srgb, var(--primary) 12%, var(--border));
-}
-[data-theme="aurora"] .emoji-orb {
-  animation: orbPulse 4s ease-in-out infinite;
-}
-[data-theme="aurora"] .btn-primary {
-  background: linear-gradient(135deg, var(--primary), #7c3aed);
-  border-color: transparent;
+[data-theme="paper"] .card,
+[data-theme="paper"] .topbar,
+[data-theme="paper"] .bottom-nav,
+[data-theme="paper"] .chore {
+  box-shadow: none;
 }
 
 /* ---------- themes: signal ---------- */
@@ -999,15 +1009,15 @@ textarea.input {
 
 /* ---------- themes: glow ---------- */
 [data-theme="glow"] {
-  --bg: #0b1020;
-  --surface: rgba(255, 255, 255, 0.06);
-  --surface-2: rgba(255, 255, 255, 0.09);
-  --border: rgba(255, 255, 255, 0.12);
-  --text: #eef2ff;
-  --muted: #94a3b8;
-  --primary: #818cf8;
-  --primary-soft: rgba(129, 140, 248, 0.15);
-  --shadow-sm: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --bg: #0a0f1a;
+  --surface: rgba(255, 255, 255, 0.09);
+  --surface-2: rgba(255, 255, 255, 0.14);
+  --border: rgba(255, 255, 255, 0.24);
+  --text: #f8fafc;
+  --muted: #cbd5e1;
+  --primary: #a5b4fc;
+  --primary-soft: rgba(165, 180, 252, 0.22);
+  --shadow-sm: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
 [data-theme="glow"] body {
   background:
@@ -1021,29 +1031,55 @@ textarea.input {
 [data-theme="glow"] .bottom-nav {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 [data-theme="glow"] .hero-card {
-  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  background: rgba(255, 255, 255, 0.07);
+}
+[data-theme="glow"] .section-title {
+  color: #a8b8cc;
 }
 [data-theme="glow"] .btn {
-  background: var(--surface-2);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text);
-  border-color: var(--border);
+  border-color: rgba(255, 255, 255, 0.28);
 }
 [data-theme="glow"] .btn-primary {
   background: linear-gradient(135deg, #6366f1, #22d3ee);
   border-color: transparent;
   color: #fff;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+}
+[data-theme="glow"] .theme-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+[data-theme="glow"] .theme-chip .muted {
+  color: #b8c5d6;
+}
+[data-theme="glow"] .theme-chip.active {
+  border-color: var(--primary);
+  background: rgba(165, 180, 252, 0.28);
+}
+[data-theme="glow"] .theme-chip.active strong {
+  color: #fff;
+}
+[data-theme="glow"] .room-card {
+  border-left-color: color-mix(in srgb, var(--template-accent, var(--primary)) 85%, #fff);
+}
+[data-theme="glow"] .room-card strong {
+  color: #fff;
 }
 [data-theme="glow"] .input,
 [data-theme="glow"] .select,
 [data-theme="glow"] textarea.input {
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.35);
   color: var(--text);
-  border-color: var(--border);
+  border-color: rgba(255, 255, 255, 0.28);
 }
 [data-theme="glow"] .template-pick.selected {
-  background: color-mix(in srgb, var(--template-accent, var(--primary)) 22%, transparent);
+  background: color-mix(in srgb, var(--template-accent, var(--primary)) 28%, transparent);
+  border-color: color-mix(in srgb, var(--template-accent, var(--primary)) 70%, #fff);
 }
 
 @keyframes fadeUp {
@@ -1057,18 +1093,7 @@ textarea.input {
   }
 }
 
-@keyframes orbPulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.03);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .emoji-orb,
   .idea-card {
     animation: none !important;
   }

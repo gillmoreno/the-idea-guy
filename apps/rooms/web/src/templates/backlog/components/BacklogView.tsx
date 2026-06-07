@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SyncBadge } from "@/templates/choreboard/components/ui";
+import { SyncBadge } from "@/shell/SyncBadge";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
+import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import type { IdeaStatus } from "../lib/types";
 import { useBacklogStore } from "../lib/useBacklogStore";
 import { AddIdea } from "./AddIdea";
@@ -12,7 +13,7 @@ import { Avatar, StatusPill } from "./ui";
 const STATUS_OPTIONS: IdeaStatus[] = ["proposed", "building", "shipped", "parked"];
 
 export function BacklogView({ memberId }: { memberId: string }) {
-  const { sync, setCurrentMember, leave, roomCode, isOwner, version } = useRoomSession();
+  const { sync, setCurrentMember, leaveRoom, roomCode, isOwner, version } = useRoomSession();
   const store = useBacklogStore();
   const [adding, setAdding] = useState(false);
   void version;
@@ -117,16 +118,14 @@ export function BacklogView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
-          <div className="muted" style={{ fontSize: 12, wordBreak: "break-all" }}>
-            Room code: {roomCode}
-          </div>
-          <p className="muted" style={{ fontSize: 12 }}>
-            Share this code for a public-ish idea pool — same encrypted sync, no central database.
-          </p>
+          <RoomCodeShare
+            roomCode={roomCode}
+            hint="Share this code for a public-ish idea pool — same encrypted sync, no central database."
+          />
           <Link className="btn btn-ghost btn-block" href="/">
             Home
           </Link>
-          <button className="btn btn-ghost btn-block" onClick={leave}>
+          <button className="btn btn-ghost btn-block" onClick={leaveRoom}>
             Leave room
           </button>
         </div>
