@@ -35,6 +35,8 @@ Fix with **one** of:
 
 This Mac already uses **`~/Infrastructure/deployer/deploy.sh`** for `*.aigil.dev` (Docker + cloudflared + launchd). The relay uses the same script with **`DEPLOY_DOMAIN=the-idea-guy.com`**.
 
+**Agent skill:** `.cursor/skills/choreboard-relay-deploy/SKILL.md` — checklist, verify steps, sudo handling.
+
 **One command** (from repo root; needs Docker running, `cloudflared tunnel login` once, and sudo for launchd):
 
 ```bash

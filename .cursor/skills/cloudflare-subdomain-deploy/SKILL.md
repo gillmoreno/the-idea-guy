@@ -56,7 +56,7 @@ When user asks to deploy:
 - [ ] Ensure `deploy/.env` has token + account id (never commit secrets)
 - [ ] Run build locally if user wants verification before upload
 - [ ] First deploy: use `--init`; repeat deploys: omit `--init`
-- [ ] Remind: **relay** is separate — host at `relay.the-idea-guy.com` (e.g. cloudflared tunnel). See `docs_and_changelog/CHOREBOARD_RELAY.md`
+- [ ] Remind: **relay** is separate — use skill **`choreboard-relay-deploy`** (`./scripts/deploy-relay.sh`) or `docs_and_changelog/CHOREBOARD_RELAY.md`
 
 ## Troubleshooting
 
