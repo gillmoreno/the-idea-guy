@@ -1,0 +1,16 @@
+services:
+  relay:
+    build: .
+    image: choreboard-relay:latest
+    container_name: choreboard-relay
+    ports:
+      - "4500:4500"
+    environment:
+      RELAY_ADDR: ":4500"
+      RELAY_DATA_DIR: "/data"
+    volumes:
+      - choreboard-relay-data:/data
+    restart: unless-stopped
+
+volumes:
+  choreboard-relay-data:

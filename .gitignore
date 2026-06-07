@@ -12,3 +12,5 @@ backend/server
 choreboard/relay/bin/
 choreboard/relay/relay
 .cursor/docs-sync-reminder.json
+relay/bin/
+relay/relay

@@ -1,8 +1,20 @@
 {
   "apex_domain": "the-idea-guy.com",
   "sites": {
+    "rooms": {
+      "title": "Rooms — local-first for small groups",
+      "project_name": "the-idea-guy-rooms",
+      "subdomain": "rooms",
+      "build_dir": "apps/rooms/web",
+      "output_dir": "apps/rooms/web/out",
+      "build_command": "npm ci && npm run build",
+      "build_env": {
+        "NEXT_PUBLIC_APP_URL": "https://rooms.the-idea-guy.com",
+        "NEXT_PUBLIC_RELAY_URL": "wss://relay.the-idea-guy.com"
+      }
+    },
     "chores": {
-      "title": "ChoreBoard — house chores",
+      "title": "ChoreBoard — house chores (legacy)",
       "project_name": "the-idea-guy-chores",
       "subdomain": "chores",
       "build_dir": "choreboard/web",

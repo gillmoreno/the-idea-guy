@@ -5,7 +5,7 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEPLOYER="${DEPLOYER_SCRIPT:-$HOME/Infrastructure/deployer/deploy.sh}"
-RELAY_DIR="${REPO_ROOT}/choreboard/relay"
+RELAY_DIR="${REPO_ROOT}/relay"
 TUNNEL_NAME="${CHOREBOARD_RELAY_TUNNEL:-choreboard-relay}"
 SUBDOMAIN="${CHOREBOARD_RELAY_SUBDOMAIN:-relay}"
 PORT="${CHOREBOARD_RELAY_PORT:-4500}"

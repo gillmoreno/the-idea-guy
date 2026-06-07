@@ -1,0 +1,17 @@
+{
+  "name": "@the-idea-guy/room-kit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "y-indexeddb": "^9.0.12",
+    "yjs": "^13.6.20"
+  },
+  "peerDependencies": {
+    "y-indexeddb": "^9.0.12",
+    "yjs": "^13.6.20"
+  }
+}
