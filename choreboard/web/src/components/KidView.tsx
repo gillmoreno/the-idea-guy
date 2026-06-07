@@ -5,6 +5,7 @@ import { useChoreBoard } from "@/lib/ChoreBoardContext";
 import { getMemberSecret } from "@/lib/memberSecrets";
 import { getEffectivePermissions } from "@/lib/permissions";
 import { weekRange } from "@/lib/store";
+import { formatFrequencyStatus } from "@/lib/frequency";
 import { CATEGORY_META, Category, Difficulty } from "@/lib/types";
 import { formatMoney, formatDate } from "@/lib/format";
 import { Avatar, DiffPill, Money, SyncBadge } from "./ui";
@@ -94,32 +95,41 @@ export function KidView({ memberId }: { memberId: string }) {
         )}
 
         <div className="stack-sm">
-          {chores.map((c) => (
-            <div key={c.id} className="chore">
-              <span className="emoji">{CATEGORY_META[c.category].emoji}</span>
-              <div className="body">
-                <div className="title">{c.title}</div>
-                <div className="desc">
-                  <DiffPill difficulty={c.difficulty} />{" "}
-                  {c.requiresApproval ? "needs a parent's OK" : "auto-approved"}
+          {chores.map((c) => {
+            const avail = store.canMarkDone(c.id, memberId);
+            const status =
+              avail.limit && avail.used > 0
+                ? formatFrequencyStatus(avail.limit, avail.used)
+                : "";
+            return (
+              <div key={c.id} className="chore">
+                <span className="emoji">{CATEGORY_META[c.category].emoji}</span>
+                <div className="body">
+                  <div className="title">{c.title}</div>
+                  <div className="desc">
+                    <DiffPill difficulty={c.difficulty} />{" "}
+                    {c.requiresApproval ? "needs a parent's OK" : "auto-approved"}
+                    {status ? ` · ${status}` : ""}
+                  </div>
                 </div>
+                {perms.seeChoreRewards && (
+                  <span className="reward">{formatMoney(c.reward, currency)}</span>
+                )}
+                {perms.canMarkDone && (
+                  <button
+                    className="btn-done"
+                    aria-label={avail.ok ? "Mark done" : status || "Done for now"}
+                    disabled={!avail.ok}
+                    onClick={() =>
+                      void store.markDone(c.id, memberId, getMemberSecret(memberId))
+                    }
+                  >
+                    ✓
+                  </button>
+                )}
               </div>
-              {perms.seeChoreRewards && (
-                <span className="reward">{formatMoney(c.reward, currency)}</span>
-              )}
-              {perms.canMarkDone && (
-                <button
-                  className="btn-done"
-                  aria-label="Mark done"
-                  onClick={() =>
-                    void store.markDone(c.id, memberId, getMemberSecret(memberId))
-                  }
-                >
-                  ✓
-                </button>
-              )}
-            </div>
-          ))}
+            );
+          })}
           {chores.length === 0 && (
             <div className="empty">No chores yet — ask a parent to add some.</div>
           )}

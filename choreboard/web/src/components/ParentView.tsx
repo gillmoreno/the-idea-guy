@@ -14,6 +14,7 @@ import { PermissionsSettings } from "./PermissionsSettings";
 import { RelaySettings } from "./RelaySettings";
 import { Completion } from "@/lib/types";
 import { weekRange } from "@/lib/store";
+import { formatFrequencyLimit, resolveFrequencyLimit } from "@/lib/frequency";
 import { CATEGORY_META, MEMBER_COLORS, Role } from "@/lib/types";
 import { formatMoney, formatDate, weekdayName } from "@/lib/format";
 import { Avatar, DiffPill, Money, SyncBadge } from "./ui";
@@ -281,7 +282,12 @@ function ChoresTab() {
               <div className="body">
                 <div className="title">{c.title}</div>
                 <div className="desc">
-                  <DiffPill difficulty={c.difficulty} /> {c.requiresApproval ? "· approval" : "· auto"}
+                  <DiffPill difficulty={c.difficulty} />{" "}
+                  {(() => {
+                    const limit = resolveFrequencyLimit(c);
+                    return limit ? `· ${formatFrequencyLimit(limit)}` : "· no limit";
+                  })()}{" "}
+                  {c.requiresApproval ? "· approval" : "· auto"}
                 </div>
               </div>
               <span className="reward">{formatMoney(c.reward, currency)}</span>

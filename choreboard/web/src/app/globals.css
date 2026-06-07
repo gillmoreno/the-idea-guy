@@ -345,6 +345,12 @@ a {
   font-size: 20px;
   flex-shrink: 0;
 }
+.btn-done:disabled {
+  opacity: 0.35;
+  cursor: default;
+  background: var(--border);
+  color: var(--muted);
+}
 .btn:disabled {
   opacity: 0.5;
   cursor: default;

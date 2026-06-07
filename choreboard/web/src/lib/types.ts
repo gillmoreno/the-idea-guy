@@ -12,6 +12,14 @@ export type Category =
 
 export type Recurrence = "anytime" | "daily" | "weekly" | "one-off";
 
+export type FrequencyPeriod = "day" | "week" | "month" | "ever";
+
+/** How many times a kid may mark a chore done per period. maxCompletions 0 = unlimited. */
+export interface ChoreFrequencyLimit {
+  maxCompletions: number;
+  period: FrequencyPeriod;
+}
+
 export type ChoreStatus = "active" | "proposed" | "archived";
 
 export type CompletionKind = "reward" | "penalty";
@@ -54,6 +62,8 @@ export interface Chore {
   difficulty: Difficulty;
   reward: number; // one price per chore, same for every kid
   recurrence: Recurrence;
+  /** When set, caps how often kids can mark this chore done. Default for new chores: 1/day. */
+  frequencyLimit?: ChoreFrequencyLimit;
   requiresApproval: boolean;
   status: ChoreStatus;
   proposedBy?: string; // member id when a kid suggested it

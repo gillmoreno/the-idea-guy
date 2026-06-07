@@ -1,6 +1,7 @@
 import * as Y from "yjs";
 import {
   Chore,
+  ChoreFrequencyLimit,
   ChoreProposal,
   Completion,
   Difficulty,
@@ -12,6 +13,7 @@ import {
   Role,
   Category,
 } from "./types";
+import { canMarkChoreDone, DEFAULT_FREQUENCY_LIMIT } from "./frequency";
 import { DEFAULT_KID_PERMISSIONS, mergePermissions } from "./permissions";
 import {
   completionSignPayload,
@@ -242,10 +244,12 @@ export class ChoreStore {
     category: Category;
     difficulty: Difficulty;
     reward: number;
-    recurrence: Recurrence;
+    recurrence?: Recurrence;
+    frequencyLimit?: ChoreFrequencyLimit;
     requiresApproval: boolean;
   }): Chore | null {
     if (!this.chores) return null;
+    const frequencyLimit = input.frequencyLimit ?? DEFAULT_FREQUENCY_LIMIT;
     const c: Chore = {
       id: uid("c_"),
       title: input.title,
@@ -253,7 +257,8 @@ export class ChoreStore {
       category: input.category,
       difficulty: input.difficulty,
       reward: input.reward,
-      recurrence: input.recurrence,
+      recurrence: input.recurrence ?? recurrenceFromLimit(frequencyLimit),
+      frequencyLimit,
       requiresApproval: input.requiresApproval,
       status: "active",
       createdAt: Date.now(),
@@ -299,7 +304,7 @@ export class ChoreStore {
       category: p.category,
       difficulty: p.difficulty,
       reward: p.reward,
-      recurrence: "anytime",
+      frequencyLimit: DEFAULT_FREQUENCY_LIMIT,
       requiresApproval: true,
     });
     this.txPublic(() => this.proposals.delete(proposalId));
@@ -310,11 +315,15 @@ export class ChoreStore {
     this.txPublic(() => this.proposals.delete(proposalId));
   }
 
-  updateChore(id: string, patch: Partial<Chore>) {
+  updateChore(id: string, patch: Partial<Chore> & { frequencyLimit?: ChoreFrequencyLimit }) {
     if (!this.chores) return;
     const existing = this.chores.get(id);
     if (!existing) return;
-    this.txAdmin(() => this.chores!.set(id, { ...existing, ...patch }));
+    const next = { ...existing, ...patch };
+    if (patch.frequencyLimit) {
+      next.recurrence = recurrenceFromLimit(patch.frequencyLimit);
+    }
+    this.txAdmin(() => this.chores!.set(id, next));
     this.publishCatalog();
   }
 
@@ -333,6 +342,12 @@ export class ChoreStore {
     return list.sort((a, b) => b.createdAt - a.createdAt);
   }
 
+  canMarkDone(choreId: string, memberId: string) {
+    const chore = this.catalog.get(choreId);
+    if (!chore) return { ok: false, remaining: 0, used: 0, limit: null as ChoreFrequencyLimit | null };
+    return canMarkChoreDone(chore, memberId, [...this.completions.values()]);
+  }
+
   async markDone(
     choreId: string,
     memberId: string,
@@ -340,6 +355,7 @@ export class ChoreStore {
   ): Promise<Completion | null> {
     const chore = this.catalog.get(choreId);
     if (!chore) return null;
+    if (!this.canMarkDone(choreId, memberId).ok) return null;
     const comp: Completion = {
       id: uid("k_"),
       choreId,
@@ -458,6 +474,14 @@ export class ChoreStore {
     if (memberId) list = list.filter((p) => p.memberId === memberId);
     return list.sort((a, b) => b.createdAt - a.createdAt);
   }
+}
+
+export function recurrenceFromLimit(limit: ChoreFrequencyLimit): Recurrence {
+  if (limit.maxCompletions <= 0) return "anytime";
+  if (limit.period === "ever") return "one-off";
+  if (limit.period === "week" && limit.maxCompletions === 1) return "weekly";
+  if (limit.period === "day" && limit.maxCompletions === 1) return "daily";
+  return "daily";
 }
 
 export function weekRange(d = new Date()): { start: string; end: string } {
