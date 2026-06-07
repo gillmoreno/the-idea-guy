@@ -1,6 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Bot,
+  FilePlus,
+  Menu,
+  Network,
+  Settings,
+} from "lucide-react";
 import { useSecondBrain } from "@/lib/SecondBrainContext";
 import { Sidebar } from "./Sidebar";
 import { NoteEditor } from "./NoteEditor";
@@ -9,6 +16,7 @@ import { SearchBar } from "./SearchBar";
 import { AIPanel } from "./AIPanel";
 import { GraphView } from "./GraphView";
 import { SyncBadge } from "./ui";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function VaultApp() {
   const {
@@ -28,7 +36,6 @@ export function VaultApp() {
 
   if (!store) return null;
 
-  // version triggers re-render on doc changes
   void version;
   const notes = store.listNotes();
   const vault = store.getVault();
@@ -54,8 +61,8 @@ export function VaultApp() {
   return (
     <div className="vault-app">
       <header className="vault-topbar">
-        <button className="btn btn-ghost btn-sm" onClick={() => setSidebarOpen((o) => !o)}>
-          ☰
+        <button className="icon-btn" onClick={() => setSidebarOpen((o) => !o)} aria-label="Toggle sidebar">
+          <Menu size={16} />
         </button>
         <div className="vault-title">
           <span>{vault?.name ?? "Vault"}</span>
@@ -63,14 +70,23 @@ export function VaultApp() {
         </div>
         <SearchBar onSelect={handleNavigate} />
         <div className="topbar-actions">
-          <button className="btn btn-sm" onClick={() => setShowGraph((g) => !g)}>
+          <button
+            className={`pill-btn ${showGraph ? "active" : ""}`}
+            onClick={() => setShowGraph((g) => !g)}
+          >
+            <Network size={14} />
             Graph
           </button>
-          <button className="btn btn-sm" onClick={() => setShowAI((a) => !a)}>
+          <button
+            className={`pill-btn ${showAI ? "active" : ""}`}
+            onClick={() => setShowAI((a) => !a)}
+          >
+            <Bot size={14} />
             AI
           </button>
-          <button className="btn btn-ghost btn-sm" onClick={() => setShowSettings(true)}>
-            ⚙
+          <ThemeToggle />
+          <button className="icon-btn" onClick={() => setShowSettings(true)} aria-label="Settings">
+            <Settings size={16} />
           </button>
         </div>
       </header>
@@ -110,17 +126,22 @@ export function VaultApp() {
               </aside>
             </>
           ) : (
-            <div className="empty" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div>
-                <div style={{ fontSize: 40, textAlign: "center" }}>📝</div>
-                <p style={{ marginTop: 12, fontWeight: 600 }}>Select or create a note</p>
-                <p className="muted" style={{ fontSize: 13, marginTop: 6 }}>
-                  {notes.length === 0
-                    ? "Your vault is empty — create your first note."
-                    : `${notes.length} note${notes.length === 1 ? "" : "s"} in your vault`}
+            <div className="empty-state">
+              <div className="empty-state-card">
+                <div className="empty-state-icon">
+                  <FilePlus size={28} />
+                </div>
+                <p style={{ fontWeight: 700, fontFamily: "var(--font-display)", fontSize: "1.2rem" }}>
+                  Select or create a note
                 </p>
-                <button className="btn btn-primary" style={{ marginTop: 16 }} onClick={handleNew}>
-                  + New note
+                <p className="muted" style={{ fontSize: 14, marginTop: 8, lineHeight: 1.55 }}>
+                  {notes.length === 0
+                    ? "Your vault is empty — create your first note and start linking ideas."
+                    : `${notes.length} note${notes.length === 1 ? "" : "s"} waiting in your vault`}
+                </p>
+                <button className="btn btn-primary" style={{ marginTop: 20 }} onClick={handleNew}>
+                  <FilePlus size={16} />
+                  New note
                 </button>
               </div>
             </div>
@@ -171,10 +192,11 @@ function SettingsModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal card stack" onClick={(e) => e.stopPropagation()}>
         <h2>Settings</h2>
+        <p className="muted" style={{ fontSize: 13 }}>Manage your vault and sync devices.</p>
         <div className="field">
           <label>Vault name</label>
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
-          <button className="btn btn-sm" style={{ marginTop: 8 }} onClick={() => onRename(name)}>
+          <button className="btn btn-sm" style={{ marginTop: 8, alignSelf: "flex-start" }} onClick={() => onRename(name)}>
             Save name
           </button>
         </div>

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { forceCenter, forceLink, forceManyBody, forceSimulation } from "d3-force";
 import { select } from "d3-selection";
+import { Network, X } from "lucide-react";
 import { NoteStore } from "@/lib/store";
 
 interface GraphViewProps {
@@ -35,6 +36,12 @@ export function GraphView({ store, activeNoteId, onSelect, onClose }: GraphViewP
     const svg = svgRef.current;
     if (!svg || notes.length === 0) return;
 
+    const styles = getComputedStyle(document.documentElement);
+    const primary = styles.getPropertyValue("--primary").trim() || "#0d9488";
+    const muted = styles.getPropertyValue("--muted").trim() || "#94a3b8";
+    const border = styles.getPropertyValue("--border").trim() || "#e2e8f0";
+    const accent = styles.getPropertyValue("--accent").trim() || "#6366f1";
+
     const width = svg.clientWidth || 600;
     const height = svg.clientHeight || 400;
 
@@ -51,17 +58,31 @@ export function GraphView({ store, activeNoteId, onSelect, onClose }: GraphViewP
         "link",
         forceLink<SimNode, SimLink>(links)
           .id((d) => d.id)
-          .distance(80),
+          .distance(100),
       )
-      .force("charge", forceManyBody().strength(-120))
+      .force("charge", forceManyBody().strength(-180))
       .force("center", forceCenter(width / 2, height / 2));
 
     const sel = select(svg);
     sel.selectAll("*").remove();
 
+    const defs = sel.append("defs");
+    const glow = defs
+      .append("filter")
+      .attr("id", "node-glow")
+      .attr("x", "-50%")
+      .attr("y", "-50%")
+      .attr("width", "200%")
+      .attr("height", "200%");
+    glow.append("feGaussianBlur").attr("stdDeviation", "3").attr("result", "blur");
+    const merge = glow.append("feMerge");
+    merge.append("feMergeNode").attr("in", "blur");
+    merge.append("feMergeNode").attr("in", "SourceGraphic");
+
     const link = sel
       .append("g")
-      .attr("stroke", "#cbd5e1")
+      .attr("stroke", border)
+      .attr("stroke-opacity", 0.8)
       .attr("stroke-width", 1.5)
       .selectAll("line")
       .data(links)
@@ -77,16 +98,20 @@ export function GraphView({ store, activeNoteId, onSelect, onClose }: GraphViewP
 
     node
       .append("circle")
-      .attr("r", (d) => (d.id === activeNoteId ? 10 : 7))
-      .attr("fill", (d) => (d.id === activeNoteId ? "#4f46e5" : "#94a3b8"));
+      .attr("r", (d) => (d.id === activeNoteId ? 12 : 8))
+      .attr("fill", (d) => (d.id === activeNoteId ? primary : muted))
+      .attr("filter", (d) => (d.id === activeNoteId ? "url(#node-glow)" : null))
+      .attr("stroke", (d) => (d.id === activeNoteId ? accent : "none"))
+      .attr("stroke-width", 2);
 
     node
       .append("text")
-      .text((d) => d.title.slice(0, 20))
-      .attr("x", 12)
+      .text((d) => d.title.slice(0, 24))
+      .attr("x", 14)
       .attr("y", 4)
       .attr("font-size", 11)
-      .attr("fill", "#334155");
+      .attr("font-weight", (d) => (d.id === activeNoteId ? 700 : 500))
+      .attr("fill", (d) => (d.id === activeNoteId ? primary : muted));
 
     simulation.on("tick", () => {
       link
@@ -105,9 +130,12 @@ export function GraphView({ store, activeNoteId, onSelect, onClose }: GraphViewP
   return (
     <div className="graph-panel">
       <div className="graph-header">
-        <h3>Note graph</h3>
-        <button className="btn btn-ghost btn-sm" onClick={onClose}>
-          Close
+        <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Network size={18} />
+          Note graph
+        </h3>
+        <button className="icon-btn" onClick={onClose} aria-label="Close graph">
+          <X size={16} />
         </button>
       </div>
       {notes.length === 0 ? (

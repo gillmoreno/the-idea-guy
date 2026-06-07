@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { FileText, Plus, Search } from "lucide-react";
 import { useSecondBrain } from "@/lib/SecondBrainContext";
 import { Note } from "@/lib/types";
 
@@ -10,6 +11,18 @@ interface SidebarProps {
   onSelect: (id: string) => void;
   onNew: () => void;
   onDelete: (id: string) => void;
+}
+
+function relativeTime(ts: number) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 export function Sidebar({ notes, activeNoteId, onSelect, onNew, onDelete }: SidebarProps) {
@@ -31,32 +44,36 @@ export function Sidebar({ notes, activeNoteId, onSelect, onNew, onDelete }: Side
           n.plainText.toLowerCase().includes(q),
       );
     }
-    return list;
+    return [...list].sort((a, b) => b.updatedAt - a.updatedAt);
   }, [notes, folderFilter, query]);
 
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
         <button className="btn btn-primary btn-sm btn-block" onClick={onNew}>
-          + New note
+          <Plus size={15} />
+          New note
         </button>
-        <input
-          className="input sidebar-search"
-          placeholder="Filter notes…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div className="search-icon-wrap">
+          <Search size={14} className="search-icon" />
+          <input
+            className="input sidebar-search"
+            placeholder="Filter notes…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
       </div>
       {folders.length > 0 && (
         <div className="folder-tabs">
           <button
-            className={folderFilter === "all" ? "active" : ""}
+            className={`pill-btn ${folderFilter === "all" ? "active" : ""}`}
             onClick={() => setFolderFilter("all")}
           >
             All
           </button>
           <button
-            className={folderFilter === "none" ? "active" : ""}
+            className={`pill-btn ${folderFilter === "none" ? "active" : ""}`}
             onClick={() => setFolderFilter("none")}
           >
             Inbox
@@ -64,7 +81,7 @@ export function Sidebar({ notes, activeNoteId, onSelect, onNew, onDelete }: Side
           {folders.map((f) => (
             <button
               key={f.id}
-              className={folderFilter === f.id ? "active" : ""}
+              className={`pill-btn ${folderFilter === f.id ? "active" : ""}`}
               onClick={() => setFolderFilter(f.id)}
             >
               {f.name}
@@ -86,7 +103,11 @@ export function Sidebar({ notes, activeNoteId, onSelect, onNew, onDelete }: Side
             >
               <div className="note-item-title">{n.title || "Untitled"}</div>
               <div className="note-item-preview">
-                {n.plainText.slice(0, 60) || "Empty note"}
+                {n.plainText.slice(0, 72) || "Empty note"}
+              </div>
+              <div className="note-item-meta">
+                <FileText size={10} />
+                {relativeTime(n.updatedAt)}
               </div>
               <button
                 className="note-item-delete"

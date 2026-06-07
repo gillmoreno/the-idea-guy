@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowLeft, ArrowRight, Link2 } from "lucide-react";
 import { NoteStore } from "@/lib/store";
 
 interface BacklinksPanelProps {
@@ -15,8 +16,13 @@ export function BacklinksPanel({ noteId, store, onNavigate }: BacklinksPanelProp
   if (backlinks.length === 0 && outgoing.length === 0) {
     return (
       <div className="panel-section">
-        <div className="panel-title">Links</div>
-        <p className="muted" style={{ fontSize: 13 }}>No links yet. Type [[ in the editor to link notes.</p>
+        <div className="panel-title" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <Link2 size={12} />
+          Links
+        </div>
+        <p className="muted" style={{ fontSize: 13, lineHeight: 1.5 }}>
+          No links yet. Type <code>[[</code> in the editor to connect notes.
+        </p>
       </div>
     );
   }
@@ -25,7 +31,10 @@ export function BacklinksPanel({ noteId, store, onNavigate }: BacklinksPanelProp
     <div className="panel-section stack-sm">
       {outgoing.length > 0 && (
         <div>
-          <div className="panel-title">Outgoing</div>
+          <div className="panel-title" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <ArrowRight size={12} />
+            Outgoing
+          </div>
           <div className="link-list">
             {outgoing.map((id) => {
               const n = store.getNote(id);
@@ -40,7 +49,10 @@ export function BacklinksPanel({ noteId, store, onNavigate }: BacklinksPanelProp
       )}
       {backlinks.length > 0 && (
         <div>
-          <div className="panel-title">Backlinks</div>
+          <div className="panel-title" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <ArrowLeft size={12} />
+            Backlinks
+          </div>
           <div className="link-list">
             {backlinks.map((id) => {
               const n = store.getNote(id);

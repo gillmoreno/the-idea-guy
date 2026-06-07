@@ -8,8 +8,11 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Collaboration from "@tiptap/extension-collaboration";
 import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { Clock } from "lucide-react";
 import { NoteStore } from "@/lib/store";
 import { Note } from "@/lib/types";
+import { Callout } from "@/lib/calloutExtension";
+import { EditorToolbar } from "./EditorToolbar";
 
 const InternalLink = Link.extend({
   addAttributes() {
@@ -34,6 +37,14 @@ interface NoteEditorProps {
   noteId: string;
   store: NoteStore;
   onNavigate: (id: string) => void;
+}
+
+function formatDate(ts: number) {
+  return new Date(ts).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
@@ -65,6 +76,7 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
           HTMLAttributes: { class: "internal-link" },
         }),
         Placeholder.configure({ placeholder: "Start writing… Type [[ to link a note" }),
+        Callout,
         Collaboration.configure({
           document: store.doc,
           field: store.contentField(noteId),
@@ -118,16 +130,31 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
   if (!note) return null;
 
   return (
-    <div className="editor-pane">
-      <input
-        className="note-title-input"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        onBlur={saveTitle}
-        onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-        placeholder="Untitled"
-      />
-      <EditorContent editor={editor} />
+    <div className="editor-shell">
+      <div className="editor-paper">
+        <EditorToolbar editor={editor} />
+        <div className="editor-pane">
+          <input
+            className="note-title-input"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={saveTitle}
+            onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+            placeholder="Untitled"
+          />
+          <div className="note-meta-row">
+            <Clock size={13} />
+            <span>Updated {formatDate(note.updatedAt)}</span>
+            {note.tags.length > 0 && (
+              <>
+                <span>·</span>
+                <span>{note.tags.join(", ")}</span>
+              </>
+            )}
+          </div>
+          <EditorContent editor={editor} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -147,7 +174,6 @@ const WikiLinkSuggestion = Extension.create({
   addProseMirrorPlugins() {
     const store = this.options.store as NoteStore;
     const currentNoteId = this.options.currentNoteId as string;
-    const onNavigate = this.options.onNavigate as (id: string) => void;
     const key = new PluginKey("wikiLinkSuggestion");
 
     return [

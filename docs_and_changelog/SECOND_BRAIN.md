@@ -61,4 +61,5 @@ See [secondbrain/README.md](../secondbrain/README.md) for env vars.
 
 ## Changelog
 
+- **2026-06-07** — UI refresh: dark mode, editor toolbar, callout blocks, landing redesign. See [SECOND_BRAIN_UI.md](./SECOND_BRAIN_UI.md).
 - **2026-05-31** — Initial MVP: vault, editor, links, search, sync, AI, graph.

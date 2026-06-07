@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Search } from "lucide-react";
 import { useSecondBrain } from "@/lib/SecondBrainContext";
 import { SearchResult } from "@/lib/types";
 
@@ -27,7 +28,8 @@ export function SearchBar({ onSelect }: SearchBarProps) {
   };
 
   return (
-    <div className="search-bar">
+    <div className="search-bar search-icon-wrap">
+      <Search size={14} className="search-icon" />
       <input
         className="input search-input"
         placeholder="Search vault…"
