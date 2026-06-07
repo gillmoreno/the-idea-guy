@@ -1,20 +1,24 @@
 "use client";
 
+import { useRef } from "react";
 import type { Editor } from "@tiptap/react";
 import {
+  AlertTriangle,
   Bold,
   Code,
   Heading1,
   Heading2,
+  ImageIcon,
   Italic,
   Lightbulb,
+  Link2,
   List,
   ListOrdered,
   Quote,
   Sparkles,
-  AlertTriangle,
 } from "lucide-react";
 import type { CalloutVariant } from "@/lib/calloutExtension";
+import { insertImageFile, promptImageUrl } from "@/lib/imageInsert";
 
 interface EditorToolbarProps {
   editor: Editor | null;
@@ -45,14 +49,32 @@ function ToolBtn({
 }
 
 export function EditorToolbar({ editor }: EditorToolbarProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   if (!editor) return null;
 
   const callout = (variant: CalloutVariant) => {
     editor.chain().focus().toggleCallout(variant).run();
   };
 
+  const pickImage = () => fileInputRef.current?.click();
+
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    await insertImageFile(editor, file);
+  };
+
   return (
     <div className="editor-toolbar">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+        hidden
+        onChange={onFileChange}
+      />
       <div className="toolbar-group">
         <ToolBtn
           active={editor.isActive("heading", { level: 1 })}
@@ -109,6 +131,16 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           title="Quote"
         >
           <Quote size={15} />
+        </ToolBtn>
+        <ToolBtn active={editor.isActive("image")} onClick={pickImage} title="Upload image">
+          <ImageIcon size={15} />
+        </ToolBtn>
+        <ToolBtn
+          active={false}
+          onClick={() => promptImageUrl(editor)}
+          title="Image from URL"
+        >
+          <Link2 size={15} />
         </ToolBtn>
       </div>
       <div className="toolbar-divider" />

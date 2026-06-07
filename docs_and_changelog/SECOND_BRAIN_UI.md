@@ -25,6 +25,24 @@ cd secondbrain && make dev
 # http://localhost:3200 — hard-refresh if styles look stale
 ```
 
+## Images in notes
+
+- **Upload** — toolbar image button (max 4 MB per file)
+- **Paste** — clipboard images from screenshots
+- **Drop** — drag a file into the editor
+- **URL** — link button next to upload inserts `https://` images
+- **Storage** — images are embedded as base64 in note HTML (syncs encrypted with the vault); image bytes show in Settings and the editor meta row
+
+## Storage visibility
+
+Users can see how much local space their vault uses:
+
+- **Per note** — byte size in the sidebar and editor meta row
+- **Settings → Storage** — vault content total, on-device CRDT/sync size, browser origin quota (when available), and a ranked list of notes by size
+
+Sizes are UTF-8 byte estimates of note text and metadata; sync data reflects the full Yjs document persisted to IndexedDB.
+
 ## Changelog
 
+- **2026-06-07** — Storage stats in settings, sidebar, and editor
 - **2026-06-07** — UI refresh: dark mode, toolbar, callouts, landing redesign, lucide icons.

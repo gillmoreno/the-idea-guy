@@ -9,6 +9,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useSecondBrain } from "@/lib/SecondBrainContext";
+import { NoteStore } from "@/lib/store";
 import { Sidebar } from "./Sidebar";
 import { NoteEditor } from "./NoteEditor";
 import { BacklinksPanel } from "./BacklinksPanel";
@@ -17,6 +18,8 @@ import { AIPanel } from "./AIPanel";
 import { GraphView } from "./GraphView";
 import { SyncBadge } from "./ui";
 import { ThemeToggle } from "./ThemeToggle";
+import { StoragePanel } from "./StoragePanel";
+import { AiSettingsPanel } from "./AiSettingsPanel";
 
 export function VaultApp() {
   const {
@@ -149,7 +152,14 @@ export function VaultApp() {
         </main>
 
         {showAI && (
-          <AIPanel activeNoteId={activeNoteId} onClose={() => setShowAI(false)} />
+          <AIPanel
+            activeNoteId={activeNoteId}
+            onClose={() => setShowAI(false)}
+            onOpenSettings={() => {
+              setShowAI(false);
+              setShowSettings(true);
+            }}
+          />
         )}
       </div>
 
@@ -157,6 +167,8 @@ export function VaultApp() {
         <SettingsModal
           inviteCode={inviteCode}
           vaultName={vault?.name ?? ""}
+          store={store}
+          version={version}
           onRename={(name) => store.updateVaultName(name)}
           onLeave={leave}
           onClose={() => setShowSettings(false)}
@@ -171,6 +183,8 @@ export function VaultApp() {
 function SettingsModal({
   inviteCode,
   vaultName,
+  store,
+  version,
   onRename,
   onLeave,
   onClose,
@@ -179,6 +193,8 @@ function SettingsModal({
 }: {
   inviteCode: string | null;
   vaultName: string;
+  store: NoteStore;
+  version: number;
   onRename: (name: string) => void;
   onLeave: () => void;
   onClose: () => void;
@@ -203,6 +219,14 @@ function SettingsModal({
         <div className="field">
           <label>Invite code (share to sync devices)</label>
           <div className="code-box">{inviteCode}</div>
+        </div>
+        <div className="field">
+          <label>AI</label>
+          <AiSettingsPanel store={store} version={version} />
+        </div>
+        <div className="field">
+          <label>Storage</label>
+          <StoragePanel store={store} version={version} />
         </div>
         <div className="field">
           <label>Folders</label>

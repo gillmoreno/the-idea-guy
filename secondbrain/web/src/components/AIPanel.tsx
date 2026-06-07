@@ -1,24 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { Bot, Send, Sparkles, X } from "lucide-react";
-import { AI_URL, useSecondBrain } from "@/lib/SecondBrainContext";
+import { Bot, Send, Settings, Sparkles, X } from "lucide-react";
+import { askVaultAI } from "@/lib/aiClient";
+import { RELAY_HTTP_URL, useSecondBrain } from "@/lib/SecondBrainContext";
 import { AIChatMessage } from "@/lib/types";
 
 interface AIPanelProps {
   activeNoteId: string | null;
   onClose: () => void;
+  onOpenSettings?: () => void;
 }
 
-export function AIPanel({ activeNoteId, onClose }: AIPanelProps) {
+export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps) {
   const { store, searchIndex } = useSecondBrain();
   const [messages, setMessages] = useState<AIChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const aiSettings = store?.getAiSettings();
+  const hasKey = store?.hasAiKey() ?? false;
+
   const ask = async (question: string, mode: "chat" | "summarize" = "chat") => {
     if (!store || !question.trim()) return;
+    if (!hasKey) {
+      setError("Add your OpenAI API key in Settings → AI.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     const userMsg: AIChatMessage = { role: "user", content: question };
@@ -33,16 +43,15 @@ export function AIPanel({ activeNoteId, onClose }: AIPanelProps) {
     }
 
     try {
-      const res = await fetch(`${AI_URL}/ai/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, relevantNotes, mode }),
-      });
-      if (!res.ok) {
-        const body = await res.text();
-        throw new Error(body || `AI request failed (${res.status})`);
-      }
-      const data = (await res.json()) as { answer: string; citedNotes: string[] };
+      const settings = store.getAiSettings();
+      const data = await askVaultAI(
+        { question, relevantNotes, mode },
+        {
+          apiKey: settings.apiKey,
+          model: settings.model,
+          relayHttpUrl: RELAY_HTTP_URL,
+        },
+      );
       setMessages((m) => [
         ...m,
         { role: "assistant", content: data.answer, citedNotes: data.citedNotes },
@@ -52,11 +61,7 @@ export function AIPanel({ activeNoteId, onClose }: AIPanelProps) {
       setError(msg);
       setMessages((m) => [
         ...m,
-        {
-          role: "assistant",
-          content:
-            "AI is unavailable. Set OPENAI_API_KEY on the relay and ensure NEXT_PUBLIC_AI_URL points to it.",
-        },
+        { role: "assistant", content: msg },
       ]);
     } finally {
       setLoading(false);
@@ -83,9 +88,32 @@ export function AIPanel({ activeNoteId, onClose }: AIPanelProps) {
         </button>
       </div>
       <p className="muted" style={{ fontSize: 12, padding: "0 18px", lineHeight: 1.5 }}>
-        Answers use keyword-matched note excerpts only — your full vault never leaves the device.
+        Uses keyword-matched note excerpts only. Your key is stored in your vault — not on
+        the relay.
       </p>
-      {activeNoteId && (
+
+      {!hasKey && (
+        <div className="ai-setup-banner">
+          <p style={{ fontSize: 13, fontWeight: 600 }}>Connect your OpenAI key</p>
+          <p className="muted" style={{ fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>
+            Add an API key in Settings to enable chat and summarize.
+          </p>
+          {onOpenSettings && (
+            <button className="btn btn-sm btn-primary" style={{ marginTop: 10 }} onClick={onOpenSettings}>
+              <Settings size={14} />
+              Open AI settings
+            </button>
+          )}
+        </div>
+      )}
+
+      {hasKey && aiSettings && (
+        <p className="muted" style={{ fontSize: 11, padding: "0 18px 8px" }}>
+          Model: {aiSettings.model}
+        </p>
+      )}
+
+      {activeNoteId && hasKey && (
         <div style={{ padding: "0 18px 10px" }}>
           <button className="pill-btn" onClick={summarize} disabled={loading}>
             <Sparkles size={13} />
@@ -97,7 +125,7 @@ export function AIPanel({ activeNoteId, onClose }: AIPanelProps) {
         {messages.length === 0 && (
           <div className="empty" style={{ fontSize: 13, padding: "24px 0" }}>
             <Bot size={32} style={{ margin: "0 auto 12px", opacity: 0.4 }} />
-            Ask anything about your notes…
+            {hasKey ? "Ask anything about your notes…" : "Set up your API key to start."}
           </div>
         )}
         {messages.map((m, i) => (
@@ -121,13 +149,17 @@ export function AIPanel({ activeNoteId, onClose }: AIPanelProps) {
       <div className="ai-input-row">
         <input
           className="input"
-          placeholder="Ask your vault…"
+          placeholder={hasKey ? "Ask your vault…" : "Add API key in Settings first"}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !loading && ask(input)}
-          disabled={loading}
+          onKeyDown={(e) => e.key === "Enter" && !loading && hasKey && ask(input)}
+          disabled={loading || !hasKey}
         />
-        <button className="btn btn-primary btn-sm" disabled={loading || !input.trim()} onClick={() => ask(input)}>
+        <button
+          className="btn btn-primary btn-sm"
+          disabled={loading || !input.trim() || !hasKey}
+          onClick={() => ask(input)}
+        >
           <Send size={14} />
         </button>
       </div>

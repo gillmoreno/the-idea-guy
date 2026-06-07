@@ -5,13 +5,18 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
 import Collaboration from "@tiptap/extension-collaboration";
 import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
-import { Clock } from "lucide-react";
+import { Clock, HardDrive } from "lucide-react";
 import { NoteStore } from "@/lib/store";
+import { htmlToPlainText } from "@/lib/html";
+import { formatBytes, noteStorageBytes } from "@/lib/storageStats";
 import { Note } from "@/lib/types";
 import { Callout } from "@/lib/calloutExtension";
+import { ImagePasteDrop } from "@/lib/imagePasteExtension";
+import { imageBytesInHtml } from "@/lib/imageInsert";
 import { EditorToolbar } from "./EditorToolbar";
 
 const InternalLink = Link.extend({
@@ -50,12 +55,32 @@ function formatDate(ts: number) {
 export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
   const note = store.getNote(noteId);
   const [title, setTitle] = useState(note?.title ?? "");
+  const [liveBytes, setLiveBytes] = useState(0);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const titleRef = useRef(title);
+  titleRef.current = title;
+
+  const refreshSize = useCallback(
+    (nextTitle: string, html: string) => {
+      if (!note) return;
+      setLiveBytes(
+        noteStorageBytes({
+          ...note,
+          title: nextTitle,
+          html,
+          plainText: htmlToPlainText(html),
+        }),
+      );
+    },
+    [note],
+  );
 
   useEffect(() => {
     const n = store.getNote(noteId);
-    setTitle(n?.title ?? "");
-  }, [noteId, store]);
+    const nextTitle = n?.title ?? "";
+    setTitle(nextTitle);
+    if (n) refreshSize(nextTitle, n.html);
+  }, [noteId, store, refreshSize]);
 
   const debouncedSync = useCallback(
     (html: string) => {
@@ -75,8 +100,16 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
           openOnClick: false,
           HTMLAttributes: { class: "internal-link" },
         }),
-        Placeholder.configure({ placeholder: "Start writing… Type [[ to link a note" }),
+        Placeholder.configure({
+          placeholder: "Start writing… Type [[ to link · paste or drop images",
+        }),
+        Image.configure({
+          inline: false,
+          allowBase64: true,
+          HTMLAttributes: { class: "note-image" },
+        }),
         Callout,
+        ImagePasteDrop,
         Collaboration.configure({
           document: store.doc,
           field: store.contentField(noteId),
@@ -106,7 +139,9 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
         }
       },
       onUpdate: ({ editor: ed }) => {
-        debouncedSync(ed.getHTML());
+        const html = ed.getHTML();
+        refreshSize(titleRef.current, html);
+        debouncedSync(html);
       },
     },
     [noteId],
@@ -129,6 +164,8 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
 
   if (!note) return null;
 
+  const imageBytes = imageBytesInHtml(editor?.getHTML() ?? note.html);
+
   return (
     <div className="editor-shell">
       <div className="editor-paper">
@@ -137,7 +174,11 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
           <input
             className="note-title-input"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+          const next = e.target.value;
+          setTitle(next);
+          if (editor) refreshSize(next, editor.getHTML());
+        }}
             onBlur={saveTitle}
             onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
             placeholder="Untitled"
@@ -145,6 +186,15 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
           <div className="note-meta-row">
             <Clock size={13} />
             <span>Updated {formatDate(note.updatedAt)}</span>
+            <span>·</span>
+            <HardDrive size={13} />
+            <span>{formatBytes(liveBytes)}</span>
+            {imageBytes > 0 && (
+              <>
+                <span>·</span>
+                <span>{formatBytes(imageBytes)} images</span>
+              </>
+            )}
             {note.tags.length > 0 && (
               <>
                 <span>·</span>

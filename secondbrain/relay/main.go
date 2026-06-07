@@ -43,7 +43,7 @@ func main() {
 		_, _ = w.Write([]byte("ok"))
 	})
 	mux.HandleFunc("/sync", hub.handleSync)
-	mux.HandleFunc("/ai/chat", handleAIChat)
+	mux.HandleFunc("/ai/forward", handleAIForward)
 
 	srv := &http.Server{
 		Addr:              addr,

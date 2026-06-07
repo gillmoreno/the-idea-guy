@@ -10,7 +10,7 @@
 | 1 | Vault + Tiptap HTML editor + sidebar CRUD | ✅ |
 | 2 | `[[` internal links, backlink index, MiniSearch | ✅ |
 | 3 | Relay sync (`appId: secondbrain`), invite vault, offline badge | ✅ |
-| 4 | AI chat + summarize via thin Go proxy | ✅ |
+| 4 | AI chat + summarize (per-vault API key, dumb relay forward) | ✅ |
 | 5 | Force-directed graph from `linkIndex` | ✅ |
 
 ## Architecture
@@ -24,7 +24,9 @@ secondbrain/web (PWA)
 
 secondbrain/relay
   ├── /sync — opaque CRDT blob relay (shared kit pattern)
-  └── /ai/chat — thin OpenAI proxy (keyword-retrieved excerpts only)
+  └── /ai/forward — dumb CORS tunnel (user Bearer token, no server key)
+
+// Y.Map "settings" → ai: { apiKey, model } — E2E synced per vault
 ```
 
 ## Data model
@@ -61,5 +63,6 @@ See [secondbrain/README.md](../secondbrain/README.md) for env vars.
 
 ## Changelog
 
+- **2026-06-07** — Per-vault AI keys in encrypted settings; relay no longer holds `OPENAI_API_KEY`. See [SECOND_BRAIN_AI.md](./SECOND_BRAIN_AI.md).
 - **2026-06-07** — UI refresh: dark mode, editor toolbar, callout blocks, landing redesign. See [SECOND_BRAIN_UI.md](./SECOND_BRAIN_UI.md).
 - **2026-05-31** — Initial MVP: vault, editor, links, search, sync, AI, graph.

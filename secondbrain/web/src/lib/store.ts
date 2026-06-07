@@ -1,6 +1,7 @@
 import * as Y from "yjs";
-import { Note, Folder, LinkEntry, VaultMeta } from "./types";
+import { AiSettings, DEFAULT_AI_MODEL, Folder, LinkEntry, Note, VaultMeta } from "./types";
 import { extractNoteLinks, htmlToPlainText, noteContentField } from "./html";
+import { utf8ByteLength } from "./storageStats";
 
 export const APP_ID = "secondbrain";
 
@@ -15,6 +16,7 @@ export class NoteStore {
   readonly notes: Y.Map<Note>;
   readonly folders: Y.Map<Folder>;
   readonly linkIndex: Y.Map<LinkEntry>;
+  readonly settings: Y.Map<unknown>;
 
   constructor(doc: Y.Doc) {
     this.doc = doc;
@@ -22,6 +24,7 @@ export class NoteStore {
     this.notes = doc.getMap("notes");
     this.folders = doc.getMap("folders");
     this.linkIndex = doc.getMap("linkIndex");
+    this.settings = doc.getMap("settings");
   }
 
   private tx(fn: () => void) {
@@ -60,6 +63,31 @@ export class NoteStore {
 
   updateVaultName(name: string) {
     this.tx(() => this.vault.set("name", name.trim() || "My vault"));
+  }
+
+  // --- AI settings (per vault, E2E-synced) ---
+  getAiSettings(): AiSettings {
+    const raw = this.settings.get("ai") as Partial<AiSettings> | undefined;
+    return {
+      provider: "openai",
+      apiKey: raw?.apiKey ?? "",
+      model: raw?.model ?? DEFAULT_AI_MODEL,
+    };
+  }
+
+  setAiSettings(patch: Partial<Pick<AiSettings, "apiKey" | "model">>) {
+    const current = this.getAiSettings();
+    this.tx(() => {
+      this.settings.set("ai", {
+        provider: "openai" as const,
+        apiKey: patch.apiKey ?? current.apiKey,
+        model: patch.model ?? current.model,
+      });
+    });
+  }
+
+  hasAiKey(): boolean {
+    return this.getAiSettings().apiKey.trim().length > 0;
   }
 
   // --- folders ---
@@ -237,6 +265,15 @@ export class NoteStore {
       ...entry,
       incoming: entry.incoming.filter((id) => id !== fromId),
     });
+  }
+
+  /** Byte estimates for link-index entries (for storage stats). */
+  getLinkIndexStats(): { id: string; bytes: number }[] {
+    const stats: { id: string; bytes: number }[] = [];
+    for (const [id, entry] of this.linkIndex.entries()) {
+      stats.push({ id, bytes: utf8ByteLength(JSON.stringify(entry)) });
+    }
+    return stats;
   }
 
   /** All link pairs for graph visualization. */

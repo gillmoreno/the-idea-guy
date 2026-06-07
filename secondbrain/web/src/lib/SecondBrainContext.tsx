@@ -13,8 +13,17 @@ import { LocalFirstDoc, SyncState } from "@/kit/sync";
 import { APP_ID, NoteStore } from "@/lib/store";
 import { NoteSearchIndex } from "@/lib/search";
 
-const RELAY_URL = process.env.NEXT_PUBLIC_RELAY_URL || "ws://localhost:4500";
-const AI_URL = process.env.NEXT_PUBLIC_AI_URL || "http://localhost:4500";
+const RELAY_URL = process.env.NEXT_PUBLIC_RELAY_URL || "ws://localhost:4501";
+
+/** HTTP origin for the sync relay (CORS tunnel for AI forward only — no keys on server). */
+function relayHttpUrl(wsUrl: string): string {
+  if (process.env.NEXT_PUBLIC_RELAY_HTTP_URL) {
+    return process.env.NEXT_PUBLIC_RELAY_HTTP_URL;
+  }
+  return wsUrl.replace(/^ws:/, "http:").replace(/^wss:/, "https:");
+}
+
+const RELAY_HTTP_URL = relayHttpUrl(RELAY_URL);
 const LS_CODE = "secondbrain.inviteCode";
 const LS_CREATOR = "secondbrain.creator";
 const LS_ACTIVE = "secondbrain.activeNoteId";
@@ -151,4 +160,4 @@ export function useSecondBrain(): SecondBrainCtx {
   return ctx;
 }
 
-export { AI_URL };
+export { RELAY_HTTP_URL };

@@ -25,6 +25,22 @@ export interface VaultMeta {
   createdAt: number;
 }
 
+/** Per-vault AI config — stored in Yjs, synced E2E encrypted (not on the relay). */
+export interface AiSettings {
+  provider: "openai";
+  apiKey: string;
+  model: string;
+}
+
+export const DEFAULT_AI_MODEL = "gpt-4o-mini";
+
+export const AI_MODEL_OPTIONS = [
+  "gpt-4o-mini",
+  "gpt-4o",
+  "gpt-4.1-mini",
+  "gpt-4.1",
+] as const;
+
 export interface SearchResult {
   id: string;
   title: string;

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { FileText, Plus, Search } from "lucide-react";
 import { useSecondBrain } from "@/lib/SecondBrainContext";
 import { Note } from "@/lib/types";
+import { formatBytes, noteStorageBytes } from "@/lib/storageStats";
 
 interface SidebarProps {
   notes: Note[];
@@ -108,6 +109,8 @@ export function Sidebar({ notes, activeNoteId, onSelect, onNew, onDelete }: Side
               <div className="note-item-meta">
                 <FileText size={10} />
                 {relativeTime(n.updatedAt)}
+                <span>·</span>
+                <span>{formatBytes(noteStorageBytes(n))}</span>
               </div>
               <button
                 className="note-item-delete"
