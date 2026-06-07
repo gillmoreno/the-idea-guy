@@ -16,11 +16,14 @@ apps/rooms/web/        Meta PWA (Next.js static export)
   src/templates/       Template plugins (choreboard, …)
 ```
 
-## Local dev
+## Local dev (hot reload)
+
+**Skill:** `.cursor/skills/rooms-dev/` — agent checklist for relay + frontend.
 
 ```bash
 cd apps/rooms
-make dev
+make dev              # Go relay + Next dev (default)
+make dev-docker       # Docker relay + Next dev
 ```
 
 - Relay: `ws://localhost:4500`
@@ -29,9 +32,49 @@ make dev
 Or two terminals:
 
 ```bash
-make dev-relay
+make dev-relay        # or make dev-relay-docker
 make dev-web
 ```
+
+## Local static preview (production-like)
+
+Same as Cloudflare Pages: `next build` → static files in `web/out`, served by a simple HTTP server.
+
+**One command** (relay + build + serve):
+
+```bash
+cd apps/rooms
+make preview-all
+```
+
+Open **http://localhost:3300**
+
+**Two terminals** (reuse a build):
+
+```bash
+# Terminal 1 — relay
+cd apps/rooms && make dev-relay
+
+# Terminal 2 — build with local env + serve web/out
+cd apps/rooms && make preview
+```
+
+`preview` sets build-time env so the app talks to your local relay, not production:
+
+- `NEXT_PUBLIC_RELAY_URL=ws://localhost:4500`
+- `NEXT_PUBLIC_APP_URL=http://localhost:3300`
+
+To test sync across devices on your LAN, rebuild with your machine IP:
+
+```bash
+cd apps/rooms/web
+NEXT_PUBLIC_RELAY_URL=ws://192.168.1.10:4500 \
+NEXT_PUBLIC_APP_URL=http://192.168.1.10:3300 \
+npm run build
+npx serve out -l 3300
+```
+
+(Run the relay bound to `0.0.0.0` if phones on the same Wi‑Fi need to connect: `RELAY_ADDR=:4500` already listens on all interfaces.)
 
 ## User flows
 
