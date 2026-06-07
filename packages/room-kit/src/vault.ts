@@ -1,9 +1,29 @@
-import type { DeviceVault, VaultRoom } from "./types";
+import type { ContactRecord, DeviceVault, PersonaRecord, VaultRoom } from "./types";
+import { CURRENT_VAULT_VERSION } from "./types";
 
 const VAULT_KEY = "rooms.vault.v1";
 
 function emptyVault(): DeviceVault {
-  return { version: 1, rooms: {} };
+  return { version: CURRENT_VAULT_VERSION, rooms: {}, contacts: {} };
+}
+
+function migrateVault(parsed: DeviceVault): DeviceVault {
+  if (!parsed.rooms) return emptyVault();
+  if (parsed.version === 1) {
+    return {
+      version: CURRENT_VAULT_VERSION,
+      relayUrlOverride: parsed.relayUrlOverride,
+      rooms: parsed.rooms,
+      contacts: {},
+      inboxCursor: {},
+    };
+  }
+  return {
+    ...parsed,
+    version: CURRENT_VAULT_VERSION,
+    contacts: parsed.contacts ?? {},
+    inboxCursor: parsed.inboxCursor ?? {},
+  };
 }
 
 export function loadVault(): DeviceVault {
@@ -12,8 +32,8 @@ export function loadVault(): DeviceVault {
     const raw = localStorage.getItem(VAULT_KEY);
     if (!raw) return emptyVault();
     const parsed = JSON.parse(raw) as DeviceVault;
-    if (parsed.version !== 1 || !parsed.rooms) return emptyVault();
-    return parsed;
+    if (parsed.version !== 1 && parsed.version !== 2) return emptyVault();
+    return migrateVault(parsed);
   } catch {
     return emptyVault();
   }
@@ -63,4 +83,36 @@ export function touchVaultRoom(vault: DeviceVault, roomCode: string): DeviceVaul
   const existing = vault.rooms[roomCode];
   if (!existing) return vault;
   return upsertVaultRoom(vault, existing);
+}
+
+export function savePersona(vault: DeviceVault, persona: PersonaRecord): DeviceVault {
+  const next = { ...vault, version: CURRENT_VAULT_VERSION as 2, persona };
+  saveVault(next);
+  return next;
+}
+
+export function upsertContact(vault: DeviceVault, contact: ContactRecord): DeviceVault {
+  const contacts = { ...(vault.contacts ?? {}), [contact.personaId]: contact };
+  const next = { ...vault, version: CURRENT_VAULT_VERSION as 2, contacts };
+  saveVault(next);
+  return next;
+}
+
+export function getContact(vault: DeviceVault, personaId: string): ContactRecord | null {
+  return vault.contacts?.[personaId] ?? null;
+}
+
+export function listContacts(vault: DeviceVault): ContactRecord[] {
+  return Object.values(vault.contacts ?? {}).sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
+export function setInboxCursor(
+  vault: DeviceVault,
+  contactPersonaId: string,
+  messageId: string,
+): DeviceVault {
+  const inboxCursor = { ...(vault.inboxCursor ?? {}), [contactPersonaId]: messageId };
+  const next = { ...vault, inboxCursor };
+  saveVault(next);
+  return next;
 }

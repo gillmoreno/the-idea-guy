@@ -9,9 +9,15 @@ import {
   MSG_SYNC_END,
   unwrapFrame,
 } from "./relayProtocol";
+import { encodeCompactedState } from "./compactDoc";
 
 const REMOTE_ORIGIN = "remote";
 const SYNC_END_FALLBACK_MS = 1500;
+
+export interface CompactResult {
+  before: number;
+  after: number;
+}
 
 export interface SyncState {
   localLoaded: boolean;
@@ -30,7 +36,10 @@ export interface LocalFirstOptions {
 }
 
 export class LocalFirstDoc {
-  readonly doc: Y.Doc;
+  private _doc: Y.Doc;
+  get doc(): Y.Doc {
+    return this._doc;
+  }
   private readonly appId: string;
   private readonly keyMaterial: string;
   private readonly roomCode: string;
@@ -47,6 +56,8 @@ export class LocalFirstDoc {
   private syncEndFallbackTimer: ReturnType<typeof setTimeout> | null = null;
   private destroyed = false;
   private checkpointSent = false;
+  private compacting = false;
+  private persistenceDbName: string | null = null;
   private state: SyncState = { localLoaded: false, connected: false };
 
   constructor(opts: LocalFirstOptions) {
@@ -57,10 +68,23 @@ export class LocalFirstDoc {
     this.relayUrl = opts.relayUrl;
     this.onChange = opts.onChange;
     this.onState = opts.onState;
-    this.doc = new Y.Doc();
-    this.doc.on("afterTransaction", () => this.onChange?.());
-    this.doc.on("update", this.handleLocalUpdate);
+    this._doc = new Y.Doc();
+    this.bindDoc(this._doc);
     void this.start();
+  }
+
+  private onAfterTransaction = () => {
+    this.onChange?.();
+  };
+
+  private bindDoc(doc: Y.Doc) {
+    doc.on("afterTransaction", this.onAfterTransaction);
+    doc.on("update", this.handleLocalUpdate);
+  }
+
+  private unbindDoc(doc: Y.Doc) {
+    doc.off("afterTransaction", this.onAfterTransaction);
+    doc.off("update", this.handleLocalUpdate);
   }
 
   private setState(patch: Partial<SyncState>) {
@@ -82,7 +106,8 @@ export class LocalFirstDoc {
     await ensureIdbReady(dbName);
     if (this.destroyed) return;
 
-    const persistence = new IndexeddbPersistence(dbName, this.doc);
+    this.persistenceDbName = dbName;
+    const persistence = new IndexeddbPersistence(dbName, this._doc);
     this.idb = persistence;
     persistence.on("synced", () => this.setState({ localLoaded: true }));
 
@@ -148,7 +173,7 @@ export class LocalFirstDoc {
   }
 
   private handleLocalUpdate = (update: Uint8Array, origin: unknown) => {
-    if (origin === REMOTE_ORIGIN) return;
+    if (origin === REMOTE_ORIGIN || this.compacting) return;
     void this.send(update);
   };
 
@@ -168,10 +193,55 @@ export class LocalFirstDoc {
       clearTimeout(this.syncEndFallbackTimer);
       this.syncEndFallbackTimer = null;
     }
-    const update = Y.encodeStateAsUpdate(this.doc);
+    const update = Y.encodeStateAsUpdate(this._doc);
     const blob = await encrypt(this.key, update);
     if (this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(frameCheckpoint(blob));
+    }
+  }
+
+  /**
+   * Prune CRDT edit history after large inline payloads (e.g. images).
+   * Rehydrates into a fresh Y.Doc and pushes a relay checkpoint.
+   */
+  async compactStorage(): Promise<CompactResult> {
+    if (this.destroyed || this.compacting || !this.persistenceDbName) {
+      return { before: 0, after: 0 };
+    }
+
+    this.compacting = true;
+    const before = Y.encodeStateAsUpdate(this._doc).byteLength;
+    const compacted = encodeCompactedState(this._doc);
+
+    try {
+      const oldDoc = this._doc;
+      this.unbindDoc(oldDoc);
+
+      if (this.idb) {
+        await this.idb.destroy();
+        this.idb = null;
+      }
+
+      const newDoc = new Y.Doc({ gc: true });
+      Y.applyUpdate(newDoc, compacted);
+      this.bindDoc(newDoc);
+      oldDoc.destroy();
+      this._doc = newDoc;
+
+      const persistence = new IndexeddbPersistence(this.persistenceDbName, this._doc);
+      this.idb = persistence;
+      persistence.on("synced", () => this.setState({ localLoaded: true }));
+      type IdbPersistence = IndexeddbPersistence & { _db: Promise<IDBDatabase> };
+      await (persistence as IdbPersistence)._db;
+      await persistence.whenSynced;
+
+      const after = Y.encodeStateAsUpdate(this._doc).byteLength;
+      this.checkpointSent = false;
+      await this.sendCheckpoint();
+      this.onChange?.();
+      return { before, after };
+    } finally {
+      this.compacting = false;
     }
   }
 
@@ -191,7 +261,7 @@ export class LocalFirstDoc {
     const encrypted = legacy ? bytes : payload;
     const plain = await decrypt(this.key, encrypted);
     if (!plain) return;
-    Y.applyUpdate(this.doc, plain, REMOTE_ORIGIN);
+    Y.applyUpdate(this._doc, plain, REMOTE_ORIGIN);
   }
 
   getState(): SyncState {
@@ -202,9 +272,9 @@ export class LocalFirstDoc {
     this.destroyed = true;
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
     if (this.syncEndFallbackTimer) clearTimeout(this.syncEndFallbackTimer);
-    this.doc.off("update", this.handleLocalUpdate);
+    this.unbindDoc(this._doc);
     this.ws?.close();
     void this.idb?.destroy();
-    this.doc.destroy();
+    this._doc.destroy();
   }
 }

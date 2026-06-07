@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { DeviceProvider } from "@/shell/DeviceProvider";
+import { PersonaContactsProvider } from "@/shell/PersonaContactsProvider";
 import { ThemeProvider } from "@/shell/ThemeProvider";
 import { ServiceWorker } from "@/templates/choreboard/components/ServiceWorker";
 
@@ -23,7 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <ThemeProvider>
-          <DeviceProvider>{children}</DeviceProvider>
+          <DeviceProvider>
+            <PersonaContactsProvider>{children}</PersonaContactsProvider>
+          </DeviceProvider>
         </ThemeProvider>
         <ServiceWorker />
       </body>

@@ -1132,6 +1132,294 @@ textarea.input {
   --epr-search-input-bg-color: color-mix(in srgb, var(--surface-2) 85%, #000);
 }
 
+/* ---------- image field (shared brick) ---------- */
+.image-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.image-field__modes {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  width: fit-content;
+}
+.image-field__mode {
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  font-family: inherit;
+  cursor: pointer;
+}
+.image-field__mode.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.image-field__drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88px;
+  padding: 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  cursor: pointer;
+}
+.image-field__drop.busy {
+  opacity: 0.7;
+  cursor: wait;
+}
+.image-field__preview-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.image-field__preview,
+.schema-record__image img,
+.fitcrew-log__proof {
+  display: block;
+  max-width: 100%;
+  width: 160px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.fitcrew-log__proof {
+  width: 120px;
+  margin-left: 44px;
+}
+.image-field__hint {
+  font-size: 12px;
+}
+.image-field__error {
+  margin: 0;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+/* ---------- Fit Crew ---------- */
+.fitcrew-hero {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+.fitcrew-hero__value {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.fitcrew-hero__label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.fitcrew-board-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fitcrew-board-rank {
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.fitcrew-board-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.fitcrew-prize {
+  align-items: flex-start;
+}
+
+/* ---------- avatar brick (persona / profile) ---------- */
+.persona-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+}
+.persona-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.persona-avatar--sm {
+  width: 36px;
+  height: 36px;
+  font-size: 12px;
+}
+.persona-avatar--md {
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+}
+.persona-avatar--lg {
+  width: 72px;
+  height: 72px;
+  font-size: 34px;
+}
+.avatar-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.avatar-field__preview-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.avatar-field__hint {
+  font-size: 12px;
+  line-height: 1.4;
+}
+.avatar-field__modes {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  width: fit-content;
+}
+.avatar-field__mode {
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  font-family: inherit;
+  cursor: pointer;
+}
+.avatar-field__mode.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.avatar-field__drop {
+  min-height: 72px;
+}
+.avatar-field__photo-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ---------- accent color brick ---------- */
+.accent-color-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.accent-color-field__preview {
+  height: 40px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.accent-color-field__modes {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  width: fit-content;
+}
+.accent-color-field__mode {
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  font-family: inherit;
+  cursor: pointer;
+}
+.accent-color-field__mode.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+.accent-color-field__grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+}
+.accent-color-field__grid--gradient {
+  grid-template-columns: repeat(4, 1fr);
+}
+.accent-color-field__swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.accent-color-field__swatch.selected {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text);
+  transform: scale(1.05);
+}
+.accent-color-field__gradient {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.accent-color-field__gradient.selected {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--text);
+  transform: scale(1.02);
+}
+.accent-color-field__custom {
+  align-items: center;
+}
+.accent-color-field__picker {
+  width: 40px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+}
+
 /* ---------- themes: paper (classic-adjacent) ---------- */
 [data-theme="paper"] {
   --bg: #fafaf9;

@@ -52,8 +52,38 @@ export interface VaultRoom {
   lastOpenedAt: number;
 }
 
+export type ContactStatus = "pending_out" | "pending_in" | "mutual" | "blocked";
+
+export interface PersonaRecord {
+  personaId: string;
+  publicKey: string;
+  privateKeyJwk: JsonWebKey;
+  displayName: string;
+  color: string;
+  /** Serialized avatar brick JSON (emoji or compressed image). */
+  avatar?: string;
+  createdAt: number;
+}
+
+export interface ContactRecord {
+  personaId: string;
+  publicKey: string;
+  displayName: string;
+  status: ContactStatus;
+  avatar?: string;
+  updatedAt: number;
+}
+
+/** Last processed inbox message id per contact persona. */
+export type InboxCursor = Record<string, string>;
+
 export interface DeviceVault {
-  version: 1;
+  version: 1 | 2;
   relayUrlOverride?: string;
+  persona?: PersonaRecord;
+  contacts?: Record<string, ContactRecord>;
+  inboxCursor?: InboxCursor;
   rooms: Record<string, VaultRoom>;
 }
+
+export const CURRENT_VAULT_VERSION = 2;

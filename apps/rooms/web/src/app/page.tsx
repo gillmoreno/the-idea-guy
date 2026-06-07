@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useDevice } from "@/shell/DeviceProvider";
+import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
+import { PersonaAvatar } from "@/components/PersonaAvatar";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { roomUrl } from "@the-idea-guy/room-kit/links";
 import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
@@ -10,6 +12,7 @@ import { getBuiltinTemplate } from "@/templates/registry";
 
 export default function HomePage() {
   const { mounted, rooms } = useDevice();
+  const { persona, pendingIncoming } = usePersonaContacts();
 
   if (!mounted) {
     return (
@@ -34,6 +37,27 @@ export default function HomePage() {
         </div>
 
         <ThemeSwitcher />
+
+        {persona && (
+          <div className="card row gap-sm" style={{ alignItems: "center" }}>
+            <PersonaAvatar
+              displayName={persona.displayName}
+              color={persona.color}
+              avatar={persona.avatar}
+              size="md"
+            />
+            <div style={{ flex: 1 }}>
+              <strong>{persona.displayName}</strong>
+              <div className="muted" style={{ fontSize: 12 }}>
+                Your persona on this device
+              </div>
+            </div>
+            <Link className="btn btn-ghost btn-sm" href="/contacts">
+              Contacts
+              {pendingIncoming.length > 0 ? ` (${pendingIncoming.length})` : ""}
+            </Link>
+          </div>
+        )}
 
         <Link className="btn btn-primary btn-block" href="/create">
           Create a room

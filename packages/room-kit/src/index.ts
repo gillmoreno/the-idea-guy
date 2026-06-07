@@ -18,7 +18,8 @@ export {
   generateParentSecret,
   generateSecret,
 } from "./invite";
-export { LocalFirstDoc, type LocalFirstOptions, type SyncState } from "./sync";
+export { encodeCompactedState } from "./compactDoc";
+export { LocalFirstDoc, type CompactResult, type LocalFirstOptions, type SyncState } from "./sync";
 export {
   frameCheckpoint,
   frameUpdate,
@@ -48,16 +49,48 @@ export {
   type DeepLink,
 } from "./links";
 export {
+  getContact,
   getRelayUrl,
   getVaultRoom,
+  listContacts,
   listVaultRooms,
   loadVault,
   removeVaultRoom,
+  savePersona,
   saveVault,
+  setInboxCursor,
   setRelayUrlOverride,
   touchVaultRoom,
+  upsertContact,
   upsertVaultRoom,
 } from "./vault";
+export {
+  canExchangeMessages,
+  canSendFriendRequest,
+  contactDisplayName,
+  shouldSyncInbox,
+} from "./contacts";
+export {
+  contactCardFromPersona,
+  encodeContactCard,
+  generatePersonaKeys,
+  importContactPublicKey,
+  importPersonaPrivateKey,
+  parseContactCard,
+  type ContactCard,
+  type PersonaKeyMaterial,
+} from "./persona";
+export {
+  derivePairInboxAesKey,
+  derivePairInboxKeyMaterial,
+  derivePairInboxRelayRoom,
+  newFriendAccept,
+  newFriendRequest,
+  pairRoomCode,
+  parseInboxMessage,
+  type InboxMessage,
+  type RoomInviteMessage,
+} from "./pairInbox";
 export { deleteIdbDatabase, ensureIdbReady, idbHasValidSchema } from "./persistence";
 export {
   deleteRoomLocalData,
@@ -71,11 +104,16 @@ export {
   DECLARATIVE_TEMPLATE_ID,
   PENDING_TEMPLATE_ID,
 } from "./types";
+export { CURRENT_VAULT_VERSION } from "./types";
 export type {
   AdminMemberRecord,
   AdminRoomMeta,
+  ContactRecord,
+  ContactStatus,
   DeviceVault,
+  InboxCursor,
   MemberRole,
+  PersonaRecord,
   PublicMemberRecord,
   PublicRoomMeta,
   TemplateId,
