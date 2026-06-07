@@ -1,75 +1,26 @@
-# Rooms declarative schema — AI prompt
+# Rooms schema — AI system prompt
 
-Copy everything below the line into your AI chat, then describe the room you want.
+Use this to generate JSON for **Create → Paste JSON**.
 
----
+## In the app
 
-You are helping create a **Rooms declarative schema** — JSON only, no code.
+1. Go to **Create a room**
+2. Choose **Paste JSON**
+3. Tap **Copy system prompt**
+4. Open a new chat in ChatGPT, Claude, or Grok — paste as the **first message** (or custom instructions)
+5. Describe your room (or copy **starter message** and edit it)
+6. Paste the model’s JSON output into the textarea
+7. **Validate JSON** → **Create room**
 
-Output a single JSON object matching this shape:
+## Without the app
 
-```json
-{
-  "schemaVersion": 1,
-  "engineVersion": 1,
-  "id": "kebab-case-slug",
-  "name": "Display Name",
-  "description": "One sentence pitch",
-  "emoji": "🎯",
-  "accent": "#6366f1",
-  "collections": [
-    {
-      "id": "items",
-      "label": "Items",
-      "singular": "item",
-      "fields": [
-        { "key": "title", "label": "Title", "type": "text", "required": true },
-        { "key": "notes", "label": "Notes", "type": "textarea" },
-        { "key": "tags", "label": "Tags", "type": "tags" }
-      ],
-      "views": ["list", "add"],
-      "permissions": { "create": "member", "edit": "member" }
-    }
-  ],
-  "features": []
-}
-```
+- Raw prompt file: `apps/rooms/web/public/prompts/room-schema-v1.txt`
+- Source of truth in code: `apps/rooms/web/src/schema/prompt.ts`
 
-## Field types (v1)
+## Full spec
 
-- `text` — single line
-- `textarea` — multi line
-- `tags` — comma-separated list stored as array
+See [SCHEMA_SPEC_V1.md](../SCHEMA_SPEC_V1.md) for field types, features, and versioning.
 
-## Feature types (v1)
+## Quick test (no AI)
 
-**Votes** — one toggle per member per record:
-
-```json
-{ "type": "votes", "collection": "items", "onePerMember": true }
-```
-
-**Status** — dropdown on each record:
-
-```json
-{
-  "type": "status",
-  "collection": "items",
-  "values": [
-    { "id": "open", "label": "Open" },
-    { "id": "done", "label": "Done" }
-  ],
-  "setBy": "owner"
-}
-```
-
-`setBy`: `"owner"` (room creator/admin) or `"member"` (anyone).
-
-## Rules
-
-- `id` and collection `id` must be lowercase slugs (`a-z`, `0-9`, hyphen).
-- At least one collection with at least one field.
-- Only JSON — no markdown fences, no explanation after the JSON.
-- Use features only when the user needs voting or status tracking.
-
-Now ask the user what room they want to build.
+On Create → Paste JSON, tap **Watch Club** or **Weekend Plans** to load an example, validate, and create.

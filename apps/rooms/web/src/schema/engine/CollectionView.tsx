@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { getCollection, getFeatures } from "@/schema/validate";
+import { bodyFields, emojiField, titleField } from "@/schema/display";
 import type { CollectionDef, FeatureDef, RoomSchema } from "@/schema/types";
 import { useSchemaStore } from "@/schema/useSchemaStore";
 
@@ -77,7 +78,14 @@ function AddRecordForm({
           ) : (
             <input
               className="input"
-              placeholder={f.type === "tags" ? "comma, separated" : undefined}
+              placeholder={
+                f.type === "tags"
+                  ? "comma, separated"
+                  : f.type === "emoji"
+                    ? "🎯"
+                    : undefined
+              }
+              maxLength={f.type === "emoji" ? 8 : undefined}
               value={fields[f.key] ?? ""}
               onChange={(e) => setFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
             />
@@ -154,17 +162,26 @@ export function CollectionView({
       )}
 
       {records.map((rec) => {
-        const title = fieldValue(rec, collection.fields[0]?.key ?? "title");
-        const subtitle = collection.fields[1]
-          ? fieldValue(rec, collection.fields[1].key)
-          : "";
+        const titleKey = titleField(collection)?.key ?? "title";
+        const title = fieldValue(rec, titleKey);
+        const rowEmoji = emojiField(collection)
+          ? fieldValue(rec, emojiField(collection)!.key) || "📌"
+          : null;
         const votes = store.getVoteCount(collectionId, rec.id);
         const voted = store.hasVoted(collectionId, rec.id, memberId);
+        const bodies = bodyFields(collection);
 
         return (
           <div key={rec.id} className="card stack-sm idea-card">
-            <div className="card-row">
-              <strong>{title}</strong>
+            <div className="card-row" style={{ alignItems: "flex-start" }}>
+              <div className="row gap-sm" style={{ flex: 1, minWidth: 0 }}>
+                {rowEmoji && (
+                  <span className="emoji-orb sm" style={{ fontSize: 20 }}>
+                    {rowEmoji}
+                  </span>
+                )}
+                <strong style={{ flex: 1 }}>{title || "Untitled"}</strong>
+              </div>
               {voteFeature && (
                 <button
                   type="button"
@@ -175,14 +192,27 @@ export function CollectionView({
                 </button>
               )}
             </div>
-            {subtitle && (
-              <p className="muted" style={{ fontSize: 14 }}>
-                {subtitle}
-              </p>
-            )}
-            {collection.fields.slice(2).map((f) => {
+            {bodies.map((f) => {
               const val = fieldValue(rec, f.key);
               if (!val) return null;
+              if (f.type === "textarea") {
+                return (
+                  <p key={f.key} className="muted" style={{ fontSize: 14 }}>
+                    {val}
+                  </p>
+                );
+              }
+              if (f.type === "tags") {
+                return (
+                  <p key={f.key} className="muted" style={{ fontSize: 13 }}>
+                    {val.split(", ").map((tag) => (
+                      <span key={tag} className="cadence-pill" style={{ marginRight: 4 }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </p>
+                );
+              }
               return (
                 <p key={f.key} className="muted" style={{ fontSize: 13 }}>
                   <b>{f.label}:</b> {val}

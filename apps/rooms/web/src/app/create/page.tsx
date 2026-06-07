@@ -13,6 +13,7 @@ import {
 import { useDevice } from "@/shell/DeviceProvider";
 import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
 import { stashPendingSchema } from "@/schema/pending";
+import { SchemaPromptPanel } from "@/schema/engine/SchemaPromptPanel";
 import { parseAndValidateJson } from "@/schema/validate";
 import { loadOfficialCatalog } from "@/templates/catalog";
 import {
@@ -231,13 +232,19 @@ export default function CreatePage() {
         )}
 
         {mode === "custom" && (
-          <div className="card stack">
-            <div className="section-title">Paste room schema (JSON)</div>
-            <p className="muted" style={{ fontSize: 13 }}>
-              Use an AI with the Rooms schema prompt to generate this file, then paste below.
-              The schema is stored inside your room — share the room invite to distribute it.
-            </p>
-            <textarea
+          <>
+            <SchemaPromptPanel
+              onLoadExample={(json) => {
+                setCustomJson(json);
+                setParseIssues([]);
+              }}
+            />
+            <div className="card stack">
+              <div className="section-title">Paste room schema (JSON)</div>
+              <p className="muted" style={{ fontSize: 13 }}>
+                The schema is stored inside your room — share the room invite to distribute it.
+              </p>
+              <textarea
               className="input"
               rows={12}
               placeholder='{ "schemaVersion": 1, "id": "my-room", ... }'
@@ -258,7 +265,8 @@ export default function CreatePage() {
             <button className="btn btn-ghost btn-sm" type="button" onClick={validateCustom}>
               Validate JSON
             </button>
-          </div>
+            </div>
+          </>
         )}
 
         <div className="field">

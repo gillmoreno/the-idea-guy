@@ -52,7 +52,12 @@ Join flow uses `templateId: _pending` until the synced doc reveals the real type
 
 ## AI prompt
 
-Copy `docs_and_changelog/prompts/ROOM_SCHEMA_PROMPT.md` into ChatGPT / Claude / Grok, describe the room, paste the JSON output on **Create → Paste JSON**.
+**In app:** Create → Paste JSON → **Copy system prompt** → paste into ChatGPT / Claude / Grok → paste JSON back → Validate → Create.
+
+See [prompts/ROOM_SCHEMA_PROMPT.md](./prompts/ROOM_SCHEMA_PROMPT.md) and [SCHEMA_SPEC_V1.md](./SCHEMA_SPEC_V1.md).
+
+**v1 field bricks:** `text`, `textarea`, `tags`, `emoji`  
+**v1 feature bricks:** `votes`, `status`
 
 ---
 
