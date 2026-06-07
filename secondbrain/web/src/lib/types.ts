@@ -62,10 +62,16 @@ export interface SearchResult {
   score: number;
 }
 
+export interface AICitation {
+  id: string;
+  title: string;
+}
+
 export interface AIChatMessage {
   role: "user" | "assistant";
   content: string;
-  citedNotes?: string[];
+  citedNotes?: AICitation[];
+  toolSteps?: string[];
 }
 
 export interface AIChatRequest {
@@ -76,5 +82,6 @@ export interface AIChatRequest {
 
 export interface AIChatResponse {
   answer: string;
-  citedNotes: string[];
+  citedNotes: AICitation[];
+  toolSteps?: string[];
 }

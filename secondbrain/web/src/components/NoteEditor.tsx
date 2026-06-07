@@ -56,7 +56,7 @@ function formatDate(ts: number) {
 }
 
 export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
-  const { compactVault } = useSecondBrain();
+  const { compactVault, refreshSearch } = useSecondBrain();
   const note = store.getNote(noteId);
   const [title, setTitle] = useState(note?.title ?? "");
   const [liveBytes, setLiveBytes] = useState(0);
@@ -78,6 +78,10 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
     },
     [note],
   );
+
+  useEffect(() => {
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+  }, [noteId]);
 
   useEffect(() => {
     const n = store.getNote(noteId);
@@ -140,10 +144,18 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
         },
       },
       onCreate: ({ editor: ed }) => {
-        const n = store.getNote(noteId);
-        if (n?.html && n.html !== "<p></p>" && ed.isEmpty) {
-          ed.commands.setContent(n.html, false);
-        }
+        // XmlFragment is source of truth — after collab binds, reconcile cached plainText/html.
+        queueMicrotask(() => {
+          if (ed.isEmpty) {
+            const n = store.getNote(noteId);
+            if (n?.html && n.html !== "<p></p>") {
+              ed.commands.setContent(n.html, false);
+            }
+          }
+          const html = ed.getHTML();
+          store.syncNoteContent(noteId, html);
+          refreshSearch();
+        });
       },
       onUpdate: ({ editor: ed }) => {
         const html = ed.getHTML();
@@ -151,7 +163,7 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
         debouncedSync(html);
       },
     },
-    [noteId],
+    [noteId, refreshSearch],
   );
 
   useEffect(() => {

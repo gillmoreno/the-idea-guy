@@ -61,7 +61,7 @@ export function SecondBrainProvider({ children }: { children: React.ReactNode })
   const refreshSearch = useCallback(() => {
     if (!lfRef.current) return;
     const s = new NoteStore(lfRef.current.doc);
-    searchIndexRef.current.rebuild(s.listNotes());
+    searchIndexRef.current.rebuild(s.notesForSearch());
   }, []);
 
   useEffect(() => {
@@ -89,7 +89,7 @@ export function SecondBrainProvider({ children }: { children: React.ReactNode })
     lfRef.current = lf;
     const ns = new NoteStore(lf.doc);
     setStore(ns);
-    searchIndexRef.current.rebuild(ns.listNotes());
+    searchIndexRef.current.rebuild(ns.notesForSearch());
     setVersion((v) => v + 1);
     return () => {
       lf.destroy();

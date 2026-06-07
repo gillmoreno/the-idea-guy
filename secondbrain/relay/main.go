@@ -45,6 +45,7 @@ func main() {
 	})
 	mux.HandleFunc("/sync", hub.handleSync)
 	mux.HandleFunc("/ai/forward", handleAIForward)
+	mux.HandleFunc("/ai/ollama/tags", handleOllamaTags)
 
 	srv := &http.Server{
 		Addr:              addr,

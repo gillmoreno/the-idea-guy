@@ -10,6 +10,7 @@ import {
   Note,
   VaultMeta,
 } from "./types";
+import { fragmentHasContent, fragmentToPlainText } from "./fragmentText";
 import { extractNoteLinks, htmlToPlainText, noteContentField } from "./html";
 import { utf8ByteLength } from "./storageStats";
 
@@ -47,6 +48,26 @@ export class NoteStore {
 
   getContentFragment(noteId: string): Y.XmlFragment {
     return this.doc.getXmlFragment(this.contentField(noteId));
+  }
+
+  /**
+   * Searchable plain text from the collaborative XmlFragment (source of truth).
+   * Falls back to cached note.plainText when the fragment is empty.
+   */
+  getLivePlainText(noteId: string): string {
+    const frag = this.getContentFragment(noteId);
+    if (fragmentHasContent(frag)) {
+      return fragmentToPlainText(frag);
+    }
+    return this.getNote(noteId)?.plainText ?? "";
+  }
+
+  /** Notes with plainText reconciled from live fragments — use for search / AI tools. */
+  notesForSearch(): Note[] {
+    return this.listNotes().map((n) => ({
+      ...n,
+      plainText: this.getLivePlainText(n.id),
+    }));
   }
 
   // --- vault ---

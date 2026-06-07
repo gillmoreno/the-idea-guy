@@ -42,11 +42,11 @@ export function Sidebar({ notes, activeNoteId, onSelect, onNew, onDelete }: Side
       list = list.filter(
         (n) =>
           n.title.toLowerCase().includes(q) ||
-          n.plainText.toLowerCase().includes(q),
+          (store?.getLivePlainText(n.id) || n.plainText).toLowerCase().includes(q),
       );
     }
     return [...list].sort((a, b) => b.updatedAt - a.updatedAt);
-  }, [notes, folderFilter, query]);
+  }, [notes, folderFilter, query, store]);
 
   return (
     <aside className="sidebar">
@@ -104,7 +104,7 @@ export function Sidebar({ notes, activeNoteId, onSelect, onNew, onDelete }: Side
             >
               <div className="note-item-title">{n.title || "Untitled"}</div>
               <div className="note-item-preview">
-                {n.plainText.slice(0, 72) || "Empty note"}
+                {(store?.getLivePlainText(n.id) || n.plainText).slice(0, 72) || "Empty note"}
               </div>
               <div className="note-item-meta">
                 <FileText size={10} />

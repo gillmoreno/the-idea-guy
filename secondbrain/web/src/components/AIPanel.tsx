@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Bot, Send, Settings, Sparkles, X } from "lucide-react";
+import { Bot, FileText, Send, Settings, Sparkles, X } from "lucide-react";
+import { AiMarkdown } from "@/components/AiMarkdown";
 import { askVaultAI } from "@/lib/aiClient";
 import { RELAY_HTTP_URL, useSecondBrain } from "@/lib/SecondBrainContext";
-import { AIChatMessage } from "@/lib/types";
+import { AICitation, AIChatMessage } from "@/lib/types";
+import { NoteStore } from "@/lib/store";
 
 interface AIPanelProps {
   activeNoteId: string | null;
@@ -12,33 +14,53 @@ interface AIPanelProps {
   onOpenSettings?: () => void;
 }
 
+function resolveCitations(
+  cited: AICitation[] | string[] | undefined,
+  store: NoteStore | null,
+): AICitation[] {
+  if (!cited?.length) return [];
+  if (typeof cited[0] === "string") {
+    return (cited as string[])
+      .map((title) => {
+        const note = store?.listNotes().find((n) => n.title === title);
+        return note ? { id: note.id, title: note.title } : null;
+      })
+      .filter((c): c is AICitation => c != null);
+  }
+  return (cited as AICitation[]).filter((c) => c.id);
+}
+
 export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps) {
-  const { store, searchIndex } = useSecondBrain();
+  const { store, searchIndex, setActiveNoteId } = useSecondBrain();
   const [messages, setMessages] = useState<AIChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [toolStep, setToolStep] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const aiSettings = store?.getAiSettings();
-  const hasKey = store?.hasAiKey() ?? false;
+  const hasKey = store?.hasAiConfigured() ?? false;
 
   const ask = async (question: string, mode: "chat" | "summarize" = "chat") => {
     if (!store || !question.trim()) return;
     if (!hasKey) {
-      setError("Add your OpenAI API key in Settings → AI.");
+      setError("Configure AI in Settings → AI (OpenAI key or local Ollama).");
       return;
     }
 
     setLoading(true);
+    setToolStep(null);
     setError(null);
     const userMsg: AIChatMessage = { role: "user", content: question };
     setMessages((m) => [...m, userMsg]);
 
-    let relevantNotes = searchIndex.retrieveForAI(question, 5);
+    let relevantNotes: { id: string; title: string; plainText: string }[] = [];
     if (mode === "summarize" && activeNoteId) {
       const note = store.getNote(activeNoteId);
       if (note) {
-        relevantNotes = [{ id: note.id, title: note.title, plainText: note.plainText }];
+        relevantNotes = [
+          { id: note.id, title: note.title, plainText: store.getLivePlainText(note.id) },
+        ];
       }
     }
 
@@ -46,25 +68,26 @@ export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps)
       const settings = store.getAiSettings();
       const data = await askVaultAI(
         { question, relevantNotes, mode },
-        {
-          apiKey: settings.apiKey,
-          model: settings.model,
-          relayHttpUrl: RELAY_HTTP_URL,
-        },
+        { settings, relayHttpUrl: RELAY_HTTP_URL },
+        { store, searchIndex, activeNoteId },
+        (label) => setToolStep(label),
       );
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: data.answer, citedNotes: data.citedNotes },
+        {
+          role: "assistant",
+          content: data.answer,
+          citedNotes: data.citedNotes,
+          toolSteps: data.toolSteps,
+        },
       ]);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "AI unavailable";
       setError(msg);
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: msg },
-      ]);
+      setMessages((m) => [...m, { role: "assistant", content: msg }]);
     } finally {
       setLoading(false);
+      setToolStep(null);
       setInput("");
     }
   };
@@ -88,15 +111,15 @@ export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps)
         </button>
       </div>
       <p className="muted" style={{ fontSize: 12, padding: "0 18px", lineHeight: 1.5 }}>
-        Uses keyword-matched note excerpts only. Your key is stored in your vault — not on
-        the relay.
+        Agent with local vault tools (search, count, dates). Tools run in your browser — only
+        results go to the model. Keys stay in your vault, not on the relay.
       </p>
 
       {!hasKey && (
         <div className="ai-setup-banner">
-          <p style={{ fontSize: 13, fontWeight: 600 }}>Connect your OpenAI key</p>
+          <p style={{ fontSize: 13, fontWeight: 600 }}>Set up AI</p>
           <p className="muted" style={{ fontSize: 12, marginTop: 4, lineHeight: 1.45 }}>
-            Add an API key in Settings to enable chat and summarize.
+            Add an OpenAI key or point to local Ollama in Settings.
           </p>
           {onOpenSettings && (
             <button className="btn btn-sm btn-primary" style={{ marginTop: 10 }} onClick={onOpenSettings}>
@@ -109,7 +132,8 @@ export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps)
 
       {hasKey && aiSettings && (
         <p className="muted" style={{ fontSize: 11, padding: "0 18px 8px" }}>
-          Model: {aiSettings.model}
+          {aiSettings.provider === "ollama" ? "Ollama" : "OpenAI"} · {aiSettings.model}
+          {aiSettings.provider === "ollama" && ` · ${aiSettings.baseUrl}`}
         </p>
       )}
 
@@ -128,20 +152,56 @@ export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps)
             {hasKey ? "Ask anything about your notes…" : "Set up your API key to start."}
           </div>
         )}
-        {messages.map((m, i) => (
-          <div key={i} className={`ai-msg ai-msg-${m.role}`}>
-            <div className="ai-msg-content">{m.content}</div>
-            {m.citedNotes && m.citedNotes.length > 0 && (
-              <div className="ai-cited muted">
-                Sources: {m.citedNotes.join(", ")}
+        {messages.map((m, i) => {
+          const citations = resolveCitations(m.citedNotes, store);
+          return (
+            <div key={i} className={`ai-msg ai-msg-${m.role}`}>
+              <div className="ai-msg-content">
+                {m.role === "assistant" ? (
+                  <AiMarkdown
+                    content={m.content}
+                    citations={citations}
+                    onOpenNote={setActiveNoteId}
+                  />
+                ) : (
+                  m.content
+                )}
               </div>
-            )}
-          </div>
-        ))}
+              {m.toolSteps && m.toolSteps.length > 0 && (
+                <div className="ai-tool-steps muted">
+                  {m.toolSteps.map((s, j) => (
+                    <span key={j} className="ai-tool-step">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {citations.length > 0 && (
+                <div className="ai-cited">
+                  <span className="ai-cited-label muted">Sources</span>
+                  <div className="ai-cite-list">
+                    {citations.map((cite) => (
+                      <button
+                        key={cite.id}
+                        type="button"
+                        className="ai-cite-link"
+                        title={`Open "${cite.title}"`}
+                        onClick={() => setActiveNoteId(cite.id)}
+                      >
+                        <FileText size={12} aria-hidden />
+                        {cite.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
         {loading && (
           <div className="muted" style={{ padding: 8, display: "flex", alignItems: "center", gap: 8 }}>
             <Sparkles size={14} className="pulse" />
-            Thinking…
+            {toolStep ?? "Thinking…"}
           </div>
         )}
         {error && <div className="ai-error">{error}</div>}
