@@ -891,6 +891,23 @@ textarea.input {
 .room-card {
   border-left: 3px solid var(--template-accent, var(--primary));
 }
+.room-card--actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 12px 12px 16px;
+}
+.room-card__link {
+  flex: 1;
+  min-width: 0;
+}
+.room-card__remove {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.room-card__remove:hover {
+  color: var(--danger, #dc2626);
+}
 
 /* ---------- theme switcher ---------- */
 .theme-grid {

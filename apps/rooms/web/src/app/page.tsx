@@ -1,18 +1,40 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import type { VaultRoom } from "@the-idea-guy/room-kit";
 import { useDevice } from "@/shell/DeviceProvider";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { PersonaAvatar } from "@/components/PersonaAvatar";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { roomUrl } from "@the-idea-guy/room-kit/links";
 import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
 import { DECLARATIVE_TEMPLATE_ID } from "@the-idea-guy/room-kit";
 import { getBuiltinTemplate } from "@/templates/registry";
 
+function roomLabel(room: VaultRoom): string {
+  if (room.roomName) return room.roomName;
+  if (room.templateId === DECLARATIVE_TEMPLATE_ID) return "Custom room";
+  return getBuiltinTemplate(room.templateId)?.name ?? "Room";
+}
+
 export default function HomePage() {
-  const { mounted, rooms } = useDevice();
+  const { mounted, rooms, removeRoomFromDevice } = useDevice();
   const { persona, pendingIncoming } = usePersonaContacts();
+  const [pendingRemove, setPendingRemove] = useState<VaultRoom | null>(null);
+  const [removing, setRemoving] = useState(false);
+
+  const confirmRemove = async () => {
+    if (!pendingRemove || removing) return;
+    setRemoving(true);
+    try {
+      await removeRoomFromDevice(pendingRemove.roomCode);
+      setPendingRemove(null);
+    } finally {
+      setRemoving(false);
+    }
+  };
 
   if (!mounted) {
     return (
@@ -80,35 +102,67 @@ export default function HomePage() {
                       }
                     : getBuiltinTemplate(r.templateId);
                 return (
-                  <Link
+                  <div
                     key={r.roomCode}
-                    className="card row-link room-card"
-                    href={roomUrl(r.roomCode)}
+                    className="card room-card room-card--actions"
                     style={
                       t?.accent
                         ? ({ "--template-accent": t.accent } as React.CSSProperties)
                         : undefined
                     }
                   >
-                    <span className="emoji-orb sm">{t?.emoji ?? "📦"}</span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <strong>{r.roomName ?? t?.name ?? "Room"}</strong>
-                      <div className="muted" style={{ fontSize: 13, wordBreak: "break-all" }}>
-                        {r.roomCode}
+                    <Link className="room-card__link row-link" href={roomUrl(r.roomCode)}>
+                      <span className="emoji-orb sm">{t?.emoji ?? "📦"}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <strong>{r.roomName ?? t?.name ?? "Room"}</strong>
+                        <div className="muted" style={{ fontSize: 13, wordBreak: "break-all" }}>
+                          {r.roomCode}
+                        </div>
+                        <RoomLocalStorage
+                          roomCode={r.roomCode}
+                          includeAdmin={!!r.adminSecret}
+                          className="muted"
+                        />
                       </div>
-                      <RoomLocalStorage
-                        roomCode={r.roomCode}
-                        includeAdmin={!!r.adminSecret}
-                        className="muted"
-                      />
-                    </div>
-                  </Link>
+                    </Link>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm room-card__remove"
+                      aria-label={`Remove ${roomLabel(r)} from this device`}
+                      onClick={() => setPendingRemove(r)}
+                    >
+                      Remove
+                    </button>
+                  </div>
                 );
               })}
             </div>
           </>
         )}
       </div>
+
+      <ConfirmModal
+        open={!!pendingRemove}
+        variant="danger"
+        title="Remove from this device?"
+        message={
+          pendingRemove ? (
+            <>
+              <strong>{roomLabel(pendingRemove)}</strong> and all encrypted data stored for it on
+              this device will be deleted. Other people&apos;s devices and the relay are not
+              affected — you can rejoin later with the invite code.
+            </>
+          ) : (
+            ""
+          )
+        }
+        confirmLabel={removing ? "Removing…" : "Remove from device"}
+        cancelLabel="Keep"
+        onConfirm={() => void confirmRemove()}
+        onCancel={() => {
+          if (!removing) setPendingRemove(null);
+        }}
+      />
     </div>
   );
 }

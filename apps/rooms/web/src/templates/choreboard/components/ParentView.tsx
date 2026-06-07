@@ -21,7 +21,7 @@ import { CATEGORY_META, MEMBER_COLORS, Role } from "@/templates/choreboard/lib/t
 import { formatMoney, formatDate, weekdayName } from "@/templates/choreboard/lib/format";
 import { Avatar, CadencePill, DiffPill, Money, SyncBadge } from "./ui";
 import { ChoreForm } from "./ChoreForm";
-import { ConfirmModal } from "./ConfirmModal";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 type Tab = "home" | "approvals" | "chores" | "payday" | "settings";
 

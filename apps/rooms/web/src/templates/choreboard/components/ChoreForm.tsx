@@ -11,7 +11,7 @@ import {
   FrequencyPeriod,
 } from "@/templates/choreboard/lib/types";
 import { DEFAULT_FREQUENCY_LIMIT, resolveFrequencyLimit } from "@/templates/choreboard/lib/frequency";
-import { ConfirmModal } from "./ConfirmModal";
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 export interface ChoreDraft {
   title: string;

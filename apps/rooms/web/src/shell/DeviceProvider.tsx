@@ -20,6 +20,7 @@ import {
   setRelayUrlOverride as persistRelayOverride,
   upsertVaultRoom,
 } from "@the-idea-guy/room-kit";
+import { purgeRoomFromDevice } from "@/lib/purgeRoomFromDevice";
 
 interface DeviceCtx {
   mounted: boolean;
@@ -31,6 +32,7 @@ interface DeviceCtx {
   setRelayUrlOverride: (url: string | null) => void;
   saveRoom: (room: VaultRoom) => void;
   forgetRoom: (roomCode: string) => void;
+  removeRoomFromDevice: (roomCode: string) => Promise<void>;
 }
 
 const Ctx = createContext<DeviceCtx | null>(null);
@@ -61,6 +63,11 @@ export function DeviceProvider({ children }: { children: React.ReactNode }) {
     setVault(removeVaultRoom(loadVault(), roomCode));
   }, []);
 
+  const removeRoomFromDevice = useCallback(async (roomCode: string) => {
+    await purgeRoomFromDevice(roomCode);
+    refreshVault();
+  }, [refreshVault]);
+
   return (
     <Ctx.Provider
       value={{
@@ -73,6 +80,7 @@ export function DeviceProvider({ children }: { children: React.ReactNode }) {
         setRelayUrlOverride,
         saveRoom,
         forgetRoom,
+        removeRoomFromDevice,
       }}
     >
       {children}
