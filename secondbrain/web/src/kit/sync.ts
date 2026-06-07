@@ -10,8 +10,15 @@
 import * as Y from "yjs";
 import { IndexeddbPersistence } from "y-indexeddb";
 import { deriveKey, deriveRoom, encrypt, decrypt } from "./crypto";
+import {
+  frameCheckpoint,
+  frameUpdate,
+  MSG_SYNC_END,
+  unwrapFrame,
+} from "./relayProtocol";
 
 const REMOTE_ORIGIN = "remote";
+const SYNC_END_FALLBACK_MS = 1500;
 
 export interface SyncState {
   localLoaded: boolean;
@@ -39,7 +46,9 @@ export class LocalFirstDoc {
   private key: CryptoKey | null = null;
   private room: string | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private syncEndFallbackTimer: ReturnType<typeof setTimeout> | null = null;
   private destroyed = false;
+  private checkpointSent = false;
   private state: SyncState = { localLoaded: false, connected: false };
 
   constructor(opts: LocalFirstOptions) {
@@ -82,15 +91,23 @@ export class LocalFirstDoc {
     }
     ws.binaryType = "arraybuffer";
     this.ws = ws;
+    this.checkpointSent = false;
 
     ws.onopen = () => {
       this.setState({ connected: true });
-      // Push our full state so the relay log and peers learn what we have.
-      void this.send(Y.encodeStateAsUpdate(this.doc));
+      if (this.syncEndFallbackTimer) clearTimeout(this.syncEndFallbackTimer);
+      this.syncEndFallbackTimer = setTimeout(() => {
+        this.syncEndFallbackTimer = null;
+        void this.sendCheckpoint();
+      }, SYNC_END_FALLBACK_MS);
     };
     ws.onmessage = (ev) => void this.handleRemoteMessage(ev.data);
     ws.onclose = () => {
       this.setState({ connected: false });
+      if (this.syncEndFallbackTimer) {
+        clearTimeout(this.syncEndFallbackTimer);
+        this.syncEndFallbackTimer = null;
+      }
       this.scheduleReconnect();
     };
     ws.onerror = () => ws.close();
@@ -105,14 +122,31 @@ export class LocalFirstDoc {
   }
 
   private handleLocalUpdate = (update: Uint8Array, origin: unknown) => {
-    if (origin === REMOTE_ORIGIN) return; // don't echo remote changes back
+    if (origin === REMOTE_ORIGIN) return;
     void this.send(update);
   };
 
   private async send(update: Uint8Array) {
     if (!this.key || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
     const blob = await encrypt(this.key, update);
-    if (this.ws.readyState === WebSocket.OPEN) this.ws.send(blob);
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(frameUpdate(blob));
+    }
+  }
+
+  private async sendCheckpoint() {
+    if (this.checkpointSent || this.destroyed || !this.key) return;
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+    this.checkpointSent = true;
+    if (this.syncEndFallbackTimer) {
+      clearTimeout(this.syncEndFallbackTimer);
+      this.syncEndFallbackTimer = null;
+    }
+    const update = Y.encodeStateAsUpdate(this.doc);
+    const blob = await encrypt(this.key, update);
+    if (this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(frameCheckpoint(blob));
+    }
   }
 
   private async handleRemoteMessage(data: ArrayBuffer | Blob) {
@@ -121,8 +155,16 @@ export class LocalFirstDoc {
       data instanceof ArrayBuffer
         ? new Uint8Array(data)
         : new Uint8Array(await data.arrayBuffer());
-    const plain = await decrypt(this.key, bytes);
-    if (!plain) return; // not for us / corrupt
+
+    const { type, payload, legacy } = unwrapFrame(bytes);
+    if (type === MSG_SYNC_END) {
+      void this.sendCheckpoint();
+      return;
+    }
+
+    const encrypted = legacy ? bytes : payload;
+    const plain = await decrypt(this.key, encrypted);
+    if (!plain) return;
     Y.applyUpdate(this.doc, plain, REMOTE_ORIGIN);
   }
 
@@ -133,6 +175,7 @@ export class LocalFirstDoc {
   destroy() {
     this.destroyed = true;
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+    if (this.syncEndFallbackTimer) clearTimeout(this.syncEndFallbackTimer);
     this.doc.off("update", this.handleLocalUpdate);
     this.ws?.close();
     void this.idb?.destroy();
