@@ -383,8 +383,9 @@ function SettingsTab() {
       <div className="section-title">Codes &amp; devices</div>
       <div className="card stack-sm">
         <p className="muted" style={{ fontSize: 13 }}>
-          <strong>Family code</strong> — give to kids and extra devices to sync chores
-          and mark them done. Cannot change prices or approve payday alone.
+          <strong>Family code</strong> — same code for every kid. After scanning, they
+          pick their name on the next screen. Finish Setup here first or their device
+          stays on &quot;Connecting…&quot;.
         </p>
         <div className="code-box">{familyCode}</div>
         {familyCode && (

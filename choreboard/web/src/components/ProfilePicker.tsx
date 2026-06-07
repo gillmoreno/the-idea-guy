@@ -93,7 +93,7 @@ export function ProfilePicker() {
       <div className="topbar">
         <div>
           <h1>{family?.name ?? "ChoreBoard"}</h1>
-          <div className="sub">Who&apos;s using this device?</div>
+          <div className="sub">Who&apos;s using this device? Tap your name.</div>
         </div>
       </div>
       <div className="app-main">

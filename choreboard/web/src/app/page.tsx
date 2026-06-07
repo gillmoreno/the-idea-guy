@@ -25,9 +25,12 @@ export default function Page() {
     isCreator,
     store,
     sync,
+    version,
+    relayUrl,
     currentMemberId,
     leave,
   } = useChoreBoard();
+  void version;
 
   if (!mounted) return <Loading message="Starting ChoreBoard…" />;
   if (!familyCode) return <Welcome />;
@@ -39,12 +42,37 @@ export default function Page() {
       <div className="centered" style={{ textAlign: "center" }}>
         <div className="hero-logo">🔗</div>
         <h1>Connecting to your family…</h1>
-        <p className="muted">
+        <p className="muted" style={{ marginTop: 8, maxWidth: 360, marginInline: "auto" }}>
           {sync.connected
-            ? "Waiting for a parent device to finish setup and sync."
-            : "Trying to reach the sync relay."}
+            ? "Waiting for a parent to finish first-time setup on their phone, then sync."
+            : "Trying to reach the sync relay — check Wi‑Fi or relay settings."}
         </p>
-        <button className="btn btn-ghost" onClick={leave}>
+        <div
+          className="muted"
+          style={{
+            marginTop: 16,
+            fontSize: 13,
+            textAlign: "left",
+            maxWidth: 360,
+            marginInline: "auto",
+            lineHeight: 1.5,
+          }}
+        >
+          <p style={{ marginBottom: 8 }}>
+            <strong>One family code for everyone.</strong> After this step you will pick{" "}
+            <strong>which kid</strong> is using this device (e.g. Emma vs Noah). You do not
+            need a separate code per child.
+          </p>
+          <p style={{ marginBottom: 8 }}>
+            <strong>Parent must:</strong> create the family → complete Setup (names for
+            parents and kids) → keep ChoreBoard open for a moment so sync can run.
+          </p>
+          <p style={{ fontSize: 12 }}>
+            Relay: {sync.connected ? "connected" : "not connected"} ·{" "}
+            <span style={{ wordBreak: "break-all" }}>{relayUrl}</span>
+          </p>
+        </div>
+        <button className="btn btn-ghost" style={{ marginTop: 16 }} onClick={leave}>
           Use a different code
         </button>
       </div>

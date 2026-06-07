@@ -97,13 +97,20 @@ export function ChoreBoardProvider({ children }: { children: React.ReactNode }) 
     pubSync.current = { localLoaded: false, connected: false };
     admSync.current = { localLoaded: false, connected: false };
 
+    const refreshStore = () => {
+      const p = publicRef.current;
+      const a = adminRef.current;
+      if (p) setStore(new ChoreStore(p.doc, a?.doc ?? null));
+      bump();
+    };
+
     const pub = new LocalFirstDoc({
       appId: APP_ID,
       familyCode: code,
       keyMaterial: publicKeyMaterial(code),
       scope: "public",
       relayUrl: relay,
-      onChange: bump,
+      onChange: refreshStore,
       onState: (s) => {
         pubSync.current = s;
         applySyncState();
@@ -119,7 +126,7 @@ export function ChoreBoardProvider({ children }: { children: React.ReactNode }) 
         keyMaterial: adminKeyMaterial(code, parent),
         scope: "admin",
         relayUrl: relay,
-        onChange: bump,
+        onChange: refreshStore,
         onState: (s) => {
           admSync.current = s;
           applySyncState();
@@ -131,8 +138,7 @@ export function ChoreBoardProvider({ children }: { children: React.ReactNode }) 
       admSync.current = { localLoaded: true, connected: false };
     }
 
-    setStore(new ChoreStore(pub.doc, admin?.doc ?? null));
-    bump();
+    refreshStore();
   }, []);
 
   useEffect(() => {
