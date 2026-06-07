@@ -47,7 +47,23 @@ The **Go relay** (`choreboard/relay/`) is optional infrastructure for encrypted 
 
 Wrangler reads `CLOUDFLARE_API_TOKEN` automatically.
 
-## Deploy ChoreBoard (house chores)
+## Deploy ChoreBoard (frontend + backend)
+
+**One command** — Cloudflare Pages + relay:
+
+```bash
+./scripts/deploy-choreboard.sh
+```
+
+From `choreboard/`:
+
+```bash
+make deploy
+```
+
+Options: `--init` (first-time Pages setup), `--frontend-only`, `--backend-only`.
+
+## Deploy ChoreBoard frontend only
 
 Use the repo script (no GitHub Actions, no Docker for the frontend):
 

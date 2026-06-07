@@ -474,6 +474,20 @@ export class ChoreStore {
     if (memberId) list = list.filter((p) => p.memberId === memberId);
     return list.sort((a, b) => b.createdAt - a.createdAt);
   }
+
+  /** Wipe completions, payments, and proposals — keeps chores, members, and settings. */
+  resetHistory(): boolean {
+    if (!this.canAdmin) return false;
+    this.txPublic(() => {
+      for (const id of [...this.completions.keys()]) this.completions.delete(id);
+      for (const id of [...this.proposals.keys()]) this.proposals.delete(id);
+    });
+    this.txAdmin(() => {
+      if (!this.payments) return;
+      for (const id of [...this.payments.keys()]) this.payments.delete(id);
+    });
+    return true;
+  }
 }
 
 export function recurrenceFromLimit(limit: ChoreFrequencyLimit): Recurrence {

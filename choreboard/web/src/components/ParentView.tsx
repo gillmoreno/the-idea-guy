@@ -14,11 +14,12 @@ import { PermissionsSettings } from "./PermissionsSettings";
 import { RelaySettings } from "./RelaySettings";
 import { Completion } from "@/lib/types";
 import { weekRange } from "@/lib/store";
-import { formatFrequencyLimit, resolveFrequencyLimit } from "@/lib/frequency";
+import { resolveFrequencyLimit } from "@/lib/frequency";
 import { CATEGORY_META, MEMBER_COLORS, Role } from "@/lib/types";
 import { formatMoney, formatDate, weekdayName } from "@/lib/format";
-import { Avatar, DiffPill, Money, SyncBadge } from "./ui";
+import { Avatar, CadencePill, DiffPill, Money, SyncBadge } from "./ui";
 import { ChoreForm } from "./ChoreForm";
+import { ConfirmModal } from "./ConfirmModal";
 
 type Tab = "home" | "approvals" | "chores" | "payday" | "settings";
 
@@ -269,34 +270,33 @@ function ChoresTab() {
             <ChoreForm
               key={c.id}
               initial={c}
-              submitLabel="Save"
+              submitLabel="Save changes"
               onSubmit={(d) => {
                 store.updateChore(c.id, d);
                 setEditing(null);
               }}
               onCancel={() => setEditing(null)}
+              onArchive={() => {
+                store.archiveChore(c.id);
+                setEditing(null);
+              }}
             />
           ) : (
-            <div key={c.id} className="chore">
+            <div key={c.id} className="chore chore-parent">
               <span className="emoji">{CATEGORY_META[c.category].emoji}</span>
               <div className="body">
                 <div className="title">{c.title}</div>
+                {c.description && <div className="chore-subtitle">{c.description}</div>}
                 <div className="desc">
-                  <DiffPill difficulty={c.difficulty} />{" "}
-                  {(() => {
-                    const limit = resolveFrequencyLimit(c);
-                    return limit ? `· ${formatFrequencyLimit(limit)}` : "· no limit";
-                  })()}{" "}
-                  {c.requiresApproval ? "· approval" : "· auto"}
+                  <DiffPill difficulty={c.difficulty} />
+                  <CadencePill limit={resolveFrequencyLimit(c)} />
+                  {c.requiresApproval && <span className="meta-pill">Approval</span>}
                 </div>
               </div>
-              <span className="reward">{formatMoney(c.reward, currency)}</span>
-              <div className="stack-sm" style={{ gap: 4 }}>
+              <div className="chore-parent-actions">
+                <span className="reward">{formatMoney(c.reward, currency)}</span>
                 <button className="btn btn-ghost btn-sm" onClick={() => setEditing(c.id)}>
                   Edit
-                </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => store.archiveChore(c.id)}>
-                  Archive
                 </button>
               </div>
             </div>
@@ -443,12 +443,92 @@ function SettingsTab() {
       <div className="section-title">Family</div>
       <FamilySettings />
 
+      <ResetHistorySection />
+
       <button className="btn btn-danger btn-block" style={{ marginTop: 8 }} onClick={leave}>
         Sign out of this device
       </button>
       <p className="muted" style={{ fontSize: 12, textAlign: "center" }}>
         Family: {family.name}. Your data lives on your devices and syncs end-to-end encrypted.
       </p>
+    </>
+  );
+}
+
+function ResetHistorySection() {
+  const { store } = useChoreBoard();
+  const [step, setStep] = useState<0 | 1 | 2>(0);
+  if (!store) return null;
+
+  const completionCount = store.listCompletions().length;
+  const paymentCount = store.listPayments().length;
+
+  return (
+    <>
+      <div className="section-title">Data</div>
+      <div className="card form-danger-zone" style={{ margin: 0 }}>
+        <div className="form-danger-label">Start over</div>
+        <p className="form-hint" style={{ marginBottom: 12 }}>
+          Clears all chore completions, balances, and payment history. Your chore catalog,
+          members, and settings stay intact. Useful while experimenting.
+        </p>
+        <button
+          className="btn btn-danger-outline btn-block"
+          disabled={completionCount === 0 && paymentCount === 0}
+          onClick={() => setStep(1)}
+        >
+          Reset all history
+        </button>
+        {completionCount === 0 && paymentCount === 0 && (
+          <p className="form-hint" style={{ marginTop: 8, textAlign: "center" }}>
+            Nothing to reset yet.
+          </p>
+        )}
+      </div>
+
+      <ConfirmModal
+        open={step === 1}
+        variant="danger"
+        icon="🔄"
+        title="Start over?"
+        message={
+          <>
+            This will erase <strong>{completionCount} completions</strong>
+            {paymentCount > 0 && (
+              <>
+                {" "}
+                and <strong>{paymentCount} payments</strong>
+              </>
+            )}
+            . All kids&apos; balances go back to zero. Your chores and family setup are not
+            affected.
+          </>
+        }
+        confirmLabel="Continue"
+        cancelLabel="Cancel"
+        onCancel={() => setStep(0)}
+        onConfirm={() => setStep(2)}
+      />
+
+      <ConfirmModal
+        open={step === 2}
+        variant="danger"
+        icon="🗑️"
+        title="This cannot be undone"
+        message={
+          <>
+            All chore history and payment records will be <strong>lost forever</strong>. There is
+            no backup and no way to recover this data from the app.
+          </>
+        }
+        confirmLabel="Yes, erase everything"
+        cancelLabel="Go back"
+        onCancel={() => setStep(0)}
+        onConfirm={() => {
+          store.resetHistory();
+          setStep(0);
+        }}
+      />
     </>
   );
 }

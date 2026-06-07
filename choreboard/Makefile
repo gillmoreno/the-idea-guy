@@ -1,4 +1,4 @@
-.PHONY: dev dev-relay dev-web build relay-build web-build
+.PHONY: dev dev-relay dev-web build relay-build web-build deploy deploy-frontend deploy-backend
 
 RELAY_ADDR ?= :4500
 WEB_PORT ?= 3100
@@ -24,3 +24,13 @@ web-build:
 	cd web && npm run build
 
 build: relay-build web-build
+
+# Production: frontend (Cloudflare Pages) + backend (relay)
+deploy:
+	../scripts/deploy-choreboard.sh
+
+deploy-frontend:
+	../scripts/deploy-choreboard.sh --frontend-only
+
+deploy-backend:
+	../scripts/deploy-choreboard.sh --backend-only
