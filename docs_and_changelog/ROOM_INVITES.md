@@ -7,7 +7,7 @@
 
 ## Flow
 
-1. **Organizer** sets up a room and picks **mutual contacts** to invite (`RoomMemberInviteField`).
+1. **Organizer** sets up a room and may pick **mutual contacts** to invite (`RoomMemberInviteField`). Invites are **optional at setup** — if none are selected, a soft reminder appears before continuing; members can always be invited later from `RoomInviteSettings`.
 2. Each invitee gets a `room_invite` on the pairwise encrypted inbox.
 3. **Invitee** sees **Room invitations** on Home when they open the app (`RoomInvitesBanner`).
 4. **Accept** → vault entry with pre-assigned `memberSlotId` → opens room (skips ProfilePicker).
@@ -38,6 +38,7 @@ Mutual contact connection is required before room invites (same gate as messagin
 | Contact picker | `apps/rooms/web/src/components/RoomMemberInviteField.tsx` |
 | Home notifications | `apps/rooms/web/src/components/RoomInvitesBanner.tsx` |
 | Setup helper | `apps/rooms/web/src/lib/finishRoomSetup.ts` |
+| Setup invite reminder | `apps/rooms/web/src/lib/useSetupFinishWithInviteReminder.tsx` |
 | Send / accept | `PersonaContactsProvider` |
 
 Used in all template Setup screens (Book Club, Fit Crew, Trip Split, Backlog, ChoreBoard, declarative).

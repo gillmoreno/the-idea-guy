@@ -15,7 +15,7 @@ export function RoomMemberInviteField({
   mutual: ContactRecord[];
   selected: ContactRecord[];
   onChange: (contacts: ContactRecord[]) => void;
-  /** Minimum invited contacts (not counting you). */
+  /** Suggested invite count (not counting you) — hint only, never enforced. */
   minContacts?: number;
   hint?: string;
 }) {
@@ -33,7 +33,9 @@ export function RoomMemberInviteField({
     <div className="room-invite-field stack-sm">
       <p className="muted" style={{ fontSize: 13, margin: 0 }}>
         {hint ??
-          `Invite mutual contacts — they get a notification when they open Rooms. Pick at least ${minContacts}.`}
+          (minContacts > 0
+            ? `Invite mutual contacts — optional now, or add them later from settings. We suggest at least ${minContacts}.`
+            : "Invite mutual contacts — optional. They get a notification when they open Rooms.")}
       </p>
 
       {mutual.length === 0 ? (

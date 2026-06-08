@@ -559,13 +559,27 @@ textarea.input {
 }
 
 /* ---------- tabs ---------- */
+.app-tab-bar {
+  padding: 10px 16px 12px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
 .tabs {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
 .tabs button {
+  flex: 0 0 auto;
   white-space: nowrap;
   border: 1px solid var(--border);
   background: var(--surface);

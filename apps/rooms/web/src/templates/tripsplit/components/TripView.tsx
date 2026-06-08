@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { formatDate } from "@/templates/choreboard/lib/format";
 import { TopbarPersona } from "@/shell/TopbarPersona";
+import { AppTabBar } from "@/shell/AppTabBar";
 import { SyncBadge } from "@/shell/SyncBadge";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
@@ -38,20 +39,26 @@ export function TripView({ memberId }: { memberId: string }) {
         trailing={<SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />}
       />
 
-      <div className="tabs" style={{ padding: "0 16px 8px" }}>
+      <AppTabBar>
         <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "expenses"}
           className={tab === "expenses" ? "active" : ""}
           onClick={() => setTab("expenses")}
         >
           Expenses
         </button>
         <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "balances"}
           className={tab === "balances" ? "active" : ""}
           onClick={() => setTab("balances")}
         >
           Balances
         </button>
-      </div>
+      </AppTabBar>
 
       <div className="app-main stack">
         {tab === "expenses" && (

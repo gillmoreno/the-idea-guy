@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { formatDate } from "@/templates/choreboard/lib/format";
 import { TopbarPersona } from "@/shell/TopbarPersona";
+import { AppTabBar } from "@/shell/AppTabBar";
 import { SyncBadge } from "@/shell/SyncBadge";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
@@ -80,17 +81,35 @@ export function ClubView({ memberId }: { memberId: string }) {
         trailing={<SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />}
       />
 
-      <div className="tabs" style={{ padding: "0 16px 8px" }}>
-        <button className={tab === "reading" ? "active" : ""} onClick={() => setTab("reading")}>
+      <AppTabBar>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "reading"}
+          className={tab === "reading" ? "active" : ""}
+          onClick={() => setTab("reading")}
+        >
           Reading
         </button>
-        <button className={tab === "queue" ? "active" : ""} onClick={() => setTab("queue")}>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "queue"}
+          className={tab === "queue" ? "active" : ""}
+          onClick={() => setTab("queue")}
+        >
           Queue ({queue.length})
         </button>
-        <button className={tab === "archive" ? "active" : ""} onClick={() => setTab("archive")}>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "archive"}
+          className={tab === "archive" ? "active" : ""}
+          onClick={() => setTab("archive")}
+        >
           Archive
         </button>
-      </div>
+      </AppTabBar>
 
       <div className="app-main stack">
         {tab === "reading" && (

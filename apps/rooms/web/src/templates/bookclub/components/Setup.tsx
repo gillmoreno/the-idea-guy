@@ -6,6 +6,7 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { RoomMemberInviteField } from "@/components/RoomMemberInviteField";
 import { finishRoomSetupWithInvites } from "@/lib/finishRoomSetup";
+import { useSetupFinishWithInviteReminder } from "@/lib/useSetupFinishWithInviteReminder";
 import { MEMBER_COLORS } from "../lib/types";
 import { BOOKCLUB_TEMPLATE_ID } from "../lib/store";
 import { useBookClubStore } from "../lib/useBookClubStore";
@@ -18,8 +19,7 @@ export function Setup() {
   const [invited, setInvited] = useState<typeof mutual>([]);
   const [busy, setBusy] = useState(false);
 
-  const canFinish =
-    !!store && !!persona && !!roomCode && name.trim() && invited.length >= 1 && !busy;
+  const canFinish = !!store && !!persona && !!roomCode && !!name.trim() && !busy;
 
   const finish = async () => {
     if (!store || !persona || !roomCode || !canFinish) return;
@@ -43,6 +43,14 @@ export function Setup() {
       setBusy(false);
     }
   };
+
+  const { requestFinish, reminderModal } = useSetupFinishWithInviteReminder({
+    invitedCount: invited.length,
+    suggestedMinContacts: 1,
+    canFinish,
+    onFinish: finish,
+    memberLabel: "readers",
+  });
 
   return (
     <div className="app">
@@ -74,7 +82,7 @@ export function Setup() {
             selected={invited}
             onChange={setInvited}
             minContacts={1}
-            hint="Pick friends to invite. You need at least one other reader besides yourself."
+            hint="Invite friends to read together — optional now, or add readers later from settings."
           />
         </div>
 
@@ -82,11 +90,12 @@ export function Setup() {
           className="btn btn-primary btn-block"
           style={{ marginTop: 16 }}
           disabled={!canFinish}
-          onClick={() => void finish()}
+          onClick={requestFinish}
         >
           {busy ? "Sending invites…" : "Open the club"}
         </button>
       </div>
+      {reminderModal}
     </div>
   );
 }

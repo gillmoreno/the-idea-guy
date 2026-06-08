@@ -6,6 +6,7 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { RoomMemberInviteField } from "@/components/RoomMemberInviteField";
 import { finishRoomSetupWithInvites } from "@/lib/finishRoomSetup";
+import { useSetupFinishWithInviteReminder } from "@/lib/useSetupFinishWithInviteReminder";
 import { CURRENCY_OPTIONS } from "@/templates/choreboard/lib/format";
 import { TRAVELER_COLORS } from "../lib/types";
 import { TRIPSPLIT_TEMPLATE_ID } from "../lib/store";
@@ -20,8 +21,7 @@ export function Setup() {
   const [invited, setInvited] = useState<typeof mutual>([]);
   const [busy, setBusy] = useState(false);
 
-  const canFinish =
-    !!store && !!persona && !!roomCode && name.trim() && invited.length >= 1 && !busy;
+  const canFinish = !!store && !!persona && !!roomCode && !!name.trim() && !busy;
 
   const finish = async () => {
     if (!store || !persona || !roomCode || !canFinish) return;
@@ -45,6 +45,14 @@ export function Setup() {
       setBusy(false);
     }
   };
+
+  const { requestFinish, reminderModal } = useSetupFinishWithInviteReminder({
+    invitedCount: invited.length,
+    suggestedMinContacts: 1,
+    canFinish,
+    onFinish: finish,
+    memberLabel: "travelers",
+  });
 
   return (
     <div className="app">
@@ -82,11 +90,12 @@ export function Setup() {
           className="btn btn-primary btn-block"
           style={{ marginTop: 16 }}
           disabled={!canFinish}
-          onClick={() => void finish()}
+          onClick={requestFinish}
         >
           {busy ? "Sending invites…" : "Open trip"}
         </button>
       </div>
+      {reminderModal}
     </div>
   );
 }
