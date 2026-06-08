@@ -56,7 +56,7 @@ Join flow uses `templateId: _pending` until the synced doc reveals the real type
 
 See [prompts/ROOM_SCHEMA_PROMPT.md](./prompts/ROOM_SCHEMA_PROMPT.md) and [SCHEMA_SPEC_V1.md](./SCHEMA_SPEC_V1.md).
 
-**v1 field bricks:** `text`, `textarea`, `tags`, `emoji`  
+**v1 field bricks:** `text`, `textarea`, `tags`, `emoji`, `image`  
 **v1 feature bricks:** `votes`, `status`
 
 ---

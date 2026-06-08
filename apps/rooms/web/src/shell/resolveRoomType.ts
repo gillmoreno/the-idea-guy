@@ -15,6 +15,7 @@ const BRANCH_INIT_KEYS: Record<string, string> = {
   tripsplit: "trip",
   bookclub: "club",
   backlog: "board",
+  fitcrew: "crew",
   [DECLARATIVE_TEMPLATE_ID]: "board",
 };
 

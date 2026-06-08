@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bot, FileText, Send, Settings, Sparkles, X } from "lucide-react";
 import { AiMarkdown } from "@/components/AiMarkdown";
 import { askVaultAI } from "@/lib/aiClient";
+import { HTML_PAGE_PROMPT_SUGGESTIONS } from "@/lib/htmlPagePrompts";
 import { RELAY_HTTP_URL, useSecondBrain } from "@/lib/SecondBrainContext";
 import { AICitation, AIChatMessage } from "@/lib/types";
 import { NoteStore } from "@/lib/store";
 
 interface AIPanelProps {
   activeNoteId: string | null;
+  pageGenMode?: boolean;
+  onPageGenModeConsumed?: () => void;
   onClose: () => void;
   onOpenSettings?: () => void;
 }
@@ -30,21 +33,39 @@ function resolveCitations(
   return (cited as AICitation[]).filter((c) => c.id);
 }
 
-export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps) {
+export function AIPanel({
+  activeNoteId,
+  pageGenMode,
+  onPageGenModeConsumed,
+  onClose,
+  onOpenSettings,
+}: AIPanelProps) {
   const { store, searchIndex, setActiveNoteId } = useSecondBrain();
   const [messages, setMessages] = useState<AIChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [toolStep, setToolStep] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const aiSettings = store?.getAiSettings();
   const hasKey = store?.hasAiConfigured() ?? false;
+  const isHtmlPage = !!(activeNoteId && store?.isHtmlPage(activeNoteId));
 
-  const ask = async (question: string, mode: "chat" | "summarize" = "chat") => {
+  const defaultMode = (): "chat" | "summarize" | "generatePage" =>
+    isHtmlPage ? "generatePage" : "chat";
+
+  const ask = async (
+    question: string,
+    mode: "chat" | "summarize" | "generatePage" = defaultMode(),
+  ) => {
     if (!store || !question.trim()) return;
     if (!hasKey) {
       setError("Configure AI in Settings → AI (OpenAI key or local Ollama).");
+      return;
+    }
+    if (mode === "generatePage" && !activeNoteId) {
+      setError("Open an HTML page note first (sidebar → HTML page).");
       return;
     }
 
@@ -92,11 +113,22 @@ export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps)
     }
   };
 
+  useEffect(() => {
+    if (!pageGenMode) return;
+    onPageGenModeConsumed?.();
+    inputRef.current?.focus();
+  }, [pageGenMode, onPageGenModeConsumed]);
+
   const summarize = () => {
     if (!activeNoteId || !store) return;
     const note = store.getNote(activeNoteId);
     if (!note) return;
     void ask(`Summarize this note titled "${note.title}":`, "summarize");
+  };
+
+  const applySuggestion = (text: string) => {
+    setInput(text);
+    inputRef.current?.focus();
   };
 
   return (
@@ -111,8 +143,9 @@ export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps)
         </button>
       </div>
       <p className="muted" style={{ fontSize: 12, padding: "0 18px", lineHeight: 1.5 }}>
-        Agent with local vault tools (search, count, dates). Tools run in your browser — only
-        results go to the model. Keys stay in your vault, not on the relay.
+        {isHtmlPage
+          ? "Describe the page you want — the agent reads your vault and writes HTML + CSS to this note."
+          : "Agent with local vault tools. Keys stay in your vault, not on the relay."}
       </p>
 
       {!hasKey && (
@@ -137,19 +170,43 @@ export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps)
         </p>
       )}
 
-      {activeNoteId && hasKey && (
-        <div style={{ padding: "0 18px 10px" }}>
+      {activeNoteId && hasKey && store && !isHtmlPage && (
+        <div className="ai-quick-actions" style={{ padding: "0 18px 10px" }}>
           <button className="pill-btn" onClick={summarize} disabled={loading}>
             <Sparkles size={13} />
             Summarize this note
           </button>
         </div>
       )}
+
+      {hasKey && isHtmlPage && (
+        <div className="ai-suggestions">
+          <span className="ai-suggestions-label muted">Suggestions — click to use, then edit & send</span>
+          <div className="ai-suggestions-list">
+            {HTML_PAGE_PROMPT_SUGGESTIONS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                className="ai-suggestion-chip"
+                disabled={loading}
+                onClick={() => applySuggestion(s)}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="ai-messages">
         {messages.length === 0 && (
           <div className="empty" style={{ fontSize: 13, padding: "24px 0" }}>
             <Bot size={32} style={{ margin: "0 auto 12px", opacity: 0.4 }} />
-            {hasKey ? "Ask anything about your notes…" : "Set up your API key to start."}
+            {hasKey
+              ? isHtmlPage
+                ? "Write your page prompt below…"
+                : "Ask anything about your notes…"
+              : "Set up your API key to start."}
           </div>
         )}
         {messages.map((m, i) => {
@@ -208,17 +265,26 @@ export function AIPanel({ activeNoteId, onClose, onOpenSettings }: AIPanelProps)
       </div>
       <div className="ai-input-row">
         <input
+          ref={inputRef}
           className="input"
-          placeholder={hasKey ? "Ask your vault…" : "Add API key in Settings first"}
+          placeholder={
+            hasKey
+              ? isHtmlPage
+                ? "Describe the HTML page you want…"
+                : "Ask your vault…"
+              : "Add API key in Settings first"
+          }
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && !loading && hasKey && ask(input)}
+          onKeyDown={(e) =>
+            e.key === "Enter" && !loading && hasKey && ask(input, defaultMode())
+          }
           disabled={loading || !hasKey}
         />
         <button
           className="btn btn-primary btn-sm"
           disabled={loading || !input.trim() || !hasKey}
-          onClick={() => ask(input)}
+          onClick={() => ask(input, defaultMode())}
         >
           <Send size={14} />
         </button>

@@ -44,6 +44,7 @@ Visual preview: http://localhost:3300/schema/preview
 ### Field inputs (Add form)
 - [ ] `text` — normal input
 - [ ] `emoji` — shared `EmojiPicker` (search, categories, recents; not a text input)
+- [ ] `image` — Upload (crop + WebP) or https link; thumbnail on card
 - [ ] `textarea` — multi-line
 - [ ] `tags` — comma hint placeholder
 

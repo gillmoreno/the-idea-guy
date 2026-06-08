@@ -1,4 +1,5 @@
 import * as Y from "yjs";
+import { htmlToPlainText } from "./html";
 
 const BLOCK_NODES = new Set([
   "paragraph",
@@ -9,6 +10,7 @@ const BLOCK_NODES = new Set([
   "codeBlock",
   "bulletList",
   "orderedList",
+  "htmlBlock",
 ]);
 
 /** Plain text from a collaborative Y.XmlFragment (source of truth for note body). */
@@ -23,7 +25,12 @@ export function fragmentToPlainText(root: Y.XmlFragment | Y.XmlElement): string 
         const t = child.toString();
         if (t) chunks.push(t);
       } else if (child instanceof Y.XmlElement) {
-        visit(child);
+        if (child.nodeName === "htmlBlock") {
+          const html = child.getAttribute("html") ?? "";
+          if (html) chunks.push(htmlToPlainText(html));
+        } else {
+          visit(child);
+        }
         if (BLOCK_NODES.has(child.nodeName)) chunks.push(" ");
       }
     }

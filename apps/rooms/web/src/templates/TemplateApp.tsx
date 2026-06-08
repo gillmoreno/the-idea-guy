@@ -21,6 +21,10 @@ const BookClubApp = lazy(() =>
 const BacklogApp = lazy(() =>
   import("./backlog/BacklogApp").then((m) => ({ default: m.BacklogApp })),
 );
+const FitCrewApp = lazy(() =>
+  import("./fitcrew/FitCrewApp").then((m) => ({ default: m.FitCrewApp })),
+);
+
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
     <div className="centered stack" style={{ textAlign: "center" }}>
@@ -51,6 +55,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return BookClubApp;
       case "backlog":
         return BacklogApp;
+      case "fitcrew":
+        return FitCrewApp;
       default:
         return null;
     }

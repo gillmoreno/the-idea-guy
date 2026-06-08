@@ -2,7 +2,7 @@ import type { TemplateKind } from "@the-idea-guy/room-kit";
 import { DECLARATIVE_TEMPLATE_ID } from "@the-idea-guy/room-kit";
 import type { RoomSchema } from "@/schema/types";
 
-export type BuiltinTemplateId = "choreboard" | "tripsplit" | "bookclub" | "backlog";
+export type BuiltinTemplateId = "choreboard" | "tripsplit" | "bookclub" | "backlog" | "fitcrew";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -60,6 +60,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     emoji: "💡🗳️",
     accent: "#f59e0b",
     ownerOnly: true,
+  },
+  {
+    kind: "builtin",
+    id: "fitcrew",
+    name: "Fit Crew",
+    description: "Friend workout league — log sessions, streaks, weekly board, silly prizes.",
+    emoji: "🏃🔥",
+    accent: "#ef4444",
   },
 ];
 

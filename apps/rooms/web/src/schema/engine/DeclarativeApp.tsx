@@ -3,6 +3,7 @@
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomConnecting } from "@/shell/RoomConnecting";
 import { RoomLoading } from "@/shell/RoomLoading";
+import { TopbarPersona } from "@/shell/TopbarPersona";
 import { SyncBadge } from "@/shell/SyncBadge";
 import { engineSupportsSchema, ENGINE_VERSION } from "@/schema/migrate";
 import { useSchemaStore } from "@/schema/useSchemaStore";
@@ -10,6 +11,9 @@ import { DeclarativeSetup } from "./Setup";
 import { DeclarativeProfilePicker } from "./ProfilePicker";
 import { CollectionView } from "./CollectionView";
 import { TemplateIcon } from "@/components/TemplateIcon";
+import { RoomCodeShare } from "@/shell/RoomCodeShare";
+import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 
 export function DeclarativeApp() {
   const {
@@ -89,15 +93,15 @@ export function DeclarativeApp() {
           : undefined
       }
     >
-      <div className="topbar">
-        <div>
-          <h1>{store.getBoardName() ?? roomSchema.name}</h1>
-          <div className="sub">
+      <TopbarPersona
+        title={store.getBoardName() ?? roomSchema.name}
+        trailing={
+          <>
             <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
-          </div>
-        </div>
-        <TemplateIcon emoji={roomSchema.emoji} size="sm" />
-      </div>
+            <TemplateIcon emoji={roomSchema.emoji} size="sm" />
+          </>
+        }
+      />
       <div className="app-main stack">
         {roomSchema.collections.map((col) => (
           <CollectionView
@@ -109,6 +113,26 @@ export function DeclarativeApp() {
         ))}
         {!primaryCollection && (
           <div className="empty">This schema has no collections defined.</div>
+        )}
+        {hasAdminAccess && (
+          <div className="card stack" style={{ marginTop: 8 }}>
+            <RoomLocalStorage roomCode={roomCode} includeAdmin />
+            <RoomInviteSettings
+              onReserveMembers={(slots) => {
+                for (const slot of slots) {
+                  store.addMember({
+                    id: slot.slotId,
+                    name: slot.name,
+                    color: slot.color,
+                  });
+                }
+              }}
+            />
+            <RoomCodeShare
+              roomCode={roomCode}
+              hint="Or share the room code for members to join manually."
+            />
+          </div>
         )}
       </div>
     </div>

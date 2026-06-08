@@ -8,7 +8,18 @@ import {
   normalizeRelayUrl,
 } from "@/lib/relayUrl";
 
+function isRelaySettingsEnabled(): boolean {
+  const v = process.env.NEXT_PUBLIC_RELAY_SETTINGS_ENABLED;
+  return v === "1" || v === "true";
+}
+
+/** Hidden unless NEXT_PUBLIC_RELAY_SETTINGS_ENABLED=true at build time. */
 export function RelaySettings() {
+  if (!isRelaySettingsEnabled()) return null;
+  return <RelaySettingsPanel />;
+}
+
+function RelaySettingsPanel() {
   const { relayUrl, setRelayUrlOverride } = useChoreBoard();
   const override = typeof window !== "undefined" ? getRelayUrlOverride() : null;
   const [draft, setDraft] = useState(override ?? "");

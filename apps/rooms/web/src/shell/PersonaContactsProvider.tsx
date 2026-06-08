@@ -44,6 +44,7 @@ import {
 import { useDevice } from "./DeviceProvider";
 import { InboxSyncManager } from "./contacts/inboxSyncManager";
 import { PersonaOnboarding } from "@/components/PersonaOnboarding";
+import { PersonaAccentSync } from "@/shell/PersonaAccentSync";
 import { DEFAULT_ACCENT } from "@/lib/accentValue";
 import { avatarForContactCard } from "@/lib/avatarValue";
 
@@ -56,6 +57,11 @@ interface PersonaContactsCtx {
   blocked: ContactRecord[];
   myContactCard: string | null;
   createPersona: (displayName: string, color: string, avatar: string) => Promise<void>;
+  updatePersona: (patch: {
+    displayName?: string;
+    color?: string;
+    avatar?: string;
+  }) => void;
   addContactByCard: (raw: string) => { ok: boolean; error?: string };
   acceptContact: (personaId: string) => Promise<void>;
   blockContact: (personaId: string) => void;
@@ -286,6 +292,25 @@ export function PersonaContactsProvider({ children }: { children: React.ReactNod
     [refresh],
   );
 
+  const updatePersona = useCallback(
+    (patch: { displayName?: string; color?: string; avatar?: string }) => {
+      const current = loadVault().persona;
+      if (!current) return;
+      const record: PersonaRecord = {
+        ...current,
+        displayName: patch.displayName?.trim() || current.displayName,
+        color: patch.color ?? current.color,
+        avatar:
+          patch.avatar !== undefined
+            ? patch.avatar.trim() || undefined
+            : current.avatar,
+      };
+      savePersona(loadVault(), record);
+      refresh();
+    },
+    [refresh],
+  );
+
   const addContactByCard = useCallback(
     (raw: string): { ok: boolean; error?: string } => {
       if (!persona) return { ok: false, error: "Create your persona first" };
@@ -457,6 +482,7 @@ export function PersonaContactsProvider({ children }: { children: React.ReactNod
       blocked,
       myContactCard,
       createPersona,
+      updatePersona,
       addContactByCard,
       acceptContact,
       blockContact,
@@ -475,6 +501,7 @@ export function PersonaContactsProvider({ children }: { children: React.ReactNod
       blocked,
       myContactCard,
       createPersona,
+      updatePersona,
       addContactByCard,
       acceptContact,
       blockContact,
@@ -496,7 +523,12 @@ export function PersonaContactsProvider({ children }: { children: React.ReactNod
     );
   }
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={value}>
+      <PersonaAccentSync />
+      {children}
+    </Ctx.Provider>
+  );
 }
 
 export function usePersonaContacts(): PersonaContactsCtx {

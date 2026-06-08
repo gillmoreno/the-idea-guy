@@ -16,7 +16,7 @@ const EmojiPickerPanel = dynamic(
 function roomsThemeToPickerTheme(): Theme {
   if (typeof document === "undefined") return Theme.LIGHT;
   const id = document.documentElement.dataset.theme;
-  return id === "glow" || id === "signal" ? Theme.DARK : Theme.LIGHT;
+  return id === "glow" ? Theme.DARK : Theme.LIGHT;
 }
 
 export type EmojiPickerProps = {

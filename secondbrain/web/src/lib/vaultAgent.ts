@@ -3,15 +3,15 @@ import { AICitation } from "./types";
 import {
   executeVaultTool,
   humanToolLabel,
+  toolsForAgent,
   VaultToolContext,
-  VAULT_TOOL_DEFINITIONS,
 } from "./vaultTools";
 
 const MAX_TOOL_ROUNDS = 8;
 
 export interface AgentRequest {
   question: string;
-  mode?: "chat" | "summarize";
+  mode?: "chat" | "summarize" | "generatePage";
   /** Pre-loaded note for summarize mode */
   summarizeNote?: { id: string; title: string; plainText: string };
   activeNoteId?: string | null;
@@ -36,7 +36,23 @@ function buildSystemPrompt(req: AgentRequest): string {
     );
   }
 
+  if (req.mode === "generatePage") {
+    return (
+      "You are a web designer for the user's open note (full HTML page post). " +
+      "1) Use read tools to fetch real content from their vault for the request. " +
+      "2) Call set_html_page with complete body `html` and `css` — beautiful, modern, responsive, self-contained. " +
+      "3) Use actual data from tools in the page (stats, quotes, lists). " +
+      "4) Reply in one short paragraph confirming what you built.\n\n" +
+      "Rules: html = body only (sections, headings, no <html>/<head>). css = full page styles. " +
+      "Use the FULL page width (width: 100%, min-height: 100vh) — do NOT render a tiny card floating in empty space. " +
+      "No JavaScript. No external URLs unless generic (e.g. fonts via system-ui).\n\n" +
+      todayLine() +
+      (req.activeNoteId ? `\nOpen note id: ${req.activeNoteId}.` : "")
+    );
+  }
+
   let prompt =
+    "For full-page HTML layouts/dashboards on the open note, use set_html_page after read tools. " +
     "You are a helpful assistant for the user's personal note vault (Second Brain). " +
     "You MUST use the provided tools to query the vault — never guess counts, dates, or note contents. " +
     "For 'how many' questions use count_notes. For finding ideas or topics use search_notes with focused keywords. " +
@@ -90,13 +106,14 @@ export async function runVaultAgent(
   ];
 
   const useTools = req.mode !== "summarize";
+  const agentTools = useTools ? toolsForAgent(ctx.activeNoteId ?? req.activeNoteId) : undefined;
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const completion = await chatCompletion(
       {
         model,
         messages,
-        ...(useTools ? { tools: VAULT_TOOL_DEFINITIONS, tool_choice: "auto" as const } : {}),
+        ...(agentTools ? { tools: agentTools, tool_choice: "auto" as const } : {}),
       },
       opts,
     );
@@ -135,7 +152,10 @@ export async function runVaultAgent(
       continue;
     }
 
-    const answer = msg.content?.trim();
+    let answer = msg.content?.trim();
+    if (!answer && req.mode === "generatePage" && toolSteps.some((s) => s.includes("HTML page"))) {
+      answer = "Your HTML page has been generated — check the preview in the editor.";
+    }
     if (!answer) {
       throw new Error("Empty response from AI model");
     }

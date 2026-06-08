@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FileText, Plus, Search } from "lucide-react";
+import { CodeXml, FileText, Plus, Search } from "lucide-react";
 import { useSecondBrain } from "@/lib/SecondBrainContext";
 import { Note } from "@/lib/types";
 import { formatBytes, noteStorageBytes } from "@/lib/storageStats";
@@ -11,6 +11,7 @@ interface SidebarProps {
   activeNoteId: string | null;
   onSelect: (id: string) => void;
   onNew: () => void;
+  onNewHtmlPage?: () => void;
   onDelete: (id: string) => void;
 }
 
@@ -26,7 +27,14 @@ function relativeTime(ts: number) {
   return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-export function Sidebar({ notes, activeNoteId, onSelect, onNew, onDelete }: SidebarProps) {
+export function Sidebar({
+  notes,
+  activeNoteId,
+  onSelect,
+  onNew,
+  onNewHtmlPage,
+  onDelete,
+}: SidebarProps) {
   const { store } = useSecondBrain();
   const [folderFilter, setFolderFilter] = useState<string | "all" | "none">("all");
   const [query, setQuery] = useState("");
@@ -51,10 +59,22 @@ export function Sidebar({ notes, activeNoteId, onSelect, onNew, onDelete }: Side
   return (
     <aside className="sidebar">
       <div className="sidebar-header">
-        <button className="btn btn-primary btn-sm btn-block" onClick={onNew}>
-          <Plus size={15} />
-          New note
-        </button>
+        <div className="sidebar-new-row">
+          <button className="btn btn-primary btn-sm btn-block" onClick={onNew}>
+            <Plus size={15} />
+            New note
+          </button>
+          {onNewHtmlPage && (
+            <button
+              className="btn btn-sm btn-block sidebar-html-btn"
+              onClick={onNewHtmlPage}
+              title="New AI-designed HTML page"
+            >
+              <CodeXml size={15} />
+              HTML page
+            </button>
+          )}
+        </div>
         <div className="search-icon-wrap">
           <Search size={14} className="search-icon" />
           <input
@@ -102,7 +122,12 @@ export function Sidebar({ notes, activeNoteId, onSelect, onNew, onDelete }: Side
               className={`note-item ${n.id === activeNoteId ? "active" : ""}`}
               onClick={() => onSelect(n.id)}
             >
-              <div className="note-item-title">{n.title || "Untitled"}</div>
+              <div className="note-item-title">
+                {n.title || "Untitled"}
+                {n.contentType === "htmlPage" && (
+                  <span className="note-type-badge">HTML</span>
+                )}
+              </div>
               <div className="note-item-preview">
                 {(store?.getLivePlainText(n.id) || n.plainText).slice(0, 72) || "Empty note"}
               </div>

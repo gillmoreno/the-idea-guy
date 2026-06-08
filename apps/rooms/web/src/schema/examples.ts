@@ -19,8 +19,8 @@ export const EXAMPLE_SCHEMAS: { id: string; label: string; schema: RoomSchema }[
           label: "Watchlist",
           singular: "show",
           fields: [
-            { key: "emoji", label: "Emoji", type: "emoji" },
             { key: "title", label: "Title", type: "text", required: true },
+            { key: "emoji", label: "Emoji", type: "emoji" },
             { key: "pitch", label: "Why watch?", type: "textarea" },
             { key: "platform", label: "Where", type: "tags" },
           ],
@@ -37,6 +37,47 @@ export const EXAMPLE_SCHEMAS: { id: string; label: string; schema: RoomSchema }[
             { id: "queued", label: "Queued" },
             { id: "watching", label: "Watching" },
             { id: "finished", label: "Finished" },
+          ],
+          setBy: "owner",
+        },
+      ],
+    },
+  },
+  {
+    id: "brick-fixture",
+    label: "Brick fixture — test every v1 element",
+    schema: {
+      schemaVersion: 1,
+      engineVersion: 1,
+      id: "brick-fixture",
+      name: "Brick Fixture",
+      description: "QA room — one record should exercise text, textarea, tags, emoji, votes, and status.",
+      emoji: "🧪",
+      accent: "#7c3aed",
+      collections: [
+        {
+          id: "items",
+          label: "Test items",
+          singular: "item",
+          fields: [
+            { key: "title", label: "Title (text)", type: "text", required: true },
+            { key: "emoji", label: "Emoji", type: "emoji" },
+            { key: "notes", label: "Notes (textarea)", type: "textarea" },
+            { key: "labels", label: "Labels (tags)", type: "tags" },
+            { key: "photo", label: "Photo (image)", type: "image" },
+          ],
+          views: ["list", "add"],
+          permissions: { create: "member" },
+        },
+      ],
+      features: [
+        { type: "votes", collection: "items", onePerMember: true },
+        {
+          type: "status",
+          collection: "items",
+          values: [
+            { id: "open", label: "Open" },
+            { id: "done", label: "Done" },
           ],
           setBy: "owner",
         },

@@ -41,7 +41,11 @@ export async function askVaultAI(
       summarizeNote,
       activeNoteId: vaultCtx.activeNoteId,
     },
-    { store: vaultCtx.store, searchIndex: vaultCtx.searchIndex },
+    {
+      store: vaultCtx.store,
+      searchIndex: vaultCtx.searchIndex,
+      activeNoteId: vaultCtx.activeNoteId,
+    },
     opts,
     onStep,
   );

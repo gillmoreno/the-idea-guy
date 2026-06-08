@@ -9,10 +9,11 @@ import { weekRange } from "@/templates/choreboard/lib/store";
 import { resolveFrequencyLimit } from "@/templates/choreboard/lib/frequency";
 import { CATEGORY_META, Category, Difficulty } from "@/templates/choreboard/lib/types";
 import { formatMoney, formatDate } from "@/templates/choreboard/lib/format";
-import { Avatar, CadencePill, DiffPill, Money, SyncBadge } from "./ui";
+import { TopbarPersona } from "@/shell/TopbarPersona";
+import { CadencePill, DiffPill, Money, SyncBadge } from "./ui";
 
 export function KidView({ memberId }: { memberId: string }) {
-  const { sync, version, setCurrentMember } = useRoomSession();
+  const { sync, version } = useRoomSession();
   const store = useChoreStore();
   const [suggesting, setSuggesting] = useState(false);
   if (!store) return null;
@@ -37,21 +38,11 @@ export function KidView({ memberId }: { memberId: string }) {
 
   return (
     <div className="app">
-      <div className="topbar">
-        <div className="card-row" style={{ gap: 10 }}>
-          <Avatar member={me} />
-          <div>
-            <h1 style={{ fontSize: 16 }}>Hi, {me.name.split(" ")[0]}!</h1>
-            <div className="sub">{family.name}</div>
-          </div>
-        </div>
-        <div className="stack-sm" style={{ alignItems: "flex-end" }}>
-          <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
-          <button className="btn btn-ghost btn-sm" onClick={() => setCurrentMember(null)}>
-            Switch
-          </button>
-        </div>
-      </div>
+      <TopbarPersona
+        title={`Hi, ${me.name.split(" ")[0]}!`}
+        subtitle={family.name}
+        trailing={<SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />}
+      />
 
       <div className="app-main">
         {showBalance && (

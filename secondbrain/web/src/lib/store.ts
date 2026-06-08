@@ -11,6 +11,7 @@ import {
   VaultMeta,
 } from "./types";
 import { fragmentHasContent, fragmentToPlainText } from "./fragmentText";
+import { DEFAULT_PAGE_CSS, DEFAULT_PAGE_HTML } from "./htmlPageDefaults";
 import { extractNoteLinks, htmlToPlainText, noteContentField } from "./html";
 import { utf8ByteLength } from "./storageStats";
 
@@ -55,11 +56,20 @@ export class NoteStore {
    * Falls back to cached note.plainText when the fragment is empty.
    */
   getLivePlainText(noteId: string): string {
+    const note = this.getNote(noteId);
+    if (note?.contentType === "htmlPage") {
+      const html = note.pageHtml ?? "";
+      return html ? htmlToPlainText(html) : note.plainText;
+    }
     const frag = this.getContentFragment(noteId);
     if (fragmentHasContent(frag)) {
       return fragmentToPlainText(frag);
     }
-    return this.getNote(noteId)?.plainText ?? "";
+    return note?.plainText ?? "";
+  }
+
+  isHtmlPage(noteId: string): boolean {
+    return this.getNote(noteId)?.contentType === "htmlPage";
   }
 
   /** Notes with plainText reconciled from live fragments — use for search / AI tools. */
@@ -167,19 +177,30 @@ export class NoteStore {
     return this.notes.get(id);
   }
 
-  createNote(input?: { title?: string; folderId?: string }): Note {
+  createNote(input?: {
+    title?: string;
+    folderId?: string;
+    contentType?: Note["contentType"];
+  }): Note {
     const id = uid("n_");
     const now = Date.now();
+    const contentType = input?.contentType ?? "richtext";
     const note: Note = {
       id,
       title: input?.title?.trim() || "Untitled",
+      contentType,
       html: "<p></p>",
       plainText: "",
+      pageHtml: contentType === "htmlPage" ? DEFAULT_PAGE_HTML : undefined,
+      pageCss: contentType === "htmlPage" ? DEFAULT_PAGE_CSS : undefined,
       folderId: input?.folderId,
       tags: [],
       createdAt: now,
       updatedAt: now,
     };
+    if (contentType === "htmlPage") {
+      note.plainText = htmlToPlainText(DEFAULT_PAGE_HTML);
+    }
     this.tx(() => {
       this.notes.set(id, note);
       this.linkIndex.set(id, { outgoing: [], incoming: [] });
@@ -191,6 +212,27 @@ export class NoteStore {
       }
     });
     return note;
+  }
+
+  createHtmlPageNote(input?: { title?: string; folderId?: string }): Note {
+    return this.createNote({ ...input, contentType: "htmlPage", title: input?.title ?? "Untitled page" });
+  }
+
+  /** Persist full HTML page body + stylesheet on the note. */
+  syncHtmlPageContent(id: string, pageHtml: string, pageCss: string) {
+    const existing = this.notes.get(id);
+    if (!existing) return;
+    const plainText = htmlToPlainText(pageHtml);
+    this.tx(() => {
+      this.notes.set(id, {
+        ...existing,
+        contentType: "htmlPage",
+        pageHtml,
+        pageCss,
+        plainText,
+        updatedAt: Date.now(),
+      });
+    });
   }
 
   updateNote(id: string, patch: Partial<Note>) {

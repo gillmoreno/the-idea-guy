@@ -2,6 +2,8 @@
 
 import type { FieldDef } from "@/schema/types";
 import { EmojiPicker } from "@/components/EmojiPicker";
+import { ImageField } from "@/components/ImageField";
+import { useRoomSession } from "@/shell/RoomSessionProvider";
 
 export function FieldInput({
   field,
@@ -12,6 +14,8 @@ export function FieldInput({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { compactRoom } = useRoomSession();
+
   if (field.type === "textarea") {
     return (
       <textarea
@@ -25,6 +29,17 @@ export function FieldInput({
 
   if (field.type === "emoji") {
     return <EmojiPicker value={value} onChange={onChange} />;
+  }
+
+  if (field.type === "image") {
+    return (
+      <ImageField
+        value={value}
+        onChange={onChange}
+        label={field.label}
+        onInlineUploaded={() => compactRoom()}
+      />
+    );
   }
 
   return (

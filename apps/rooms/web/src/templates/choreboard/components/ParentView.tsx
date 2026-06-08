@@ -12,13 +12,15 @@ import { generateMemberSecret } from "@the-idea-guy/room-kit";
 import { qrFamilyJoin, qrMemberLink, qrParentUnlock } from "@the-idea-guy/room-kit";
 import { QRBlock } from "@/shell/QRBlock";
 import { PermissionsSettings } from "./PermissionsSettings";
-import { RelaySettings } from "./RelaySettings";
+import { RelaySettings } from "@/shell/RelaySettings";
+import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { Completion } from "@/templates/choreboard/lib/types";
 import { weekRange } from "@/templates/choreboard/lib/store";
 import { resolveFrequencyLimit } from "@/templates/choreboard/lib/frequency";
 import { CATEGORY_META, MEMBER_COLORS, Role } from "@/templates/choreboard/lib/types";
 import { formatMoney, formatDate, weekdayName } from "@/templates/choreboard/lib/format";
+import { TopbarPersona } from "@/shell/TopbarPersona";
 import { Avatar, CadencePill, DiffPill, Money, SyncBadge } from "./ui";
 import { ChoreForm } from "./ChoreForm";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -26,34 +28,22 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 type Tab = "home" | "approvals" | "chores" | "payday" | "settings";
 
 export function ParentView({ memberId }: { memberId: string }) {
-  const { sync, setCurrentMember } = useRoomSession();
+  const { sync } = useRoomSession();
   const store = useChoreStore();
   const [tab, setTab] = useState<Tab>("home");
   if (!store) return null;
   const family = store.getFamily()!;
-  const me = store.getMember(memberId);
-
   const pendingCount = store.listCompletions({ status: "pending" }).length;
   const proposedCount = store.listProposals().length;
   const approvalBadge = pendingCount + proposedCount;
 
   return (
     <div className="app">
-      <div className="topbar">
-        <div className="card-row" style={{ gap: 10 }}>
-          {me && <Avatar member={me} />}
-          <div>
-            <h1 style={{ fontSize: 16 }}>{family.name}</h1>
-            <div className="sub">Parent dashboard</div>
-          </div>
-        </div>
-        <div className="stack-sm" style={{ alignItems: "flex-end" }}>
-          <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
-          <button className="btn btn-ghost btn-sm" onClick={() => setCurrentMember(null)}>
-            Switch
-          </button>
-        </div>
-      </div>
+      <TopbarPersona
+        title={family.name}
+        subtitle="Parent dashboard"
+        trailing={<SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />}
+      />
 
       <div className="app-main">
         {tab === "home" && <HomeTab />}
@@ -421,6 +411,22 @@ function SettingsTab() {
       <PermissionsSettings />
 
       <RelaySettings />
+
+      <RoomInviteSettings
+        title="Invite co-parents"
+        memberColors={MEMBER_COLORS}
+        hint="Invite other parents from your contacts. They join with parent access after accepting."
+        onReserveMembers={(slots) => {
+          for (const slot of slots) {
+            store.addMember({
+              id: slot.slotId,
+              name: slot.name,
+              role: "parent",
+              color: slot.color,
+            });
+          }
+        }}
+      />
 
       <div className="spread">
         <div className="section-title">Members</div>

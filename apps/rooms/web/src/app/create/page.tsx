@@ -11,7 +11,6 @@ import {
   roomUrl,
 } from "@the-idea-guy/room-kit";
 import { useDevice } from "@/shell/DeviceProvider";
-import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
 import { stashPendingSchema } from "@/schema/pending";
 import { SchemaPromptPanel } from "@/schema/engine/SchemaPromptPanel";
 import { parseAndValidateJson } from "@/schema/validate";
@@ -33,6 +32,7 @@ const PLACEHOLDERS: Record<string, string> = {
   tripsplit: "Barcelona 2026",
   bookclub: "Tuesday Night Readers",
   backlog: "Rooms ideas",
+  fitcrew: "Saturday Run Club",
 };
 
 export default function CreatePage() {
@@ -150,8 +150,6 @@ export default function CreatePage() {
         <h1>Create a room</h1>
       </div>
       <div className="app-main stack">
-        <ThemeSwitcher compact />
-
         <div className="section-title">How do you want to start?</div>
         <div className="theme-grid">
           {(

@@ -11,7 +11,8 @@ export function ThemeSwitcher({ compact }: { compact?: boolean }) {
       <div className="section-title">Look &amp; feel</div>
       {!compact && (
         <p className="muted" style={{ fontSize: 13 }}>
-          Four CSS-only themes — no images, snappy on mobile. Pick one to iterate on.
+          Four CSS-only themes — no images, snappy on mobile. Applies to every screen in Rooms on
+          this device.
         </p>
       )}
       <div className="theme-grid">

@@ -16,6 +16,7 @@ import { formatBytes, noteStorageBytes } from "@/lib/storageStats";
 import { Note } from "@/lib/types";
 import { useSecondBrain } from "@/lib/SecondBrainContext";
 import { Callout } from "@/lib/calloutExtension";
+import { HtmlBlock } from "@/lib/htmlBlockExtension";
 import { ImagePasteDrop } from "@/lib/imagePasteExtension";
 import { imageBytesInHtml } from "@/lib/imageInsert";
 import { EditorToolbar } from "./EditorToolbar";
@@ -120,6 +121,7 @@ export function NoteEditor({ noteId, store, onNavigate }: NoteEditorProps) {
           HTMLAttributes: { class: "note-image" },
         }),
         Callout,
+        HtmlBlock,
         ImagePasteDrop,
         Collaboration.configure({
           document: store.doc,

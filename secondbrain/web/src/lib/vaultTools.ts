@@ -5,6 +5,7 @@ import { AICitation, Note } from "./types";
 export interface VaultToolContext {
   store: NoteStore;
   searchIndex: NoteSearchIndex;
+  activeNoteId?: string | null;
 }
 
 type DateField = "updatedAt" | "createdAt";
@@ -139,6 +140,36 @@ export const VAULT_TOOL_DEFINITIONS = [
     },
   },
 ];
+
+export const SET_HTML_PAGE_TOOL = {
+  type: "function" as const,
+  function: {
+    name: "set_html_page",
+    description:
+      "Write the currently open note as a full HTML page (replaces entire post). " +
+      "Call after read tools when user wants a designed page, dashboard, or layout. " +
+      "`html` = body markup only (no html/head tags). `css` = full stylesheet covering 100% page width. " +
+      "Avoid narrow floating cards — design should fill the viewport.",
+    parameters: {
+      type: "object",
+      properties: {
+        html: { type: "string", description: "Body HTML" },
+        css: { type: "string", description: "Page CSS" },
+        title: { type: "string", description: "Optional note title" },
+      },
+      required: ["html", "css"],
+    },
+  },
+};
+
+export type VaultToolDefinition = (typeof VAULT_TOOL_DEFINITIONS)[number] | typeof SET_HTML_PAGE_TOOL;
+
+/** Read tools + optional write tool when a note is open. */
+export function toolsForAgent(activeNoteId?: string | null): VaultToolDefinition[] {
+  const tools: VaultToolDefinition[] = [...VAULT_TOOL_DEFINITIONS];
+  if (activeNoteId) tools.push(SET_HTML_PAGE_TOOL);
+  return tools;
+}
 
 function clampLimit(n: unknown, fallback: number): number {
   const v = typeof n === "number" && Number.isFinite(n) ? Math.floor(n) : fallback;
@@ -279,6 +310,8 @@ export function humanToolLabel(name: string, args: Record<string, unknown>): str
       return "Checking links…";
     case "vault_summary":
       return "Summarizing vault…";
+    case "set_html_page":
+      return "Generating HTML page…";
     default:
       return `Running ${name}…`;
   }
@@ -386,14 +419,47 @@ export function executeVaultTool(
         return { result: { error: "Note not found" }, citedNotes };
       }
       citedNotes.push(cite(note));
+      const body =
+        note.contentType === "htmlPage"
+          ? truncate(note.pageHtml ?? "", MAX_NOTE_BODY)
+          : truncate(livePlainText(ctx, note.id, note.plainText), MAX_NOTE_BODY);
       return {
         result: {
           id: note.id,
           title: note.title,
+          contentType: note.contentType ?? "richtext",
           tags: note.tags,
           createdAt: note.createdAt,
           updatedAt: note.updatedAt,
-          plainText: truncate(livePlainText(ctx, note.id, note.plainText), MAX_NOTE_BODY),
+          plainText: body,
+          pageCss: note.contentType === "htmlPage" ? truncate(note.pageCss ?? "", 2000) : undefined,
+        },
+        citedNotes,
+      };
+    }
+
+    case "set_html_page": {
+      const noteId = ctx.activeNoteId;
+      if (!noteId) {
+        return { result: { error: "No note is open — open or create an HTML page first" }, citedNotes };
+      }
+      const html = String(args.html ?? "").trim();
+      const css = String(args.css ?? "");
+      if (!html) {
+        return { result: { error: "html is required" }, citedNotes };
+      }
+      ctx.store.syncHtmlPageContent(noteId, html, css);
+      if (typeof args.title === "string" && args.title.trim()) {
+        ctx.store.updateNote(noteId, { title: args.title.trim() });
+      }
+      const note = ctx.store.getNote(noteId);
+      if (note) citedNotes.push(cite(note));
+      return {
+        result: {
+          success: true,
+          noteId,
+          title: note?.title,
+          contentType: "htmlPage",
         },
         citedNotes,
       };

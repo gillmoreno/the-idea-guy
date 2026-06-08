@@ -3,14 +3,16 @@
 import { useState } from "react";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { getCollection, getFeatures } from "@/schema/validate";
-import { bodyFields, emojiField, titleField } from "@/schema/display";
 import type { CollectionDef, FeatureDef, RoomSchema } from "@/schema/types";
 import { useSchemaStore } from "@/schema/useSchemaStore";
+import { isImageFieldEmpty } from "@/lib/imageValue";
+import { FieldInput } from "./FieldInput";
+import { RecordCard } from "./RecordCard";
 
-function fieldValue(record: { fields: Record<string, string | string[]> }, key: string): string {
-  const v = record.fields[key];
-  if (Array.isArray(v)) return v.join(", ");
-  return typeof v === "string" ? v : "";
+function fieldFilled(field: { type: string; required?: boolean }, raw: string): boolean {
+  if (!field.required) return true;
+  if (field.type === "image") return !isImageFieldEmpty(raw);
+  return !!raw.trim();
 }
 
 function AddRecordForm({
@@ -57,7 +59,7 @@ function AddRecordForm({
     onDone();
   };
 
-  const canSubmit = collection.fields.every((f) => !f.required || (fields[f.key] ?? "").trim());
+  const canSubmit = collection.fields.every((f) => fieldFilled(f, fields[f.key] ?? ""));
 
   return (
     <div className="card stack">
@@ -68,28 +70,11 @@ function AddRecordForm({
             {f.label}
             {f.required ? " *" : ""}
           </label>
-          {f.type === "textarea" ? (
-            <textarea
-              className="input"
-              rows={3}
-              value={fields[f.key] ?? ""}
-              onChange={(e) => setFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
-            />
-          ) : (
-            <input
-              className="input"
-              placeholder={
-                f.type === "tags"
-                  ? "comma, separated"
-                  : f.type === "emoji"
-                    ? "🎯"
-                    : undefined
-              }
-              maxLength={f.type === "emoji" ? 8 : undefined}
-              value={fields[f.key] ?? ""}
-              onChange={(e) => setFields((prev) => ({ ...prev, [f.key]: e.target.value }))}
-            />
-          )}
+          <FieldInput
+            field={f}
+            value={fields[f.key] ?? ""}
+            onChange={(v) => setFields((prev) => ({ ...prev, [f.key]: v }))}
+          />
         </div>
       ))}
       <div className="row gap-sm">
@@ -161,82 +146,21 @@ export function CollectionView({
         <div className="empty">Nothing here yet — add the first entry.</div>
       )}
 
-      {records.map((rec) => {
-        const titleKey = titleField(collection)?.key ?? "title";
-        const title = fieldValue(rec, titleKey);
-        const rowEmoji = emojiField(collection)
-          ? fieldValue(rec, emojiField(collection)!.key) || "📌"
-          : null;
-        const votes = store.getVoteCount(collectionId, rec.id);
-        const voted = store.hasVoted(collectionId, rec.id, memberId);
-        const bodies = bodyFields(collection);
-
-        return (
-          <div key={rec.id} className="card stack-sm idea-card">
-            <div className="card-row" style={{ alignItems: "flex-start" }}>
-              <div className="row gap-sm" style={{ flex: 1, minWidth: 0 }}>
-                {rowEmoji && (
-                  <span className="emoji-orb sm" style={{ fontSize: 20 }}>
-                    {rowEmoji}
-                  </span>
-                )}
-                <strong style={{ flex: 1 }}>{title || "Untitled"}</strong>
-              </div>
-              {voteFeature && (
-                <button
-                  type="button"
-                  className={`btn btn-sm vote-btn${voted ? " voted" : ""}`}
-                  onClick={() => store.toggleVote(collectionId, rec.id, memberId)}
-                >
-                  ▲ <span className="vote-count">{votes}</span>
-                </button>
-              )}
-            </div>
-            {bodies.map((f) => {
-              const val = fieldValue(rec, f.key);
-              if (!val) return null;
-              if (f.type === "textarea") {
-                return (
-                  <p key={f.key} className="muted" style={{ fontSize: 14 }}>
-                    {val}
-                  </p>
-                );
-              }
-              if (f.type === "tags") {
-                return (
-                  <p key={f.key} className="muted" style={{ fontSize: 13 }}>
-                    {val.split(", ").map((tag) => (
-                      <span key={tag} className="cadence-pill" style={{ marginRight: 4 }}>
-                        {tag}
-                      </span>
-                    ))}
-                  </p>
-                );
-              }
-              return (
-                <p key={f.key} className="muted" style={{ fontSize: 13 }}>
-                  <b>{f.label}:</b> {val}
-                </p>
-              );
-            })}
-            {canSetStatus && statusValues.length > 0 && (
-              <select
-                className="select"
-                value={rec.status ?? statusValues[0]?.id ?? ""}
-                onChange={(e) =>
-                  store.setRecordStatus(collectionId, rec.id, e.target.value)
-                }
-              >
-                {statusValues.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.label}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-        );
-      })}
+      {records.map((rec) => (
+        <RecordCard
+          key={rec.id}
+          record={rec}
+          collection={collection}
+          voteFeature={voteFeature}
+          votes={store.getVoteCount(collectionId, rec.id)}
+          voted={store.hasVoted(collectionId, rec.id, memberId)}
+          onToggleVote={() => store.toggleVote(collectionId, rec.id, memberId)}
+          canSetStatus={canSetStatus}
+          statusValues={statusValues}
+          status={rec.status}
+          onStatusChange={(s) => store.setRecordStatus(collectionId, rec.id, s)}
+        />
+      ))}
     </div>
   );
 }

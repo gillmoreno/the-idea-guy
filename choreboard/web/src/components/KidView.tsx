@@ -11,7 +11,7 @@ import { formatMoney, formatDate } from "@/lib/format";
 import { Avatar, CadencePill, DiffPill, Money, SyncBadge } from "./ui";
 
 export function KidView({ memberId }: { memberId: string }) {
-  const { store, sync, version, setCurrentMember } = useChoreBoard();
+  const { store, sync, version } = useChoreBoard();
   const [suggesting, setSuggesting] = useState(false);
   if (!store) return null;
   void version;
@@ -43,12 +43,7 @@ export function KidView({ memberId }: { memberId: string }) {
             <div className="sub">{family.name}</div>
           </div>
         </div>
-        <div className="stack-sm" style={{ alignItems: "flex-end" }}>
-          <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
-          <button className="btn btn-ghost btn-sm" onClick={() => setCurrentMember(null)}>
-            Switch
-          </button>
-        </div>
+        <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
       </div>
 
       <div className="app-main">

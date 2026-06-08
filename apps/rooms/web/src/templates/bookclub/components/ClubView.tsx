@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatDate } from "@/templates/choreboard/lib/format";
+import { TopbarPersona } from "@/shell/TopbarPersona";
 import { SyncBadge } from "@/shell/SyncBadge";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
+import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
 import type { Book } from "../lib/types";
 import { useBookClubStore } from "../lib/useBookClubStore";
 import { AddBook } from "./AddBook";
@@ -46,7 +48,7 @@ function BookRow({
 }
 
 export function ClubView({ memberId }: { memberId: string }) {
-  const { sync, setCurrentMember, leaveRoom, roomCode, hasAdminAccess, version } = useRoomSession();
+  const { sync, leaveRoom, roomCode, hasAdminAccess, version } = useRoomSession();
   const store = useBookClubStore();
   const [tab, setTab] = useState<Tab>("reading");
   const [adding, setAdding] = useState<"queue" | "current" | null>(null);
@@ -72,18 +74,11 @@ export function ClubView({ memberId }: { memberId: string }) {
 
   return (
     <div className="app">
-      <div className="topbar">
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h1>{club.name}</h1>
-          <div className="sub row gap-sm">
-            <span>{me?.name ?? "Member"}</span>
-            <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
-          </div>
-        </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => setCurrentMember(null)}>
-          Switch
-        </button>
-      </div>
+      <TopbarPersona
+        title={club.name}
+        subtitle={me?.name ?? "Member"}
+        trailing={<SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />}
+      />
 
       <div className="tabs" style={{ padding: "0 16px 8px" }}>
         <button className={tab === "reading" ? "active" : ""} onClick={() => setTab("reading")}>
@@ -230,9 +225,22 @@ export function ClubView({ memberId }: { memberId: string }) {
 
         <div className="card stack" style={{ marginTop: 8 }}>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
+          <RoomInviteSettings
+            title="Invite members"
+            hint="Invite readers from your contacts — they accept from their home screen."
+            onReserveMembers={(slots) => {
+              for (const slot of slots) {
+                store.addMember({
+                  id: slot.slotId,
+                  name: slot.name,
+                  color: slot.color,
+                });
+              }
+            }}
+          />
           <RoomCodeShare
             roomCode={roomCode}
-            hint="Share the code so members can join from their own devices."
+            hint="Or share the code so members can join from their own devices."
           />
           <Link className="btn btn-ghost btn-block" href="/">
             Home

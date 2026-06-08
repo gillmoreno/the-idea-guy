@@ -3,9 +3,20 @@
 import { useState } from "react";
 import { DEFAULT_RELAY_URL } from "@the-idea-guy/room-kit";
 import { useDevice } from "@/shell/DeviceProvider";
+import { isRelaySettingsEnabled } from "@/shell/roomFeatures";
 import { normalizeRelayUrl } from "@/shell/relayUrl";
 
+/**
+ * Standard Rooms settings block — custom sync relay URL.
+ * Hidden unless NEXT_PUBLIC_RELAY_SETTINGS_ENABLED=true at build time.
+ */
 export function RelaySettings() {
+  if (!isRelaySettingsEnabled()) return null;
+
+  return <RelaySettingsPanel />;
+}
+
+function RelaySettingsPanel() {
   const { relayUrl, vault, setRelayUrlOverride } = useDevice();
   const override = vault.relayUrlOverride ?? null;
   const [draft, setDraft] = useState(override ?? "");

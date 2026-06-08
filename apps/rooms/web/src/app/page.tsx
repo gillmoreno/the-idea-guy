@@ -10,7 +10,6 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { RoomInvitesBanner } from "@/components/RoomInvitesBanner";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { roomUrl } from "@the-idea-guy/room-kit/links";
-import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
 import { DECLARATIVE_TEMPLATE_ID } from "@the-idea-guy/room-kit";
 import { getBuiltinTemplate } from "@/templates/registry";
 import { TemplateIcon } from "@/components/TemplateIcon";
@@ -60,10 +59,8 @@ export default function HomePage() {
           </p>
         </div>
 
-        <ThemeSwitcher />
-
         {persona && (
-          <div className="card row gap-sm" style={{ alignItems: "center" }}>
+          <Link href="/profile" className="card row gap-sm persona-card-link" style={{ alignItems: "center" }}>
             <PersonaAvatar
               displayName={persona.displayName}
               color={persona.color}
@@ -73,14 +70,20 @@ export default function HomePage() {
             <div style={{ flex: 1 }}>
               <strong>{persona.displayName}</strong>
               <div className="muted" style={{ fontSize: 12 }}>
-                Your persona on this device
+                Your profile on this device
               </div>
             </div>
-            <Link className="btn btn-ghost btn-sm" href="/contacts">
-              Contacts
-              {pendingIncoming.length > 0 ? ` (${pendingIncoming.length})` : ""}
-            </Link>
-          </div>
+            <span className="btn btn-ghost btn-sm" style={{ pointerEvents: "none" }}>
+              Edit
+            </span>
+          </Link>
+        )}
+
+        {persona && (
+          <Link className="btn btn-block" href="/contacts">
+            Contacts
+            {pendingIncoming.length > 0 ? ` (${pendingIncoming.length})` : ""}
+          </Link>
         )}
 
         <Link className="btn btn-primary btn-block" href="/create">

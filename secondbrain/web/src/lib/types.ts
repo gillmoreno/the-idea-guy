@@ -1,8 +1,16 @@
+export type NoteContentType = "richtext" | "htmlPage";
+
 export interface Note {
   id: string;
   title: string;
+  /** richtext = Tiptap doc; htmlPage = full sandboxed HTML/CSS page */
+  contentType?: NoteContentType;
   html: string;
   plainText: string;
+  /** Full-page mode: body HTML (no wrapper) */
+  pageHtml?: string;
+  /** Full-page mode: page stylesheet */
+  pageCss?: string;
   folderId?: string;
   tags: string[];
   createdAt: number;
@@ -77,7 +85,7 @@ export interface AIChatMessage {
 export interface AIChatRequest {
   question: string;
   relevantNotes: { id: string; title: string; plainText: string }[];
-  mode?: "chat" | "summarize";
+  mode?: "chat" | "summarize" | "generatePage";
 }
 
 export interface AIChatResponse {

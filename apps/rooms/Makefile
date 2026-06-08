@@ -1,4 +1,4 @@
-.PHONY: dev dev-fresh dev-stop dev-restart dev-relay dev-relay-docker dev-docker dev-web build relay-build web-build web-build-local preview preview-all deploy
+.PHONY: dev dev-fresh dev-stop dev-restart dev-relay dev-relay-docker dev-docker dev-web build relay-build web-build web-build-local preview preview-all deploy schema-qa
 
 RELAY_ADDR ?= :4500
 RELAY_PORT ?= 4500
@@ -74,6 +74,10 @@ preview-all:
 		wait
 
 build: relay-build web-build
+
+# SchemaEngine UI quality gate (dev server must be running on :$(WEB_PORT)).
+schema-qa:
+	cd web && npm run qa:schema-ui
 
 deploy:
 	../../scripts/deploy-rooms.sh

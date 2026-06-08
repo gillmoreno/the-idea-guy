@@ -78,20 +78,20 @@ export default function ContactsPage() {
 
       <div className="app-main stack">
         <div className="card stack-sm">
-          <div className="row gap-sm" style={{ alignItems: "center" }}>
+          <Link href="/profile" className="row gap-sm persona-card-link" style={{ alignItems: "center" }}>
             <PersonaAvatar
               displayName={persona.displayName}
               color={persona.color}
               avatar={persona.avatar}
               size="lg"
             />
-            <div>
+            <div style={{ flex: 1 }}>
               <strong>{persona.displayName}</strong>
               <div className="muted" style={{ fontSize: 12 }}>
-                Shown to connected friends
+                Edit profile — shown to connected friends
               </div>
             </div>
-          </div>
+          </Link>
           <div className="section-title">Your contact code</div>
           <p className="muted" style={{ fontSize: 13 }}>
             Friends add you with this code or QR. Messages and invites only flow after{" "}

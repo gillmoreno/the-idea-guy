@@ -18,7 +18,7 @@ export interface ChatMessage {
 export interface ChatCompletionRequest {
   model: string;
   messages: ChatMessage[];
-  tools?: typeof import("./vaultTools").VAULT_TOOL_DEFINITIONS;
+  tools?: import("./vaultTools").VaultToolDefinition[];
   tool_choice?: "auto" | "none";
 }
 

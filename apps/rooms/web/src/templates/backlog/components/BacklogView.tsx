@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { TopbarPersona } from "@/shell/TopbarPersona";
 import { SyncBadge } from "@/shell/SyncBadge";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
+import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
 import type { IdeaStatus } from "../lib/types";
 import { useBacklogStore } from "../lib/useBacklogStore";
 import { AddIdea } from "./AddIdea";
@@ -13,7 +15,7 @@ import { Avatar, StatusPill } from "./ui";
 const STATUS_OPTIONS: IdeaStatus[] = ["proposed", "building", "shipped", "parked"];
 
 export function BacklogView({ memberId }: { memberId: string }) {
-  const { sync, setCurrentMember, leaveRoom, roomCode, isOwner, version } = useRoomSession();
+  const { sync, leaveRoom, roomCode, isOwner, version } = useRoomSession();
   const store = useBacklogStore();
   const [adding, setAdding] = useState(false);
   void version;
@@ -28,18 +30,11 @@ export function BacklogView({ memberId }: { memberId: string }) {
 
   return (
     <div className="app">
-      <div className="topbar">
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h1>{board.name}</h1>
-          <div className="sub row gap-sm">
-            <span>{me?.name ?? "Voter"}</span>
-            <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
-          </div>
-        </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => setCurrentMember(null)}>
-          Switch
-        </button>
-      </div>
+      <TopbarPersona
+        title={board.name}
+        subtitle={me?.name ?? "Voter"}
+        trailing={<SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />}
+      />
 
       <div className="app-main stack">
         <div className="card stack-sm">
@@ -118,9 +113,23 @@ export function BacklogView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <RoomInviteSettings
+            title="Invite voters"
+            minContacts={0}
+            hint="Optional — invite contacts who can propose and vote on ideas."
+            onReserveMembers={(slots) => {
+              for (const slot of slots) {
+                store.addMember({
+                  id: slot.slotId,
+                  name: slot.name,
+                  color: slot.color,
+                });
+              }
+            }}
+          />
           <RoomCodeShare
             roomCode={roomCode}
-            hint="Share this code for a public-ish idea pool — same encrypted sync, no central database."
+            hint="Or share this code — same encrypted sync, no central database."
           />
           <Link className="btn btn-ghost btn-block" href="/">
             Home

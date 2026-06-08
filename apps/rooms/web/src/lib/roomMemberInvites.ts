@@ -43,3 +43,5 @@ export function buildInviteeSlots(
     color: pickSetupMemberColor(i + 1, colors),
   }));
 }
+
+export type InviteeSlot = ReturnType<typeof buildInviteeSlots>[number];

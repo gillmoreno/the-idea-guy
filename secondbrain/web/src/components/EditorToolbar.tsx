@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Bold,
   Code,
+  CodeXml,
   Heading1,
   Heading2,
   ImageIcon,
@@ -141,6 +142,17 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
           title="Image from URL"
         >
           <Link2 size={15} />
+        </ToolBtn>
+      </div>
+      <div className="toolbar-divider" />
+      <div className="toolbar-group">
+        <span className="toolbar-label">Lab</span>
+        <ToolBtn
+          active={editor.isActive("htmlBlock")}
+          onClick={() => editor.chain().focus().insertHtmlBlock().run()}
+          title="Insert HTML block (custom HTML + CSS)"
+        >
+          <CodeXml size={15} />
         </ToolBtn>
       </div>
       <div className="toolbar-divider" />

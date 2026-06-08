@@ -23,6 +23,8 @@ There is no separate whitelist file: **`mutual` is the allow list**. `blocked` i
 - Created on first visit (X25519 keypair in device vault).
 - **Contact code** + QR = public key + optional name (`rooms1.…`).
 - Private key never leaves the device; relay never sees it.
+- **Profile** (`/profile`) — display name, avatar, **Look & feel** theme, and **Accent color** (sets `--primary` app-wide via `applyPersonaAccent`).
+- Tap your avatar in any room header (`TopbarPersona`) to go **home** (`/`).
 
 ---
 

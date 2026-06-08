@@ -78,6 +78,8 @@ interface RoomSessionCtx {
   unlockAdmin: (adminSecret: string) => void;
   leaveRoom: () => void;
   setCurrentMember: (id: string | null) => void;
+  /** Prune CRDT history after large inline images. */
+  compactRoom: () => Promise<void>;
 }
 
 const Ctx = createContext<RoomSessionCtx | null>(null);
@@ -361,6 +363,10 @@ export function RoomSessionProvider({
     [roomCode, saveRoom],
   );
 
+  const compactRoom = useCallback(async () => {
+    await publicRef.current?.compactStorage();
+  }, []);
+
   const roomMeta = useMemo(
     () =>
       docs
@@ -389,6 +395,7 @@ export function RoomSessionProvider({
       unlockAdmin,
       leaveRoom,
       setCurrentMember,
+      compactRoom,
     }),
     [
       mounted,
@@ -409,6 +416,7 @@ export function RoomSessionProvider({
       unlockAdmin,
       leaveRoom,
       setCurrentMember,
+      compactRoom,
     ],
   );
 

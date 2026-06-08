@@ -24,7 +24,7 @@ import { ConfirmModal } from "./ConfirmModal";
 type Tab = "home" | "approvals" | "chores" | "payday" | "settings";
 
 export function ParentView({ memberId }: { memberId: string }) {
-  const { store, sync, setCurrentMember } = useChoreBoard();
+  const { store, sync } = useChoreBoard();
   const [tab, setTab] = useState<Tab>("home");
   if (!store) return null;
   const family = store.getFamily()!;
@@ -44,12 +44,7 @@ export function ParentView({ memberId }: { memberId: string }) {
             <div className="sub">Parent dashboard</div>
           </div>
         </div>
-        <div className="stack-sm" style={{ alignItems: "flex-end" }}>
-          <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
-          <button className="btn btn-ghost btn-sm" onClick={() => setCurrentMember(null)}>
-            Switch
-          </button>
-        </div>
+        <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
       </div>
 
       <div className="app-main">

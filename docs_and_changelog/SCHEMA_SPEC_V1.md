@@ -28,6 +28,7 @@
 | `textarea` | string | Multi-line |
 | `tags` | `string[]` | Comma-separated input → pills |
 | `emoji` | string | Shared `EmojiPicker` (full Unicode set, search, categories, recents); shown as record icon tile |
+| `image` | string (JSON) | Shared `ImageField` — upload (auto-crop WebP ≤300 KB inline) or public URL link |
 
 Future v2 candidates: `number`, `date`, `select`, `money`, `member` — not valid in v1 AI output.
 

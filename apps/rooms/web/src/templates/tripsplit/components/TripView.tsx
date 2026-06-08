@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { formatDate } from "@/templates/choreboard/lib/format";
+import { TopbarPersona } from "@/shell/TopbarPersona";
 import { SyncBadge } from "@/shell/SyncBadge";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
+import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
 import { useTripSplitStore } from "../lib/useTripSplitStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
@@ -15,7 +17,7 @@ import { Avatar, MoneyCents } from "./ui";
 type Tab = "expenses" | "balances";
 
 export function TripView({ memberId }: { memberId: string }) {
-  const { sync, setCurrentMember, leaveRoom, roomCode, hasAdminAccess } = useRoomSession();
+  const { sync, leaveRoom, roomCode, hasAdminAccess } = useRoomSession();
   const store = useTripSplitStore();
   const [tab, setTab] = useState<Tab>("expenses");
   const [adding, setAdding] = useState(false);
@@ -30,18 +32,11 @@ export function TripView({ memberId }: { memberId: string }) {
 
   return (
     <div className="app">
-      <div className="topbar">
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h1>{trip.name}</h1>
-          <div className="sub row gap-sm">
-            <span>{me?.name ?? "Traveler"}</span>
-            <SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />
-          </div>
-        </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => setCurrentMember(null)}>
-          Switch
-        </button>
-      </div>
+      <TopbarPersona
+        title={trip.name}
+        subtitle={me?.name ?? "Traveler"}
+        trailing={<SyncBadge connected={sync.connected} localLoaded={sync.localLoaded} />}
+      />
 
       <div className="tabs" style={{ padding: "0 16px 8px" }}>
         <button
@@ -109,6 +104,19 @@ export function TripView({ memberId }: { memberId: string }) {
 
         <div className="card stack" style={{ marginTop: 8 }}>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
+          <RoomInviteSettings
+            title="Invite travelers"
+            hint="Invite contacts to join this trip — they can log expenses from their own phones."
+            onReserveMembers={(slots) => {
+              for (const slot of slots) {
+                store.addTraveler({
+                  id: slot.slotId,
+                  name: slot.name,
+                  color: slot.color,
+                });
+              }
+            }}
+          />
           <RoomCodeShare
             roomCode={roomCode}
             hint="Share the room code so friends can join and add expenses from their phones."

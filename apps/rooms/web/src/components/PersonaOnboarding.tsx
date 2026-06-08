@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { AccentColorField } from "@/components/AccentColorField";
 import { AvatarField } from "@/components/AvatarField";
 import { serializeAvatarValue } from "@/lib/avatarValue";
 import { DEFAULT_ACCENT } from "@/lib/accentValue";
@@ -12,7 +11,6 @@ export function PersonaOnboarding({
   onCreate: (name: string, color: string, avatar: string) => Promise<void>;
 }) {
   const [name, setName] = useState("");
-  const [color, setColor] = useState(DEFAULT_ACCENT);
   const [avatar, setAvatar] = useState(() =>
     serializeAvatarValue({ kind: "emoji", emoji: "😊" }),
   );
@@ -22,7 +20,7 @@ export function PersonaOnboarding({
     if (!name.trim() || busy) return;
     setBusy(true);
     try {
-      await onCreate(name.trim(), color, avatar);
+      await onCreate(name.trim(), DEFAULT_ACCENT, avatar);
     } finally {
       setBusy(false);
     }
@@ -54,12 +52,8 @@ export function PersonaOnboarding({
               value={avatar}
               onChange={setAvatar}
               displayName={name}
-              color={color}
+              color={DEFAULT_ACCENT}
             />
-          </div>
-          <div className="field">
-            <label>Accent</label>
-            <AccentColorField value={color} onChange={setColor} />
           </div>
           <button
             className="btn btn-primary btn-block"

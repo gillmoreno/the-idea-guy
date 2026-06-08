@@ -42,6 +42,8 @@ Mutual contact connection is required before room invites (same gate as messagin
 
 Used in all template Setup screens (Book Club, Fit Crew, Trip Split, Backlog, ChoreBoard, declarative).
 
+**Post-setup:** admins see the same contact picker in **`RoomInviteSettings`** (`apps/rooms/web/src/shell/RoomInviteSettings.tsx`) — Settings (ChoreBoard) or the room footer (other templates). Requires `hasAdminAccess` (admin secret unlocked).
+
 ---
 
 ## Related

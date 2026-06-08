@@ -11,7 +11,7 @@ import {
 import { useSecondBrain } from "@/lib/SecondBrainContext";
 import { NoteStore } from "@/lib/store";
 import { Sidebar } from "./Sidebar";
-import { NoteEditor } from "./NoteEditor";
+import { NoteView } from "./NoteView";
 import { BacklinksPanel } from "./BacklinksPanel";
 import { SearchBar } from "./SearchBar";
 import { AIPanel } from "./AIPanel";
@@ -33,6 +33,7 @@ export function VaultApp() {
   } = useSecondBrain();
 
   const [showAI, setShowAI] = useState(false);
+  const [aiPageGenMode, setAiPageGenMode] = useState(false);
   const [showGraph, setShowGraph] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -46,6 +47,16 @@ export function VaultApp() {
   const handleNew = () => {
     const note = store.createNote();
     setActiveNoteId(note.id);
+  };
+
+  const handleNewHtmlPage = () => {
+    const note = store.createHtmlPageNote();
+    setActiveNoteId(note.id);
+  };
+
+  const handleOpenAiForPage = () => {
+    setShowAI(true);
+    setAiPageGenMode(true);
   };
 
   const handleDelete = (id: string) => {
@@ -101,6 +112,7 @@ export function VaultApp() {
             activeNoteId={activeNoteId}
             onSelect={setActiveNoteId}
             onNew={handleNew}
+            onNewHtmlPage={handleNewHtmlPage}
             onDelete={handleDelete}
           />
         )}
@@ -115,18 +127,21 @@ export function VaultApp() {
             />
           ) : activeNoteId && store.getNote(activeNoteId) ? (
             <>
-              <NoteEditor
+              <NoteView
                 noteId={activeNoteId}
                 store={store}
                 onNavigate={handleNavigate}
+                onOpenAiForPage={handleOpenAiForPage}
               />
-              <aside className="right-panel">
-                <BacklinksPanel
-                  noteId={activeNoteId}
-                  store={store}
-                  onNavigate={handleNavigate}
-                />
-              </aside>
+              {!store.isHtmlPage(activeNoteId) && (
+                <aside className="right-panel">
+                  <BacklinksPanel
+                    noteId={activeNoteId}
+                    store={store}
+                    onNavigate={handleNavigate}
+                  />
+                </aside>
+              )}
             </>
           ) : (
             <div className="empty-state">
@@ -154,6 +169,8 @@ export function VaultApp() {
         {showAI && (
           <AIPanel
             activeNoteId={activeNoteId}
+            pageGenMode={aiPageGenMode}
+            onPageGenModeConsumed={() => setAiPageGenMode(false)}
             onClose={() => setShowAI(false)}
             onOpenSettings={() => {
               setShowAI(false);

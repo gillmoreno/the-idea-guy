@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { applyPersonaAccent } from "@/lib/applyPersonaAccent";
+import { loadVault } from "@the-idea-guy/room-kit";
 import { loadTheme, saveTheme, ThemeId } from "./themes";
 
 const Ctx = createContext<{
@@ -20,6 +22,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = (id: ThemeId) => {
     setThemeState(id);
     saveTheme(id);
+    const accent = loadVault().persona?.color;
+    if (accent) applyPersonaAccent(accent);
   };
 
   return <Ctx.Provider value={{ theme, setTheme }}>{children}</Ctx.Provider>;

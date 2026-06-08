@@ -66,7 +66,7 @@ template.backlog.votes   → Map<ideaId, Map<memberId, votedAt>>
 
 ## Look & feel experiments
 
-Four CSS-only themes (no images) — switch on Home or Create:
+Four CSS-only themes (no images) — switch on **Profile** (`/profile`):
 
 | Theme | Vibe |
 |-------|------|
