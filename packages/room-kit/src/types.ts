@@ -50,6 +50,12 @@ export interface VaultRoom {
   adminSecret?: string;
   isOwner?: boolean;
   lastOpenedAt: number;
+  /** Yjs state-vector hash after last room open (baseline for update badges). */
+  lastSeenStateHash?: string;
+  /** Last successful background pull from the relay on home. */
+  lastBackgroundSyncedAt?: number;
+  /** Remote changes since lastSeenStateHash — cleared when the room is opened. */
+  hasRemoteUpdates?: boolean;
 }
 
 export type ContactStatus = "pending_out" | "pending_in" | "mutual" | "blocked";
@@ -97,6 +103,8 @@ export interface RoomInviteRecord {
 export interface DeviceVault {
   version: 1 | 2;
   relayUrlOverride?: string;
+  /** Pull room updates when the home screen is open (default on). */
+  backgroundRoomSync?: boolean;
   persona?: PersonaRecord;
   contacts?: Record<string, ContactRecord>;
   inboxCursor?: InboxCursor;

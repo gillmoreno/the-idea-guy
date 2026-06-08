@@ -18,7 +18,9 @@ import {
   SyncState,
   TemplateId,
   TemplateKind,
+  acknowledgeRoomSeen,
   adminKeyMaterial,
+  hashDocState,
   loadVault,
   publicKeyMaterial,
   touchVaultRoom,
@@ -91,7 +93,7 @@ export function RoomSessionProvider({
   roomCode: string | null;
   children: React.ReactNode;
 }) {
-  const { relayUrl, saveRoom, forgetRoom } = useDevice();
+  const { relayUrl, saveRoom, forgetRoom, refreshVault } = useDevice();
   const [mounted, setMounted] = useState(false);
   const [roomCode, setRoomCode] = useState<string | null>(initialRoomCode);
   const [templateKind, setTemplateKind] = useState<TemplateKind | null>(() => {
@@ -118,6 +120,7 @@ export function RoomSessionProvider({
   const adminRef = useRef<LocalFirstDoc | null>(null);
   const pubSync = useRef<SyncState>({ localLoaded: false, connected: false });
   const admSync = useRef<SyncState>({ localLoaded: false, connected: false });
+  const seenHashRef = useRef<string | null>(null);
 
   const bump = () => setVersion((v) => v + 1);
 
@@ -283,6 +286,21 @@ export function RoomSessionProvider({
     },
     [refreshDocs],
   );
+
+  useEffect(() => {
+    seenHashRef.current = null;
+  }, [roomCode]);
+
+  useEffect(() => {
+    if (!sync.localLoaded || !roomCode || !publicRef.current) return;
+    void (async () => {
+      const hash = await hashDocState(publicRef.current!.doc);
+      if (seenHashRef.current === hash) return;
+      seenHashRef.current = hash;
+      acknowledgeRoomSeen(loadVault(), roomCode, hash);
+      refreshVault();
+    })();
+  }, [sync.localLoaded, roomCode, refreshVault]);
 
   useEffect(() => {
     if (!roomCode) {

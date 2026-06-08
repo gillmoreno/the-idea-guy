@@ -8,12 +8,16 @@ import { AvatarField } from "@/components/AvatarField";
 import { PersonaAvatar } from "@/components/PersonaAvatar";
 import { serializeAvatarValue } from "@/lib/avatarValue";
 import { DEFAULT_ACCENT } from "@/lib/accentValue";
+import { isBackgroundRoomSyncEnabled } from "@the-idea-guy/room-kit";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
+import { useDevice } from "@/shell/DeviceProvider";
 import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { persona, updatePersona } = usePersonaContacts();
+  const { vault, setBackgroundRoomSyncEnabled } = useDevice();
+  const backgroundSyncOn = isBackgroundRoomSyncEnabled(vault);
   const [name, setName] = useState("");
   const [color, setColor] = useState(DEFAULT_ACCENT);
   const [avatar, setAvatar] = useState(() =>
@@ -102,6 +106,27 @@ export default function ProfilePage() {
         </div>
 
         <ThemeSwitcher />
+
+        <div className="card stack-sm">
+          <div className="row gap-sm" style={{ alignItems: "flex-start", justifyContent: "space-between" }}>
+            <div>
+              <strong>Check rooms on home</strong>
+              <p className="muted" style={{ fontSize: 13, margin: "6px 0 0" }}>
+                While the home screen is open, pull updates for your rooms and show an
+                &ldquo;Updated&rdquo; badge when something changed. No push notifications — you
+                need to open Rooms.
+              </p>
+            </div>
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={backgroundSyncOn}
+                onChange={(e) => setBackgroundRoomSyncEnabled(e.target.checked)}
+              />
+              <span className="toggle-switch__track" aria-hidden />
+            </label>
+          </div>
+        </div>
 
         <div className="card stack-sm">
           <AccentColorField

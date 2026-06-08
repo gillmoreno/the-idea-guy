@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { VaultRoom } from "@the-idea-guy/room-kit";
+import { isBackgroundRoomSyncEnabled } from "@the-idea-guy/room-kit";
 import { useDevice } from "@/shell/DeviceProvider";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
+import { useBackgroundRoomSync } from "@/shell/useBackgroundRoomSync";
 import { PersonaAvatar } from "@/components/PersonaAvatar";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { RoomInvitesBanner } from "@/components/RoomInvitesBanner";
@@ -21,10 +23,14 @@ function roomLabel(room: VaultRoom): string {
 }
 
 export default function HomePage() {
-  const { mounted, rooms, removeRoomFromDevice } = useDevice();
+  const { mounted, rooms, removeRoomFromDevice, vault } = useDevice();
   const { persona, pendingIncoming } = usePersonaContacts();
+  const { isSyncing } = useBackgroundRoomSync(true);
   const [pendingRemove, setPendingRemove] = useState<VaultRoom | null>(null);
   const [removing, setRemoving] = useState(false);
+
+  const roomsWithUpdates = rooms.filter((r) => r.hasRemoteUpdates).length;
+  const backgroundSyncOn = isBackgroundRoomSyncEnabled(vault);
 
   const confirmRemove = async () => {
     if (!pendingRemove || removing) return;
@@ -97,7 +103,17 @@ export default function HomePage() {
 
         {rooms.length > 0 && (
           <>
-            <div className="section-title">Your rooms</div>
+            <div className="section-title row gap-sm" style={{ alignItems: "center" }}>
+              <span>Your rooms</span>
+              {backgroundSyncOn && isSyncing ? (
+                <span className="muted" style={{ fontSize: 12, fontWeight: 400 }}>
+                  Checking for updates…
+                </span>
+              ) : null}
+              {!isSyncing && roomsWithUpdates > 0 ? (
+                <span className="room-update-pill">{roomsWithUpdates} updated</span>
+              ) : null}
+            </div>
             <div className="stack-sm">
               {rooms.map((r) => {
                 const t =
@@ -121,7 +137,14 @@ export default function HomePage() {
                     <Link className="room-card__link row-link" href={roomUrl(r.roomCode)}>
                       <TemplateIcon emoji={t?.emoji ?? "📦"} size="sm" />
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <strong>{r.roomName ?? t?.name ?? "Room"}</strong>
+                        <div className="row gap-sm" style={{ alignItems: "center" }}>
+                          <strong>{r.roomName ?? t?.name ?? "Room"}</strong>
+                          {r.hasRemoteUpdates ? (
+                            <span className="room-update-dot" title="Updated since you last opened this room">
+                              Updated
+                            </span>
+                          ) : null}
+                        </div>
                         <div className="muted" style={{ fontSize: 13, wordBreak: "break-all" }}>
                           {r.roomCode}
                         </div>

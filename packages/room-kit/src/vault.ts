@@ -92,6 +92,45 @@ export function touchVaultRoom(vault: DeviceVault, roomCode: string): DeviceVaul
   return upsertVaultRoom(vault, existing);
 }
 
+/** Merge vault room fields without bumping lastOpenedAt (background sync metadata). */
+export function patchVaultRoom(
+  vault: DeviceVault,
+  roomCode: string,
+  patch: Partial<VaultRoom>,
+): DeviceVault {
+  const key = roomCode.trim();
+  const existing = vault.rooms[key];
+  if (!existing) return vault;
+  const next = {
+    ...vault,
+    rooms: { ...vault.rooms, [key]: { ...existing, ...patch } },
+  };
+  saveVault(next);
+  return next;
+}
+
+export function isBackgroundRoomSyncEnabled(vault: DeviceVault): boolean {
+  return vault.backgroundRoomSync !== false;
+}
+
+export function setBackgroundRoomSync(vault: DeviceVault, enabled: boolean): DeviceVault {
+  const next = { ...vault, backgroundRoomSync: enabled };
+  saveVault(next);
+  return next;
+}
+
+/** Mark a room as seen — call when the user opens the room. */
+export function acknowledgeRoomSeen(
+  vault: DeviceVault,
+  roomCode: string,
+  stateHash: string,
+): DeviceVault {
+  return patchVaultRoom(vault, roomCode, {
+    lastSeenStateHash: stateHash,
+    hasRemoteUpdates: false,
+  });
+}
+
 export function savePersona(vault: DeviceVault, persona: PersonaRecord): DeviceVault {
   const next = { ...vault, version: CURRENT_VAULT_VERSION as 2, persona };
   saveVault(next);

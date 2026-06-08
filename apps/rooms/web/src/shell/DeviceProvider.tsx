@@ -18,6 +18,7 @@ import {
   loadVault,
   removeVaultRoom,
   setRelayUrlOverride as persistRelayOverride,
+  setBackgroundRoomSync,
   upsertVaultRoom,
 } from "@the-idea-guy/room-kit";
 import { purgeRoomFromDevice } from "@/lib/purgeRoomFromDevice";
@@ -30,6 +31,7 @@ interface DeviceCtx {
   defaultRelayUrl: string;
   refreshVault: () => void;
   setRelayUrlOverride: (url: string | null) => void;
+  setBackgroundRoomSyncEnabled: (enabled: boolean) => void;
   saveRoom: (room: VaultRoom) => void;
   forgetRoom: (roomCode: string) => void;
   removeRoomFromDevice: (roomCode: string) => Promise<void>;
@@ -55,6 +57,10 @@ export function DeviceProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const setBackgroundRoomSyncEnabled = useCallback((enabled: boolean) => {
+    setVault(setBackgroundRoomSync(loadVault(), enabled));
+  }, []);
+
   const saveRoom = useCallback((room: VaultRoom) => {
     setVault(upsertVaultRoom(loadVault(), room));
   }, []);
@@ -78,6 +84,7 @@ export function DeviceProvider({ children }: { children: React.ReactNode }) {
         defaultRelayUrl: DEFAULT_RELAY_URL,
         refreshVault,
         setRelayUrlOverride,
+        setBackgroundRoomSyncEnabled,
         saveRoom,
         forgetRoom,
         removeRoomFromDevice,

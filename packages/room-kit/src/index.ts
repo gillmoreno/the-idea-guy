@@ -19,7 +19,14 @@ export {
   generateSecret,
 } from "./invite";
 export { encodeCompactedState } from "./compactDoc";
+export { hashDocState } from "./docStateHash";
+export {
+  pullRoomPublicChannel,
+  type PullRoomPublicOptions,
+  type PullRoomPublicResult,
+} from "./pullRoomSync";
 export { LocalFirstDoc, type CompactResult, type LocalFirstOptions, type SyncState } from "./sync";
+export { DEFAULT_BACKGROUND_SYNC_PARALLEL } from "./backgroundSyncConstants";
 export {
   frameCheckpoint,
   frameUpdate,
@@ -49,18 +56,22 @@ export {
   type DeepLink,
 } from "./links";
 export {
+  acknowledgeRoomSeen,
   getContact,
   getRelayUrl,
   getRoomInvite,
   getVaultRoom,
+  isBackgroundRoomSyncEnabled,
   listContacts,
   listPendingRoomInvites,
   listVaultRooms,
   loadVault,
+  patchVaultRoom,
   removeRoomInvite,
   removeVaultRoom,
   savePersona,
   saveVault,
+  setBackgroundRoomSync,
   setInboxCursor,
   setRelayUrlOverride,
   touchVaultRoom,
