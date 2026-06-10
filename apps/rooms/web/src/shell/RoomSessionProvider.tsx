@@ -242,7 +242,7 @@ export function RoomSessionProvider({
   }, [applyMetaFromDoc, roomCode]);
 
   const wireDocs = useCallback(
-    (code: string, admin: string | null, relay: string) => {
+    (code: string, admin: string | null, relay: string, passphrase?: string) => {
       teardown();
       setSync({ localLoaded: false, connected: false });
       pubSync.current = { localLoaded: false, connected: false };
@@ -254,6 +254,7 @@ export function RoomSessionProvider({
         keyMaterial: publicKeyMaterial(code),
         scope: "public",
         relayUrl: relay,
+        passphrase,
         onChange: refreshDocs,
         onState: (s) => {
           pubSync.current = s;
@@ -270,6 +271,7 @@ export function RoomSessionProvider({
           keyMaterial: adminKeyMaterial(code, admin),
           scope: "admin",
           relayUrl: relay,
+          passphrase,
           onChange: refreshDocs,
           onState: (s) => {
             admSync.current = s;
@@ -307,7 +309,8 @@ export function RoomSessionProvider({
       teardown();
       return;
     }
-    wireDocs(roomCode, adminSecret, relayUrl);
+    const vaultRoom = loadVault().rooms[roomCode];
+    wireDocs(roomCode, adminSecret, relayUrl, vaultRoom?.roomPassphrase);
     return teardown;
   }, [roomCode, adminSecret, relayUrl, wireDocs]);
 

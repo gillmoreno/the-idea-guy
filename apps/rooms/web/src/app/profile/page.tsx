@@ -12,6 +12,7 @@ import { isBackgroundRoomSyncEnabled } from "@the-idea-guy/room-kit";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { useDevice } from "@/shell/DeviceProvider";
 import { ThemeSwitcher } from "@/shell/ThemeSwitcher";
+import { AppLockSettings } from "@/shell/AppLockSettings";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -106,6 +107,8 @@ export default function ProfilePage() {
         </div>
 
         <ThemeSwitcher />
+
+        <AppLockSettings />
 
         <div className="card stack-sm">
           <div className="row gap-sm" style={{ alignItems: "flex-start", justifyContent: "space-between" }}>

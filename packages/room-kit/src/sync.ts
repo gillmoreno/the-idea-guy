@@ -1,7 +1,7 @@
 // LocalFirstDoc — Yjs + IndexedDB + E2E-encrypted sync over the relay.
 import { Y } from "./yjs";
 import { IndexeddbPersistence } from "y-indexeddb";
-import { deriveKey, deriveRoom, encrypt, decrypt, type SyncScope } from "./crypto";
+import { deriveChannelKey, deriveRoom, encrypt, decrypt, type SyncScope } from "./crypto";
 import { deleteIdbDatabase, ensureIdbReady } from "./persistence";
 import {
   frameCheckpoint,
@@ -31,6 +31,8 @@ export interface LocalFirstOptions {
   roomCode: string;
   scope: SyncScope;
   relayUrl: string;
+  /** Optional room passphrase — enables Argon2id key + relay id derivation. */
+  passphrase?: string;
   onChange?: () => void;
   onState?: (state: SyncState) => void;
 }
@@ -45,6 +47,7 @@ export class LocalFirstDoc {
   private readonly roomCode: string;
   private readonly scope: SyncScope;
   private readonly relayUrl: string;
+  private readonly passphrase?: string;
   private readonly onChange?: () => void;
   private readonly onState?: (s: SyncState) => void;
 
@@ -66,6 +69,7 @@ export class LocalFirstDoc {
     this.roomCode = opts.roomCode;
     this.scope = opts.scope;
     this.relayUrl = opts.relayUrl;
+    this.passphrase = opts.passphrase?.trim() || undefined;
     this.onChange = opts.onChange;
     this.onState = opts.onState;
     this._doc = new Y.Doc();
@@ -93,8 +97,8 @@ export class LocalFirstDoc {
   }
 
   private async start() {
-    this.key = await deriveKey(this.keyMaterial);
-    this.room = await deriveRoom(this.roomCode, this.appId, this.scope);
+    this.key = await deriveChannelKey(this.roomCode, this.keyMaterial, this.passphrase);
+    this.room = await deriveRoom(this.roomCode, this.appId, this.scope, this.passphrase);
     if (this.destroyed) return;
 
     await this.initPersistence(`${this.appId}:${this.scope}:${this.room}`);

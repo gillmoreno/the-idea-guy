@@ -85,6 +85,7 @@ export class BackgroundRoomSyncManager {
           appId: APP_ID,
           roomCode: room.roomCode,
           relayUrl: this.relayUrl,
+          passphrase: room.roomPassphrase,
         });
 
         if (result.connected && result.stateHash) {

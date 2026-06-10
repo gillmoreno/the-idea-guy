@@ -2,11 +2,14 @@ export { Y, isYMap } from "./yjs";
 export { APP_ID, DEFAULT_APP_URL, DEFAULT_RELAY_URL } from "./constants";
 export {
   adminKeyMaterial,
+  deriveChannelKey,
   deriveKey,
+  derivePinKey,
   deriveRoom,
   encrypt,
   decrypt,
   publicKeyMaterial,
+  randomSaltHex,
   type SyncScope,
 } from "./crypto";
 export {
@@ -47,6 +50,7 @@ export {
   parseDeepLink,
   parseJoinFromUrl,
   parseJoinLocation,
+  parseRoomCodeFromLocation,
   parseAppSearchParams,
   qrFamilyJoin,
   qrMemberLink,
@@ -60,8 +64,10 @@ export {
   getContact,
   getRelayUrl,
   getRoomInvite,
+  getSessionPin,
   getVaultRoom,
   isBackgroundRoomSyncEnabled,
+  isVaultSessionLocked,
   listContacts,
   listPendingRoomInvites,
   listVaultRooms,
@@ -74,11 +80,21 @@ export {
   setBackgroundRoomSync,
   setInboxCursor,
   setRelayUrlOverride,
+  setSessionVault,
   touchVaultRoom,
   upsertContact,
   upsertRoomInvite,
   upsertVaultRoom,
 } from "./vault";
+export {
+  changeVaultPin,
+  disableVaultLock,
+  enableVaultLock,
+  isVaultLockEnabled,
+  readPlainVaultJson,
+  readVaultLockMeta,
+  unlockVaultWithPin,
+} from "./vaultLock";
 export {
   canExchangeMessages,
   canSendFriendRequest,

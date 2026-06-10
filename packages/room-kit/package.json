@@ -17,5 +17,8 @@
   "devDependencies": {
     "y-indexeddb": "^9.0.12",
     "yjs": "^13.6.20"
+  },
+  "dependencies": {
+    "hash-wasm": "^4.12.0"
   }
 }

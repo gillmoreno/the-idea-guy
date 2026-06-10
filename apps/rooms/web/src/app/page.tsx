@@ -139,6 +139,11 @@ export default function HomePage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="row gap-sm" style={{ alignItems: "center" }}>
                           <strong>{r.roomName ?? t?.name ?? "Room"}</strong>
+                          {r.passphraseProtected ? (
+                            <span className="room-update-dot" title="Passphrase protected">
+                              🔒
+                            </span>
+                          ) : null}
                           {r.hasRemoteUpdates ? (
                             <span className="room-update-dot" title="Updated since you last opened this room">
                               Updated

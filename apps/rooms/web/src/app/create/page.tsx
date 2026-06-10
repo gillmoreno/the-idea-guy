@@ -45,6 +45,9 @@ export default function CreatePage() {
   const [customJson, setCustomJson] = useState("");
   const [parseIssues, setParseIssues] = useState<string[]>([]);
   const [roomName, setRoomName] = useState("");
+  const [usePassphrase, setUsePassphrase] = useState(false);
+  const [passphrase, setPassphrase] = useState("");
+  const [passphraseConfirm, setPassphraseConfirm] = useState("");
 
   useEffect(() => {
     loadOfficialCatalog().then((items) => {
@@ -82,6 +85,11 @@ export default function CreatePage() {
     const roomCode = generateRoomCode();
     const adminSecret = generateAdminSecret();
     const memberId = generateMemberId();
+    const pp = usePassphrase ? passphrase.trim() : "";
+    if (usePassphrase) {
+      if (pp.length < 4) return;
+      if (pp !== passphraseConfirm.trim()) return;
+    }
 
     let pick: TemplatePick | null = null;
     let schemaStash = false;
@@ -124,6 +132,8 @@ export default function CreatePage() {
       memberId,
       adminSecret,
       isOwner: true,
+      roomPassphrase: pp || undefined,
+      passphraseProtected: !!pp,
       lastOpenedAt: Date.now(),
     });
 
@@ -131,12 +141,17 @@ export default function CreatePage() {
     router.push(roomUrl(roomCode));
   };
 
+  const passphraseOk =
+    !usePassphrase ||
+    (passphrase.trim().length >= 4 && passphrase.trim() === passphraseConfirm.trim());
+
   const canCreate =
-    mode === "builtin"
+    passphraseOk &&
+    (mode === "builtin"
       ? !!selectedBuiltin
       : mode === "official"
         ? !!selectedCatalog
-        : customJson.trim().length > 0;
+        : customJson.trim().length > 0);
 
   return (
     <div
@@ -274,6 +289,50 @@ export default function CreatePage() {
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
           />
+        </div>
+
+        <div className="card stack-sm">
+          <label className="row gap-sm" style={{ alignItems: "center", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={usePassphrase}
+              onChange={(e) => setUsePassphrase(e.target.checked)}
+            />
+            <strong>Protect with passphrase</strong>
+          </label>
+          <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+            Share the invite link as usual. Share the passphrase separately (in person, on a call).
+            Without it, the room code alone cannot decrypt the room.
+          </p>
+          {usePassphrase ? (
+            <>
+              <div className="field">
+                <label>Passphrase</label>
+                <input
+                  className="input"
+                  type="password"
+                  value={passphrase}
+                  onChange={(e) => setPassphrase(e.target.value)}
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                />
+              </div>
+              <div className="field">
+                <label>Confirm passphrase</label>
+                <input
+                  className="input"
+                  type="password"
+                  value={passphraseConfirm}
+                  onChange={(e) => setPassphraseConfirm(e.target.value)}
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                />
+              </div>
+              <p className="muted" style={{ fontSize: 12, margin: 0, color: "var(--danger, #dc2626)" }}>
+                No recovery if you forget this passphrase. The room cannot be opened without it.
+              </p>
+            </>
+          ) : null}
         </div>
 
         <button

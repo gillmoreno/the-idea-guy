@@ -1,4 +1,4 @@
-/** Invite / deep links for the Rooms meta-app. Secrets in hash when possible. */
+/** Invite / deep links for the Rooms meta-app. Secrets live in the URL hash (never sent to CDN logs). */
 
 import { DEFAULT_APP_URL } from "./constants";
 
@@ -7,38 +7,66 @@ export function appOrigin(): string {
   return DEFAULT_APP_URL;
 }
 
+function hashLink(path: string, params: Record<string, string | undefined>): string {
+  const sp = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value?.trim()) sp.set(key, value.trim());
+  }
+  const qs = sp.toString();
+  return qs ? `${appOrigin()}${path}#${qs}` : `${appOrigin()}${path}`;
+}
+
+/** Open an existing room — room code in hash only. */
 export function roomUrl(roomCode: string): string {
-  const code = encodeURIComponent(roomCode.trim());
-  return `${appOrigin()}/room?c=${code}`;
+  return hashLink("/room", { c: roomCode.trim() });
 }
 
+/** Member invite — room code in hash only. */
 export function memberJoinUrl(roomCode: string): string {
-  return `${appOrigin()}/join?code=${encodeURIComponent(roomCode.trim())}`;
+  return hashLink("/join", { c: roomCode.trim() });
 }
 
+/** Admin invite — room code + admin secret + optional template, all in hash. */
 export function adminJoinUrl(roomCode: string, adminSecret: string, templateId?: string): string {
-  const base = `${appOrigin()}/join`;
-  const q = new URLSearchParams({ code: roomCode.trim() });
-  if (templateId) q.set("template", templateId);
-  return `${base}?${q.toString()}#admin=${encodeURIComponent(adminSecret.trim())}`;
+  return hashLink("/join", {
+    c: roomCode.trim(),
+    admin: adminSecret.trim(),
+    template: templateId,
+  });
 }
 
 export type DeepLink =
   | { type: "join"; roomCode: string; adminSecret?: string; templateId?: string }
   | { type: "member"; link: string };
 
+function readLocationParams(search: string, hash: string): URLSearchParams {
+  const merged = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  if (hash.startsWith("#")) {
+    const fromHash = new URLSearchParams(hash.slice(1));
+    for (const [key, value] of fromHash.entries()) {
+      if (!merged.has(key)) merged.set(key, value);
+    }
+  }
+  return merged;
+}
+
 export function parseJoinLocation(search: string, hash: string): DeepLink | null {
-  const params = new URLSearchParams(search);
-  const roomCode = params.get("code") ?? params.get("join") ?? params.get("c");
+  const params = readLocationParams(search, hash);
+  const roomCode = params.get("c") ?? params.get("code") ?? params.get("join");
   if (!roomCode) return null;
 
-  let adminSecret: string | undefined;
-  if (hash.startsWith("#")) {
-    const h = new URLSearchParams(hash.slice(1));
-    adminSecret = h.get("admin") ?? undefined;
-  }
-  const templateId = params.get("template") ?? undefined;
-  return { type: "join", roomCode: decodeURIComponent(roomCode), adminSecret, templateId };
+  return {
+    type: "join",
+    roomCode: decodeURIComponent(roomCode),
+    adminSecret: params.get("admin") ?? undefined,
+    templateId: params.get("template") ?? undefined,
+  };
+}
+
+/** Read room code from /room location (hash-first, legacy query fallback). */
+export function parseRoomCodeFromLocation(search: string, hash: string): string | null {
+  const parsed = parseJoinLocation(search, hash);
+  return parsed?.type === "join" ? parsed.roomCode : null;
 }
 
 export function parseDeepLink(raw: string): DeepLink | null {
@@ -57,7 +85,6 @@ export function parseDeepLink(raw: string): DeepLink | null {
     }
   }
 
-  // Bare room code paste
   if (!s.includes(" ") && s.length >= 8) {
     return { type: "join", roomCode: s };
   }
@@ -65,7 +92,7 @@ export function parseDeepLink(raw: string): DeepLink | null {
   return null;
 }
 
-/** Strip invite params from the address bar (admin secret must not linger in history). */
+/** Strip invite params from the address bar (secrets must not linger in history). */
 export function stripInviteParamsFromUrl(): void {
   if (typeof window === "undefined") return;
   const url = new URL(window.location.href);
@@ -76,9 +103,20 @@ export function stripInviteParamsFromUrl(): void {
       changed = true;
     }
   }
-  if (url.hash.includes("admin=")) {
-    url.hash = "";
-    changed = true;
+  if (url.hash) {
+    const h = new URLSearchParams(url.hash.slice(1));
+    let hashChanged = false;
+    for (const key of ["c", "code", "join", "admin", "template"]) {
+      if (h.has(key)) {
+        h.delete(key);
+        hashChanged = true;
+      }
+    }
+    if (hashChanged) {
+      const rest = h.toString();
+      url.hash = rest ? rest : "";
+      changed = true;
+    }
   }
   if (changed) {
     const tail = url.searchParams.toString();
@@ -96,12 +134,12 @@ export function qrParentUnlock(adminSecret: string): string {
 }
 
 export function parseJoinFromUrl(search: string): string | null {
-  const d = parseJoinLocation(search, "");
+  const d = parseJoinLocation(search, typeof window !== "undefined" ? window.location.hash : "");
   return d?.type === "join" ? d.roomCode : null;
 }
 
 export function parseAppSearchParams(search: string): { type: string; value: string } | null {
-  const d = parseJoinLocation(search, "");
+  const d = parseJoinLocation(search, typeof window !== "undefined" ? window.location.hash : "");
   if (d?.type === "join") return { type: "join", value: d.roomCode };
   return null;
 }

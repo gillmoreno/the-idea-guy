@@ -3,6 +3,7 @@ import "./globals.css";
 import { DeviceProvider } from "@/shell/DeviceProvider";
 import { PersonaContactsProvider } from "@/shell/PersonaContactsProvider";
 import { ThemeProvider } from "@/shell/ThemeProvider";
+import { VaultLockProvider } from "@/shell/VaultLockProvider";
 import { ServiceWorker } from "@/templates/choreboard/components/ServiceWorker";
 
 export const metadata: Metadata = {
@@ -24,9 +25,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <ThemeProvider>
-          <DeviceProvider>
-            <PersonaContactsProvider>{children}</PersonaContactsProvider>
-          </DeviceProvider>
+          <VaultLockProvider>
+            <DeviceProvider>
+              <PersonaContactsProvider>{children}</PersonaContactsProvider>
+            </DeviceProvider>
+          </VaultLockProvider>
         </ThemeProvider>
         <ServiceWorker />
       </body>

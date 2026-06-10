@@ -1,5 +1,5 @@
 import { IndexeddbPersistence } from "y-indexeddb";
-import { deriveKey, deriveRoom, decrypt, encrypt, publicKeyMaterial } from "./crypto";
+import { deriveChannelKey, deriveRoom, decrypt, encrypt, publicKeyMaterial } from "./crypto";
 import { hashDocState } from "./docStateHash";
 import { ensureIdbReady } from "./persistence";
 import { frameCheckpoint, MSG_SYNC_END, unwrapFrame } from "./relayProtocol";
@@ -14,6 +14,7 @@ export interface PullRoomPublicOptions {
   appId: string;
   roomCode: string;
   relayUrl: string;
+  passphrase?: string;
 }
 
 export interface PullRoomPublicResult {
@@ -32,8 +33,9 @@ export async function pullRoomPublicChannel(
   opts: PullRoomPublicOptions,
 ): Promise<PullRoomPublicResult> {
   const keyMaterial = publicKeyMaterial(opts.roomCode);
-  const key = await deriveKey(keyMaterial);
-  const relayRoom = await deriveRoom(opts.roomCode, opts.appId, "public");
+  const passphrase = opts.passphrase?.trim() || undefined;
+  const key = await deriveChannelKey(opts.roomCode, keyMaterial, passphrase);
+  const relayRoom = await deriveRoom(opts.roomCode, opts.appId, "public", passphrase);
   const dbName = persistenceDbName(opts.appId, "public", relayRoom);
 
   await ensureIdbReady(dbName);

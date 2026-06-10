@@ -15,11 +15,13 @@ export async function roomPersistenceDbNames(
   roomCode: string,
   appId: string = APP_ID,
   includeAdmin = false,
+  passphrase?: string,
 ): Promise<string[]> {
-  const publicRoom = await deriveRoom(roomCode, appId, "public");
+  const pp = passphrase?.trim() || undefined;
+  const publicRoom = await deriveRoom(roomCode, appId, "public", pp);
   const names = [persistenceDbName(appId, "public", publicRoom)];
   if (includeAdmin) {
-    const adminRoom = await deriveRoom(roomCode, appId, "admin");
+    const adminRoom = await deriveRoom(roomCode, appId, "admin", pp);
     names.push(persistenceDbName(appId, "admin", adminRoom));
   }
   return names;
@@ -85,8 +87,9 @@ export async function measureRoomLocalBytes(
   roomCode: string,
   includeAdmin = false,
   appId: string = APP_ID,
+  passphrase?: string,
 ): Promise<number> {
-  const names = await roomPersistenceDbNames(roomCode, appId, includeAdmin);
+  const names = await roomPersistenceDbNames(roomCode, appId, includeAdmin, passphrase);
   let total = 0;
   for (const name of names) {
     total += await measureIndexedDbDatabase(name);
@@ -99,8 +102,9 @@ export async function deleteRoomLocalData(
   roomCode: string,
   includeAdmin = false,
   appId: string = APP_ID,
+  passphrase?: string,
 ): Promise<void> {
-  const names = await roomPersistenceDbNames(roomCode, appId, includeAdmin);
+  const names = await roomPersistenceDbNames(roomCode, appId, includeAdmin, passphrase);
   await Promise.all(names.map((name) => deleteIdbDatabase(name)));
 }
 

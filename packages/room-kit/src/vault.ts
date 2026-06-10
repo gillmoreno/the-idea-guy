@@ -6,8 +6,31 @@ import type {
   VaultRoom,
 } from "./types";
 import { CURRENT_VAULT_VERSION } from "./types";
+import {
+  isVaultLockEnabled,
+  persistLockedVault,
+  readPlainVaultJson,
+  writePlainVaultJson,
+} from "./vaultLock";
 
 const VAULT_KEY = "rooms.vault.v1";
+
+/** In-memory vault while app is unlocked (required when PIN lock is on). */
+let sessionVault: DeviceVault | null = null;
+let sessionPin: string | null = null;
+
+export function setSessionVault(vault: DeviceVault | null, pin?: string | null): void {
+  sessionVault = vault;
+  sessionPin = pin ?? null;
+}
+
+export function getSessionPin(): string | null {
+  return sessionPin;
+}
+
+export function isVaultSessionLocked(): boolean {
+  return isVaultLockEnabled() && sessionVault === null;
+}
 
 function emptyVault(): DeviceVault {
   return { version: CURRENT_VAULT_VERSION, rooms: {}, contacts: {} };
@@ -35,8 +58,10 @@ function migrateVault(parsed: DeviceVault): DeviceVault {
 
 export function loadVault(): DeviceVault {
   if (typeof window === "undefined") return emptyVault();
+  if (sessionVault) return sessionVault;
+  if (isVaultLockEnabled()) return emptyVault();
   try {
-    const raw = localStorage.getItem(VAULT_KEY);
+    const raw = readPlainVaultJson();
     if (!raw) return emptyVault();
     const parsed = JSON.parse(raw) as DeviceVault;
     if (parsed.version !== 1 && parsed.version !== 2) return emptyVault();
@@ -48,7 +73,12 @@ export function loadVault(): DeviceVault {
 
 export function saveVault(vault: DeviceVault): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(VAULT_KEY, JSON.stringify(vault));
+  sessionVault = vault;
+  if (isVaultLockEnabled() && sessionPin) {
+    void persistLockedVault(sessionPin, vault);
+    return;
+  }
+  writePlainVaultJson(JSON.stringify(vault));
 }
 
 export function listVaultRooms(vault: DeviceVault): VaultRoom[] {

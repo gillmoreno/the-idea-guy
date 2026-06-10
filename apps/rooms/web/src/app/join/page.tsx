@@ -17,6 +17,7 @@ function JoinInner() {
   const { saveRoom } = useDevice();
   const [code, setCode] = useState("");
   const [adminSecret, setAdminSecret] = useState("");
+  const [passphrase, setPassphrase] = useState("");
 
   useEffect(() => {
     const parsed = parseJoinLocation(window.location.search, window.location.hash);
@@ -25,7 +26,7 @@ function JoinInner() {
     setCode(parsed.roomCode);
     if (parsed.adminSecret) setAdminSecret(parsed.adminSecret);
     if (parsed.roomCode) {
-      finishJoin(parsed.roomCode, parsed.adminSecret, parsed.templateId, true);
+      finishJoin(parsed.roomCode, parsed.adminSecret, parsed.templateId, undefined, true);
     }
   }, []);
 
@@ -33,11 +34,13 @@ function JoinInner() {
     roomCode: string,
     secret: string | undefined,
     templateId: string | undefined,
+    roomPassphrase: string | undefined,
     autoNavigate = false,
   ) => {
     const trimmed = roomCode.trim();
     if (!trimmed) return;
     const memberId = generateMemberId();
+    const pp = roomPassphrase?.trim();
 
     saveRoom({
       roomCode: trimmed,
@@ -45,6 +48,8 @@ function JoinInner() {
       memberId,
       adminSecret: secret?.trim(),
       isOwner: !!secret,
+      roomPassphrase: pp || undefined,
+      passphraseProtected: !!pp,
       lastOpenedAt: Date.now(),
     });
 
@@ -84,15 +89,28 @@ function JoinInner() {
             spellCheck={false}
           />
         </div>
+        <div className="field">
+          <label>Room passphrase (optional)</label>
+          <input
+            className="input"
+            type="password"
+            placeholder="Only if the room owner shared one separately"
+            value={passphrase}
+            onChange={(e) => setPassphrase(e.target.value)}
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+          />
+        </div>
         <button
           className="btn btn-primary btn-block"
           disabled={!code.trim()}
-          onClick={() => finishJoin(code, adminSecret || undefined, undefined, true)}
+          onClick={() => finishJoin(code, adminSecret || undefined, undefined, passphrase || undefined, true)}
         >
           Join room
         </button>
         <p className="muted" style={{ fontSize: 12 }}>
-          Member invite = room code only. Admin invite includes the admin secret (keep it safe).
+          Member invite = room code only. Passphrase (if any) is shared out-of-band — never in the link.
         </p>
       </div>
     </div>

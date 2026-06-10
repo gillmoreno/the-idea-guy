@@ -1,17 +1,12 @@
 // Room and member secrets. Uses crypto.getRandomValues — not Math.random.
 
-const B64URL =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
-
-/** 16 bytes → ~128 bits of entropy, URL-safe (22 chars). */
+/** 16 bytes → 128 bits of entropy, URL-safe base64url (22 chars). */
 export function generateSecret(bytes = 16): string {
   const buf = new Uint8Array(bytes);
   crypto.getRandomValues(buf);
-  let out = "";
-  for (let i = 0; i < buf.length; i++) {
-    out += B64URL[buf[i] & 63];
-  }
-  return out;
+  let bin = "";
+  for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]!);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 /** Room invite — share with members to sync shared data. */

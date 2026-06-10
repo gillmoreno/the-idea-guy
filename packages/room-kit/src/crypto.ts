@@ -4,8 +4,15 @@ const enc = new TextEncoder();
 
 const normalize = (s: string) => s.trim();
 
-async function sha256(input: string): Promise<Uint8Array> {
-  const digest = await crypto.subtle.digest("SHA-256", enc.encode(input) as BufferSource);
+/** Argon2id params — tuned for browser (fast enough on mobile, slow enough for passphrases). */
+const ARGON2_MEMORY = 65536; // 64 MiB
+const ARGON2_ITERATIONS = 2;
+const ARGON2_PARALLELISM = 1;
+const ARGON2_HASH_LEN = 32;
+
+async function sha256(input: string | Uint8Array): Promise<Uint8Array> {
+  const bytes = typeof input === "string" ? enc.encode(input) : input;
+  const digest = await crypto.subtle.digest("SHA-256", bytes as BufferSource);
   return new Uint8Array(digest);
 }
 
@@ -13,6 +20,28 @@ function toHex(bytes: Uint8Array): string {
   return Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
+}
+
+async function argon2Derive(
+  password: Uint8Array,
+  saltLabel: string,
+): Promise<Uint8Array> {
+  const { argon2id } = await import("hash-wasm");
+  const salt = await sha256(saltLabel);
+  const digest = await argon2id({
+    password,
+    salt,
+    parallelism: ARGON2_PARALLELISM,
+    iterations: ARGON2_ITERATIONS,
+    memorySize: ARGON2_MEMORY,
+    hashLength: ARGON2_HASH_LEN,
+    outputType: "binary",
+  });
+  return new Uint8Array(digest);
+}
+
+function passphrasePassword(roomCode: string, passphrase: string): Uint8Array {
+  return enc.encode(`${normalize(roomCode)}\0${normalize(passphrase)}`);
 }
 
 /** Symmetric key from arbitrary secret material (room code, admin secret, etc.). */
@@ -25,18 +54,58 @@ export async function deriveKey(material: string): Promise<CryptoKey> {
 }
 
 /**
+ * Derive AES key for a room channel.
+ * Uses Argon2id when a passphrase is set; legacy SHA-256 otherwise (existing rooms).
+ */
+export async function deriveChannelKey(
+  roomCode: string,
+  keyMaterial: string,
+  passphrase?: string,
+): Promise<CryptoKey> {
+  if (passphrase?.trim()) {
+    const raw = await argon2Derive(
+      passphrasePassword(roomCode, passphrase),
+      `lfk-argon-key:v1:${normalize(keyMaterial)}`,
+    );
+    return crypto.subtle.importKey("raw", raw as BufferSource, { name: "AES-GCM" }, false, [
+      "encrypt",
+      "decrypt",
+    ]);
+  }
+  return deriveKey(keyMaterial);
+}
+
+/**
  * Relay room id — unique per app + room + channel (public vs admin).
- * Members only connect to the `public` room; they never see admin ciphertext.
+ * Uses Argon2id when passphrase is set so ciphertext cannot be fetched without it.
  */
 export async function deriveRoom(
   roomCode: string,
   appId: string,
   scope: SyncScope,
+  passphrase?: string,
 ): Promise<string> {
+  if (passphrase?.trim()) {
+    const raw = await argon2Derive(
+      passphrasePassword(roomCode, passphrase),
+      `lfk-argon-room:v1:${normalize(appId)}:${scope}:${normalize(roomCode)}`,
+    );
+    return toHex(raw.slice(0, 16));
+  }
   const raw = await sha256(
     "lfk-room:" + normalize(appId) + ":" + scope + ":" + normalize(roomCode),
   );
   return toHex(raw.slice(0, 16));
+}
+
+/** @deprecated Use deriveChannelKey + deriveRoom with optional passphrase. */
+export async function deriveChannelRoom(
+  roomCode: string,
+  appId: string,
+  scope: SyncScope,
+  passphrase?: string,
+): Promise<string> {
+  return deriveRoom(roomCode, appId, scope, passphrase);
 }
 
 export type SyncScope = "public" | "admin";
@@ -49,6 +118,18 @@ export function adminKeyMaterial(roomCode: string, adminSecret: string): string 
 /** Public channel key: room code only. */
 export function publicKeyMaterial(roomCode: string): string {
   return `lfk-public:${normalize(roomCode)}`;
+}
+
+/** Derive a key from a PIN + salt (vault lock). */
+export async function derivePinKey(pin: string, saltHex: string): Promise<CryptoKey> {
+  const raw = await argon2Derive(
+    enc.encode(normalize(pin)),
+    `lfk-vault-pin:v1:${saltHex}`,
+  );
+  return crypto.subtle.importKey("raw", raw as BufferSource, { name: "AES-GCM" }, false, [
+    "encrypt",
+    "decrypt",
+  ]);
 }
 
 export async function encrypt(key: CryptoKey, plaintext: Uint8Array): Promise<Uint8Array> {
@@ -80,3 +161,10 @@ export async function decrypt(key: CryptoKey, data: Uint8Array): Promise<Uint8Ar
     return null;
   }
 }
+
+export function randomSaltHex(): string {
+  const buf = crypto.getRandomValues(new Uint8Array(16));
+  return toHex(buf);
+}
+
+export { toHex, sha256 };

@@ -1,13 +1,23 @@
 "use client";
 
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { parseRoomCodeFromLocation, stripInviteParamsFromUrl } from "@the-idea-guy/room-kit";
 import { RoomSessionProvider } from "@/shell/RoomSessionProvider";
 import { TemplateApp } from "@/templates/TemplateApp";
 
 function RoomInner() {
-  const params = useSearchParams();
-  const roomCode = params.get("c")?.trim() || null;
+  const [roomCode, setRoomCode] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return parseRoomCodeFromLocation(window.location.search, window.location.hash);
+  });
+
+  useEffect(() => {
+    const code = parseRoomCodeFromLocation(window.location.search, window.location.hash);
+    if (code) {
+      stripInviteParamsFromUrl();
+      setRoomCode(code);
+    }
+  }, []);
 
   if (!roomCode) {
     return (

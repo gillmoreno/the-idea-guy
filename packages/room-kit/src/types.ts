@@ -56,6 +56,10 @@ export interface VaultRoom {
   lastBackgroundSyncedAt?: number;
   /** Remote changes since lastSeenStateHash — cleared when the room is opened. */
   hasRemoteUpdates?: boolean;
+  /** Optional second secret — shared out-of-band, never in invite URLs. */
+  roomPassphrase?: string;
+  /** Room requires passphrase for key derivation (invite link alone is insufficient). */
+  passphraseProtected?: boolean;
 }
 
 export type ContactStatus = "pending_out" | "pending_in" | "mutual" | "blocked";
