@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fit Crew — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../backlog.html">Backlog &amp; priorities</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>Rooms platform</h2>
+      <a href="../rooms/architecture.html">Architecture</a>
+      <a href="../rooms/sync-and-local-first.html">Sync &amp; local-first</a>
+      <a href="../rooms/security.html">Security &amp; invites</a>
+      <a href="../rooms/personas-and-contacts.html">Personas &amp; contacts</a>
+      <a href="../rooms/schema-engine.html">Schema engine</a>
+      <a href="../rooms/themes-and-profile.html">Themes &amp; profile</a>
+      <h2>Templates</h2>
+      <a href="choreboard.html">ChoreBoard</a>
+      <a href="tripsplit.html">Trip Split</a>
+      <a href="bookclub.html">Book Club</a>
+      <a href="fitcrew.html" class="active">Fit Crew</a>
+      <a href="backlog-room.html">Backlog room</a>
+      <h2>Other apps</h2>
+      <a href="../secondbrain/overview.html">Second Brain</a>
+      <a href="../website/overview.html">Website</a>
+    </nav>
+    <main>
+      <article>
+        <h1>Fit Crew</h1>
+        <p class="lead">A friend workout league in a private room — log sessions, chase streaks, top the weekly board, and bet silly prizes.</p>
+
+        <h2>The problem</h2>
+        <p>Staying consistent with workouts is easier with friends, but the existing options are heavy: Strava-style apps are global social networks with accounts, feeds, and your activity data on someone else's servers. A small crew of friends just wants to see who showed up this week, keep streaks honest, and put a brunch bet on the line.</p>
+
+        <h2>The solution</h2>
+        <p>Fit Crew is a Rooms template — Strava-ish <em>for a small crew</em>, not a global network. One person creates a crew room and shares an invite code. There are no accounts; each friend joins on their phone and picks their member profile. Everything (logs, streaks, prizes) lives in a Yjs CRDT document on each device and syncs end-to-end encrypted through the dumb relay, which can never read it.</p>
+
+        <div class="card">
+          <strong>One-line pitch</strong>
+          Log workouts with friends, watch the weekly leaderboard and live streaks, and award prizes — no accounts, no server that can read your data.
+        </div>
+
+        <h2>Key flows</h2>
+        <ol>
+          <li><strong>Create</strong> — pick the Fit Crew template, name the crew, add at least two members.</li>
+          <li><strong>Share</strong> — send the room code (or use room invites); each friend joins and picks their own profile on their phone.</li>
+          <li><strong>Log a workout</strong> — choose an activity (run, gym, walk, yoga, sport, other), optionally add minutes, a note, and a proof photo.</li>
+          <li><strong>Check the board</strong> — the weekly leaderboard ranks members by workouts since Monday, with a live streak counter per member and a crown for #1.</li>
+          <li><strong>Prizes &amp; stakes</strong> — anyone can add a stake (title, emoji, description); anyone can award it to a member from a dropdown once it's earned.</li>
+        </ol>
+        <p>The main screen also shows a personal hero strip (current streak / workouts this week / best-ever streak) and a recent-activity feed of the last 12 logs with proof photos inline.</p>
+
+        <h2>Data model (<code>template.fitcrew.*</code>)</h2>
+        <p>All state lives in the public Yjs doc under the <code>fitcrew</code> template branch — there is no separate admin data beyond the standard room shell.</p>
+        <table>
+          <tr><th>Key</th><th>Shape</th><th>Holds</th></tr>
+          <tr><td><code>template.fitcrew.crew</code></td><td>Map</td><td><code>{ name, createdAt }</code> — crew settings; a set <code>name</code> marks the room as initialized.</td></tr>
+          <tr><td><code>template.fitcrew.members</code></td><td>Map&lt;id, Member&gt;</td><td><code>{ id, name, color, joinedAt }</code> — sorted by join time.</td></tr>
+          <tr><td><code>template.fitcrew.logs</code></td><td>Map&lt;id, WorkoutLog&gt;</td><td><code>{ memberId, activity, minutes?, note?, proofImage?, dayKey, loggedAt }</code>.</td></tr>
+          <tr><td><code>template.fitcrew.prizes</code></td><td>Map&lt;id, Prize&gt;</td><td><code>{ title, emoji, description?, createdById, createdAt, awardedToId? }</code>.</td></tr>
+        </table>
+        <p>Two fields do extra work: <code>dayKey</code> is the local calendar day (<code>YYYY-MM-DD</code>) stamped at log time and is the only input to streak math, and <code>proofImage</code> is a serialized image-brick JSON value (the photo is stored inside the doc, then the room is compacted after inline upload).</p>
+
+        <h2>Streaks and the weekly board</h2>
+        <p>Nothing is precomputed or stored — stats are derived client-side from the logs on every render (<code>lib/streaks.ts</code>):</p>
+        <ul>
+          <li><strong>Current streak</strong> — count of consecutive distinct <code>dayKey</code>s ending at today <em>or yesterday</em>. Anchoring on yesterday means you don't see your streak drop to zero before you've had a chance to work out today.</li>
+          <li><strong>Best streak</strong> — the longest consecutive-day run anywhere in history (never less than the current streak).</li>
+          <li><strong>Weekly count</strong> — raw number of logs since Monday 00:00 local time (Sunday counts as the end of the week, not the start).</li>
+        </ul>
+        <div class="card">
+          <strong>Leaderboard tie-breaking</strong>
+          The board sorts by workouts this week, then current streak, then best streak. The top row gets the crown.
+        </div>
+
+        <h2>Notable rules and edge cases</h2>
+        <ul>
+          <li><strong>Two logs in one day count once for streaks</strong> — streaks use <em>distinct</em> day keys, but each log still counts toward the weekly total.</li>
+          <li><strong>Local time everywhere</strong> — <code>dayKey</code> and the Monday week boundary use the device's local clock, so crews across time zones may see slightly different "weeks". Acceptable for a friend group.</li>
+          <li><strong>No edit/delete on logs</strong> — v1 is append-only; honesty is socially enforced (that's what proof photos are for).</li>
+          <li><strong>Prizes are open</strong> — anyone can create a prize and anyone can award (or re-award) it via the dropdown; there is no owner gate. The awarded member shows a trophy pill.</li>
+          <li><strong>Setup is owner-only</strong> — until the owner finishes setup, joiners see a "connecting" screen; after setup, joiners without a profile go through the profile picker.</li>
+          <li><strong>Invite slots become members</strong> — reserving invites pre-creates member entries (<code>slotId</code> becomes the member id), so the invited friend lands directly on their profile.</li>
+        </ul>
+
+        <h2>Building blocks exercised</h2>
+        <table>
+          <tr><th>Brick</th><th>Use in Fit Crew</th></tr>
+          <tr><td><code>EmojiPicker</code></td><td>Choosing a prize emoji.</td></tr>
+          <tr><td><code>ImageField</code></td><td>Optional workout proof photo.</td></tr>
+          <tr><td><code>compactRoom</code></td><td>Shrinking the doc after an inline image upload.</td></tr>
+        </table>
+
+        <h2>Key code paths</h2>
+        <ul>
+          <li><code>apps/rooms/web/src/templates/fitcrew/FitCrewApp.tsx</code> — entry point: loading → setup → profile picker → main view.</li>
+          <li><code>apps/rooms/web/src/templates/fitcrew/lib/store.ts</code> — <code>FitCrewStore</code>: all reads/writes on the Yjs branch, leaderboard sort, prize awarding.</li>
+          <li><code>apps/rooms/web/src/templates/fitcrew/lib/streaks.ts</code> — <code>localDayKey</code>, <code>startOfWeekMs</code>, <code>computeStreakStats</code>.</li>
+          <li><code>apps/rooms/web/src/templates/fitcrew/lib/types.ts</code> — <code>WorkoutLog</code>, <code>Prize</code>, <code>ACTIVITY_META</code>, member colors.</li>
+          <li><code>apps/rooms/web/src/templates/fitcrew/components/FitCrewView.tsx</code> — hero stats, weekly board, prizes, activity feed, invites.</li>
+          <li><code>apps/rooms/web/src/templates/fitcrew/components/LogWorkout.tsx</code> / <code>AddPrize.tsx</code> — the two write forms.</li>
+          <li><code>apps/rooms/web/src/templates/registry.ts</code> — registered as builtin id <code>fitcrew</code>.</li>
+        </ul>
+
+        <p class="footer">Sources: <code>docs_and_changelog/FIT_CREW.md, apps/rooms/web/src/templates/fitcrew/lib/store.ts, apps/rooms/web/src/templates/fitcrew/lib/streaks.ts, apps/rooms/web/src/templates/fitcrew/lib/types.ts, apps/rooms/web/src/templates/fitcrew/components/FitCrewView.tsx</code> · Last synced 2026-06-10</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

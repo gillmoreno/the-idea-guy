@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trip Split — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+<div class="layout">
+<nav>
+  <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+  <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+  <h2>Start</h2>
+  <a href="../index.html">Overview</a>
+  <a href="../backlog.html">Backlog &amp; priorities</a>
+  <a href="../how-docs-work.html">How these docs work</a>
+  <h2>Rooms platform</h2>
+  <a href="../rooms/architecture.html">Architecture</a>
+  <a href="../rooms/sync-and-local-first.html">Sync &amp; local-first</a>
+  <a href="../rooms/security.html">Security &amp; invites</a>
+  <a href="../rooms/personas-and-contacts.html">Personas &amp; contacts</a>
+  <a href="../rooms/schema-engine.html">Schema engine</a>
+  <a href="../rooms/themes-and-profile.html">Themes &amp; profile</a>
+  <h2>Templates</h2>
+  <a href="choreboard.html">ChoreBoard</a>
+  <a href="tripsplit.html" class="active">Trip Split</a>
+  <a href="bookclub.html">Book Club</a>
+  <a href="fitcrew.html">Fit Crew</a>
+  <a href="backlog-room.html">Backlog room</a>
+  <h2>Other apps</h2>
+  <a href="../secondbrain/overview.html">Second Brain</a>
+  <a href="../website/overview.html">Website</a>
+</nav>
+<main>
+<article>
+  <h1>Trip Split</h1>
+  <p class="lead">A Splitwise-style room for trips: friends log shared expenses, the app computes who's up and who's down, and suggests the minimum set of "X owes Y" transfers to settle.</p>
+
+  <h2>The problem</h2>
+  <p>On a group trip, one person pays for dinner, another covers the taxi, a third books the rental — and by day three nobody knows who owes whom. Mental math and group-chat IOUs don't scale, and the popular fix (Splitwise) means handing a third-party server a complete record of your group's spending.</p>
+
+  <h2>The solution</h2>
+  <p>Trip Split is the second Rooms template. A trip is a room: travelers join with the invite code, anyone logs expenses, and every device independently computes net balances and simplified settlement suggestions from the same synced expense list. Local-first like all Rooms — Yjs CRDT on each phone, end-to-end encrypted relay sync, no server-side expense database. Actual settling happens outside the app (Venmo, cash); Trip Split just tells you the minimum transfers.</p>
+
+  <h2>Key flows</h2>
+  <ul>
+    <li><strong>Create &amp; join</strong> — pick Trip Split, name the trip, add travelers (minimum 2). Share the room code; friends join from the Rooms home screen, and each device picks "who's on this device" via the profile picker. The creator holds the room's admin secret (shell-level role), but all v1 trip data is on the public channel — any traveler can add or delete expenses.</li>
+    <li><strong>Log an expense</strong> — description, amount, who paid, and which travelers it's split among (equal split). Date defaults to today; expenses list newest-first by date then creation time.</li>
+    <li><strong>Check balances</strong> — the Balances tab shows each traveler's net position (positive = others owe them) plus the simplified debt list, e.g. "Ana owes Ben $42.50".</li>
+  </ul>
+  <p>The UI is two tabs (<code>TripView</code>): <strong>Expenses</strong> and <strong>Balances</strong>, on the shared <code>AppTabBar</code>.</p>
+
+  <h2>Balance math</h2>
+  <p>Two pure functions in <code>lib/balances.ts</code> do all the work, recomputed from scratch on every render — there's no stored balance state to drift out of sync:</p>
+  <div class="card">
+    <strong>1. computeBalances</strong>
+    For each expense, the amount is split equally among <code>splitAmongIds</code>. Each non-payer's share decreases their net and increases the payer's net by the same amount. (If the payer is in the split, their own share simply cancels out — it's skipped.)
+  </div>
+  <div class="card">
+    <strong>2. simplifyDebts</strong>
+    Greedy matching, Splitwise-style: split members into creditors (net &gt; 0) and debtors (net &lt; 0), sort both largest-first, then repeatedly pay the smaller of the two heads until everyone is at zero. Produces a short, human-readable list of transfers rather than a web of pairwise IOUs.
+  </div>
+
+  <h2>Currency &amp; rounding</h2>
+  <ul>
+    <li>All amounts are stored as <strong>integer cents</strong> (<code>amountCents</code>) to avoid floating-point drift.</li>
+    <li>One currency per trip, chosen at setup (default USD); it's a display label, not converted.</li>
+    <li>Uneven divisions are handled deterministically: each splitter gets <code>floor(amount / n)</code>, and the leftover cents are distributed one each to the first splitters in the list — so a $10.00 three-way split charges 334 / 333 / 333 cents and always sums exactly to the total.</li>
+  </ul>
+
+  <h2>Data model (Yjs keys)</h2>
+  <p>Public branch only in v1 — there is no admin-only trip data.</p>
+  <table>
+    <tr><th>Key</th><th>Holds</th></tr>
+    <tr><td><code>template.tripsplit.trip</code></td><td><code>{ name, currency, createdAt }</code></td></tr>
+    <tr><td><code>template.tripsplit.travelers</code></td><td>Map of <code>{ id, name, color, joinedAt }</code></td></tr>
+    <tr><td><code>template.tripsplit.expenses</code></td><td>Map of <code>{ id, description, amountCents, paidById, splitAmongIds[], date, createdAt, createdById }</code></td></tr>
+  </table>
+
+  <h2>Notable rules &amp; edge cases</h2>
+  <ul>
+    <li>Balances ignore split ids that don't match a known traveler (defensive filter in <code>computeBalances</code>), so a removed or unknown id can't corrupt totals.</li>
+    <li>Expenses record <code>createdById</code> separately from <code>paidById</code> — anyone can log an expense on someone else's behalf.</li>
+    <li>Deleting an expense is the only mutation besides adding; balances simply recompute.</li>
+    <li>Intentional v1 limits: equal splits only (no shares/percentages), single currency, no recorded settlements (paying someone back doesn't zero the ledger — you'd delete or offset expenses), no categories/receipts, and travelers are added at setup only. Unequal splits, settlements, and mid-trip traveler add are the planned next steps.</li>
+  </ul>
+
+  <h2>Key code paths</h2>
+  <ul>
+    <li><code>apps/rooms/web/src/templates/tripsplit/lib/balances.ts</code> — <code>computeBalances</code> + <code>simplifyDebts</code> (all the money logic).</li>
+    <li><code>apps/rooms/web/src/templates/tripsplit/lib/store.ts</code> — <code>TripSplitStore</code>: Yjs CRUD for trip, travelers, expenses.</li>
+    <li><code>apps/rooms/web/src/templates/tripsplit/lib/types.ts</code> — data shapes (integer-cents convention documented here).</li>
+    <li><code>apps/rooms/web/src/templates/tripsplit/TripSplitApp.tsx</code> — shell: loading → setup → profile → main.</li>
+    <li><code>apps/rooms/web/src/templates/tripsplit/components/TripView.tsx</code>, <code>AddExpense.tsx</code>, <code>BalancesPanel.tsx</code>, <code>Setup.tsx</code> — tabs and forms.</li>
+  </ul>
+
+  <p class="footer">Sources: <code>docs_and_changelog/TRIP_SPLIT.md, apps/rooms/web/src/templates/tripsplit/</code> · Last synced 2026-06-10</p>
+</article>
+</main>
+</div>
+</body>
+</html>

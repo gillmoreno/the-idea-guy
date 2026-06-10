@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Security &amp; invites — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+<div class="layout">
+<nav>
+  <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+  <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+  <h2>Start</h2>
+  <a href="../index.html">Overview</a>
+  <a href="../backlog.html">Backlog &amp; priorities</a>
+  <a href="../how-docs-work.html">How these docs work</a>
+  <h2>Rooms platform</h2>
+  <a href="architecture.html">Architecture</a>
+  <a href="sync-and-local-first.html">Sync &amp; local-first</a>
+  <a href="security.html" class="active">Security &amp; invites</a>
+  <a href="personas-and-contacts.html">Personas &amp; contacts</a>
+  <a href="schema-engine.html">Schema engine</a>
+  <a href="themes-and-profile.html">Themes &amp; profile</a>
+  <h2>Templates</h2>
+  <a href="../templates/choreboard.html">ChoreBoard</a>
+  <a href="../templates/tripsplit.html">Trip Split</a>
+  <a href="../templates/bookclub.html">Book Club</a>
+  <a href="../templates/fitcrew.html">Fit Crew</a>
+  <a href="../templates/backlog-room.html">Backlog room</a>
+  <h2>Other apps</h2>
+  <a href="../secondbrain/overview.html">Second Brain</a>
+  <a href="../website/overview.html">Website</a>
+</nav>
+<main>
+<article>
+  <h1>Security &amp; invites</h1>
+  <p class="lead">Every Rooms security feature is built client-side: secrets live on your devices and in shared links, never on a server you have to trust.</p>
+
+  <h2>The big idea: no accounts, no server-side trust</h2>
+  <p>Rooms has no sign-up, no passwords stored on a server, and no user database. Access to a room is access to its <strong>room code</strong> — a random secret that doubles as the seed for the encryption key. If you have the code, you can decrypt the room; if you don't, the data is just ciphertext. This means the entire security model lives in three places: the links you share, the keys derived on your device, and the local vault that remembers them.</p>
+  <div class="card">
+    <strong>Why this way?</strong>
+    Accounts would mean a server that can reset passwords, read metadata, and become a target. By making the room code the only credential, the relay server stays "dumb" — it stores and forwards encrypted blobs it cannot read, and there is nothing valuable to steal from it.
+  </div>
+
+  <h2>Invite links: secrets in the URL hash</h2>
+  <p>Early versions put the room code in the query string (<code>?c=...</code>). That was a real leak: CDNs, server access logs, and link-preview bots all see and record query strings. Today, every invite parameter lives in the URL <strong>fragment</strong> (the part after <code>#</code>), which browsers never send over the network.</p>
+  <table>
+    <tr><th>Link</th><th>Format</th></tr>
+    <tr><td>Open a room</td><td><code>/room#c={roomCode}</code></td></tr>
+    <tr><td>Member join</td><td><code>/join#c={roomCode}</code></td></tr>
+    <tr><td>Admin join</td><td><code>/join#c={code}&amp;admin={secret}&amp;template={id}</code></td></tr>
+  </table>
+  <p>What users see: an invite link or QR code works exactly the same as before. Behind the scenes, the code never appears in any server or CDN log. Legacy query-string links still parse for backward compatibility, and after a link loads, the app scrubs invite parameters out of the address bar so secrets don't linger in browser history.</p>
+
+  <h2>Room code + admin secret: two tiers of access</h2>
+  <p>Each room has two encrypted channels with separate keys:</p>
+  <ul>
+    <li><strong>Public channel</strong> — key derived from the room code alone. Anyone with the member invite can read and write the shared data.</li>
+    <li><strong>Admin channel</strong> — key derived from the room code <em>plus</em> a separate admin secret. Admin-only data (settings, controls) physically cannot be decrypted on a member-only device, because the key material simply isn't there.</li>
+  </ul>
+  <p>This is permission-by-cryptography rather than permission-by-policy: there is no server check that could be bypassed, just math.</p>
+
+  <h2>Optional room passphrase (Argon2id)</h2>
+  <p>The room code alone means a leaked link grants full access. For sensitive rooms, the owner can set a <strong>passphrase at creation time</strong> and share it out-of-band (in person, over a call). With a passphrase set, key derivation gets meaningfully stronger:</p>
+  <table>
+    <tr><th></th><th>No passphrase (legacy)</th><th>With passphrase</th></tr>
+    <tr><td>AES key</td><td>SHA-256 of the room code material</td><td>Argon2id over room code + passphrase</td></tr>
+    <tr><td>Relay room id</td><td>SHA-256 of app + scope + code</td><td>Argon2id — the ciphertext can't even be <em>fetched</em> without the passphrase</td></tr>
+  </table>
+  <p>Argon2id is a deliberately slow, memory-hard hash (tuned at 64&nbsp;MiB / 2 iterations for browsers), which makes brute-forcing a passphrase impractical even if an attacker somehow obtains the room code. The passphrase is stored only in the device vault — never in invite URLs, never on the relay.</p>
+  <div class="card">
+    <strong>Tradeoff: no recovery.</strong>
+    Because no server ever sees the passphrase, there is no "forgot passphrase" flow. Lose it and the room is unreadable, period. The UI warns loudly about this at creation time. This is the same deliberate tradeoff made everywhere in Rooms: stronger privacy in exchange for personal responsibility for secrets.
+  </div>
+
+  <h2>End-to-end encryption: AES-256-GCM</h2>
+  <p>All room data that travels through the relay is encrypted on-device with AES-256-GCM (via the browser's Web Crypto API) before it leaves. Each message gets a fresh random 12-byte IV, and GCM's built-in authentication means tampered ciphertext simply fails to decrypt — there's no way to silently corrupt a room's data in transit.</p>
+
+  <h2>Device app lock (PIN)</h2>
+  <p>Even with everything encrypted in transit, room codes, admin secrets, and passphrases have to live <em>somewhere</em> on the device — the local vault in <code>localStorage</code>. Anyone who opens your browser could read it. The optional <strong>app lock</strong> closes this gap:</p>
+  <ul>
+    <li>You set a PIN (4+ digits) under Profile → App lock.</li>
+    <li>The entire vault is encrypted with a key derived via Argon2id(PIN, random salt) and the plaintext copy is deleted.</li>
+    <li>On open, the app asks for the PIN, verifies it against an encrypted verifier string, and decrypts the vault into memory for the session.</li>
+    <li>Any vault change while locked is re-encrypted before being saved.</li>
+  </ul>
+  <p>Again, no server and no recovery: forget the PIN and the local copy is gone — but room data isn't lost, because you can rejoin rooms with their invite codes and re-sync from the relay or other devices.</p>
+
+  <h2>What the relay can and cannot see</h2>
+  <table>
+    <tr><th>The relay sees</th><th>The relay cannot see</th></tr>
+    <tr><td>Opaque room ids (hashes — Argon2id-hardened when a passphrase is set)</td><td>Room codes, admin secrets, or passphrases</td></tr>
+    <tr><td>Encrypted blobs and their sizes</td><td>Any room content — names, tasks, messages, members</td></tr>
+    <tr><td>Connection timing and IP addresses (like any web server)</td><td>Who a persona is, or which human is behind a device</td></tr>
+  </table>
+  <p>The operator of the relay is in the same position as any outside attacker: ciphertext only. This "zero-access" property is structural, not a policy promise.</p>
+
+  <h2>Threat model in plain words</h2>
+  <div class="card">
+    <strong>Protected against:</strong>
+    a nosy or compromised relay/CDN operator (sees only ciphertext and opaque ids); leaked server or CDN logs (no secrets in query strings); someone casually opening your browser (app lock encrypts the vault at rest); brute-force on passphrases and PINs (Argon2id is slow and memory-hard); tampering with synced data in transit (GCM authentication).
+  </div>
+  <div class="card">
+    <strong>Not protected against:</strong>
+    someone you shared the link with re-sharing it — a leaked room code without a passphrase is full member access; a removed member who keeps the old code (no forward secrecy or key rotation yet, so the public channel stays readable to them); malware or full compromise of an unlocked device; losing all your secrets (no recovery service exists, by design). Server-side 2FA was intentionally skipped because it would require accounts.
+  </div>
+
+  <h2>Invites between contacts</h2>
+  <p>Beyond shareable links, rooms can be offered directly to <strong>mutual contacts</strong> (see <a href="personas-and-contacts.html">Personas &amp; contacts</a>). The organizer picks contacts during setup (optional — a soft reminder appears if skipped, and admins can invite later from room settings). Each invitee receives a <code>room_invite</code> message over their end-to-end encrypted pairwise inbox, containing the room code, name, template, and a pre-reserved member slot bound to their persona key. Accepting adds the room to their vault and drops them straight in — no profile-picking step, and the room code never travels in the clear.</p>
+
+  <h2>Key code paths</h2>
+  <ul>
+    <li><code>packages/room-kit/src/crypto.ts</code> — key derivation (SHA-256 / Argon2id), AES-256-GCM encrypt/decrypt, public vs admin key material, PIN key</li>
+    <li><code>packages/room-kit/src/links.ts</code> — hash-based invite links, legacy parsing, address-bar scrubbing</li>
+    <li><code>packages/room-kit/src/vaultLock.ts</code> — PIN lock enable/unlock/change, encrypted vault storage</li>
+    <li><code>packages/room-kit/src/pairInbox.ts</code> — pairwise encrypted inbox carrying <code>room_invite</code> messages</li>
+    <li><code>apps/rooms/web/src/shell/VaultLockProvider.tsx</code> — app-lock session handling</li>
+    <li><code>apps/rooms/web/src/shell/RoomInviteSettings.tsx</code> — post-setup admin invites</li>
+    <li><code>apps/rooms/web/src/lib/purgeRoomFromDevice.ts</code> — local-only room removal</li>
+  </ul>
+
+  <p class="footer">Sources: <code>docs_and_changelog/ROOM_SECURITY.md, docs_and_changelog/ROOM_INVITES.md, docs_and_changelog/ROOM_DEVICE_DATA.md, packages/room-kit/src/crypto.ts, packages/room-kit/src/vaultLock.ts, packages/room-kit/src/links.ts, packages/room-kit/src/pairInbox.ts</code> · Last synced 2026-06-10</p>
+</article>
+</main>
+</div>
+</body>
+</html>

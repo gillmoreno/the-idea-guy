@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Idea Guy website — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+<div class="layout">
+<nav>
+  <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+  <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+  <h2>Start</h2>
+  <a href="../index.html">Overview</a>
+  <a href="../backlog.html">Backlog &amp; priorities</a>
+  <a href="../how-docs-work.html">How these docs work</a>
+  <h2>Rooms platform</h2>
+  <a href="../rooms/architecture.html">Architecture</a>
+  <a href="../rooms/sync-and-local-first.html">Sync &amp; local-first</a>
+  <a href="../rooms/security.html">Security &amp; invites</a>
+  <a href="../rooms/personas-and-contacts.html">Personas &amp; contacts</a>
+  <a href="../rooms/schema-engine.html">Schema engine</a>
+  <a href="../rooms/themes-and-profile.html">Themes &amp; profile</a>
+  <h2>Templates</h2>
+  <a href="../templates/choreboard.html">ChoreBoard</a>
+  <a href="../templates/tripsplit.html">Trip Split</a>
+  <a href="../templates/bookclub.html">Book Club</a>
+  <a href="../templates/fitcrew.html">Fit Crew</a>
+  <a href="../templates/backlog-room.html">Backlog room</a>
+  <h2>Other apps</h2>
+  <a href="../secondbrain/overview.html">Second Brain</a>
+  <a href="overview.html" class="active">Website</a>
+</nav>
+<main>
+<article>
+
+<h1>The Idea Guy website</h1>
+<p class="lead">The personal brand site — a Next.js static front, a small Go content API, and nginx packaged as one Docker container — that turns the repo's experiments into public proof: shipped builds, an idea log, a stealable stack, and snippets.</p>
+
+<h2>What it is</h2>
+<p>"It's time for the idea." The site is the public face of the project: a personal brand and knowledge base exploring what one person can build with AI that's actually useful. It is a single-page Next.js 15 site (static export) whose sections are fed by a tiny Go API reading JSON files — no database, no CMS.</p>
+
+<div class="card">
+<p><strong>Status: not online yet.</strong> The monolith builds and runs locally (<code>docker compose up --build</code> or <code>make dev</code> for Next.js on <code>:3000</code> + Go on <code>:8081</code>), but it has not been deployed to a public host. The deployment plan is the one-container monolith below.</p>
+</div>
+
+<h2>Why one container</h2>
+<p>The whole site ships as a single Docker image via Docker Compose. nginx is the only entry point on port 80: <code>/</code> serves the static Next.js export, <code>/api/*</code> reverse-proxies to the Go process on internal <code>:8080</code>, and <code>/health</code> hits the Go health check. One artifact to build, one thing to deploy, no orchestration — the right size for a personal site, at the cost of redeploying the whole image to change content in production.</p>
+<p>In local dev the browser talks to Go directly (<code>NEXT_PUBLIC_API_BASE=http://localhost:8081</code> from <code>frontend/.env.development</code>); in Docker that variable is empty and requests use relative <code>/api/*</code> paths through nginx.</p>
+
+<h2>Positioning: the lens</h2>
+<p>The site's framing is a single repeatable four-step method rather than scattered principles:</p>
+<ol>
+  <li><strong>Spot the problem</strong> — something people actually struggle with today.</li>
+  <li><strong>Explain how it's solved now</strong> — map current solutions with data, charts, and context; show the gaps.</li>
+  <li><strong>Ship a meaningfully better approach</strong> — use modern AI as leverage to build something simpler, more beautiful, more useful, or more powerful.</li>
+  <li><strong>Teach the process publicly</strong> — share the problem, the research, the build, and the lessons.</li>
+</ol>
+<p>This lens lives in the hero copy and a <code>#method</code> section on the homepage, with the nav label "The lens." The planned next step is extending each Build entry with <code>problem</code> and <code>betterApproach</code> fields so every shipped item tells the full lens story (problem → how it's solved today → the better approach → lesson).</p>
+
+<h2>Sections users see</h2>
+<p>Header navigation: <strong>Shipped → Ideas → Stack → Snippets → About</strong>.</p>
+<div class="card">
+<table>
+  <tr><th>Section</th><th>Anchor</th><th>API</th><th>What it shows</th></tr>
+  <tr><td>Builds ("What I've Shipped")</td><td><code>#builds</code></td><td><code>GET /api/builds</code></td><td>Cards for real experiments: one-liner, stack tags, key learning, status badge (live / shipped / building / archived), links to demo, X thread, repo</td></tr>
+  <tr><td>Idea log</td><td><code>#ideas</code></td><td><code>GET /api/ideas</code></td><td>Public ideas with status (exploring / building / shipped / parked) and why each matters; shipped ideas link to their build or thread</td></tr>
+  <tr><td>Tools &amp; workflow</td><td><code>#tools</code></td><td><code>GET /api/tools</code></td><td>Three parts: grouped stack, numbered idea-to-public workflow, and copy-paste Cursor rules — built to be "high steal-value"</td></tr>
+  <tr><td>Snippets</td><td>—</td><td><code>GET /api/snippets</code></td><td>Knowledge snippets</td></tr>
+</table>
+</div>
+<p>The Builds section is the hero's primary CTA ("See what I've shipped") — the deliberate move from manifesto to proof.</p>
+
+<h2>The content API</h2>
+<p>Content lives as JSON files in <code>backend/data/</code> (<code>builds.json</code>, <code>ideas.json</code>, <code>tools.json</code>, <code>snippets.json</code>). The Go server loads them at request time and serves them at <code>/api/builds</code>, <code>/api/ideas</code>, <code>/api/tools</code>, <code>/api/snippets</code> — editing content means editing a JSON file and restarting the server (or rebuilding the image for production). <code>CONTENT_DIR</code> (default <code>data</code>, <code>/app/data</code> in Docker) and <code>API_ADDR</code> (default <code>:8080</code>) are the only knobs.</p>
+<p><strong>Tradeoff: dual-maintained content.</strong> Each frontend section also carries a hardcoded fallback (e.g. <code>fallbackBuilds</code> in <code>BuildsSection.tsx</code>) used when the API is unreachable, such as during <code>next dev</code> without the Go server. Adding a build means updating both the handler/JSON and the frontend fallback — simple, but two places to keep in sync. Adding a new content type is a five-step recipe: JSON file, loader in <code>store.go</code>, handler in <code>main.go</code>, (covered-by-catch-all) nginx location, and a frontend section.</p>
+
+<h2>Roadmap</h2>
+<ul>
+  <li><strong>Done:</strong> What I've Shipped, Idea log, Tools &amp; workflow.</li>
+  <li><strong>Next (from IDEA_LOG_AND_TOOLS.md):</strong> How-to guides ("coming soon" section), then an interactive <strong>Idea Validator</strong> demo backed by the API.</li>
+  <li><strong>Also planned (README):</strong> GitHub repos linked from snippets, idea log / blog posts, X/Twitter integration for sharing.</li>
+  <li><strong>Positioning follow-up:</strong> extend the Build model with <code>problem</code> / <code>betterApproach</code> so every build proves the lens.</li>
+  <li><strong>Deploy:</strong> put the one-container monolith on a public host.</li>
+</ul>
+
+<h2>Key code paths</h2>
+<div class="card">
+<ul>
+  <li><code>frontend/src/app/page.tsx</code> — homepage: hero, lens/<code>#method</code> section, section composition</li>
+  <li><code>frontend/src/components/BuildsSection.tsx</code>, <code>IdeaLogSection.tsx</code>, <code>ToolsSection.tsx</code>, <code>SnippetsSection.tsx</code> — sections with API fetch + fallbacks</li>
+  <li><code>frontend/src/components/SiteHeader.tsx</code>, <code>SiteFooter.tsx</code> — navigation and footer</li>
+  <li><code>backend/cmd/server/main.go</code> — Go API handlers (<code>handleBuilds</code>, <code>handleIdeas</code>, <code>handleTools</code>, snippets, health)</li>
+  <li><code>backend/internal/content/store.go</code> — JSON content loader and types</li>
+  <li><code>backend/data/</code> — builds.json, ideas.json, tools.json, snippets.json</li>
+  <li><code>nginx/</code>, <code>docker/</code>, <code>Dockerfile</code>, <code>docker-compose.yml</code> — monolith gateway and build</li>
+</ul>
+</div>
+
+<p class="footer">Sources: <code>README.md, docs_and_changelog/IDEA_LOG_AND_TOOLS.md, docs_and_changelog/BUILDS_SECTION.md, docs_and_changelog/CONTENT_API.md, docs_and_changelog/POSITIONING_LENS.md, frontend/src/, backend/</code> · Last synced 2026-06-10</p>
+
+</article>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Backlog room — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../backlog.html">Backlog &amp; priorities</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>Rooms platform</h2>
+      <a href="../rooms/architecture.html">Architecture</a>
+      <a href="../rooms/sync-and-local-first.html">Sync &amp; local-first</a>
+      <a href="../rooms/security.html">Security &amp; invites</a>
+      <a href="../rooms/personas-and-contacts.html">Personas &amp; contacts</a>
+      <a href="../rooms/schema-engine.html">Schema engine</a>
+      <a href="../rooms/themes-and-profile.html">Themes &amp; profile</a>
+      <h2>Templates</h2>
+      <a href="choreboard.html">ChoreBoard</a>
+      <a href="tripsplit.html">Trip Split</a>
+      <a href="bookclub.html">Book Club</a>
+      <a href="fitcrew.html">Fit Crew</a>
+      <a href="backlog-room.html" class="active">Backlog room</a>
+      <h2>Other apps</h2>
+      <a href="../secondbrain/overview.html">Second Brain</a>
+      <a href="../website/overview.html">Website</a>
+    </nav>
+    <main>
+      <article>
+        <h1>Backlog room</h1>
+        <p class="lead">A community idea pool for what to build next — friends propose and vote inside a room, and the owner decides what ships.</p>
+
+        <h2>The problem</h2>
+        <p>The Idea Guy ships small apps for friend groups, and the obvious question is "what should we build next?" Collecting that input normally means a feedback board product or a database with accounts — exactly the kind of central infrastructure the rest of the product avoids.</p>
+
+        <h2>The solution: a room, not a database</h2>
+        <p>The Backlog is itself a Rooms template, built on the same stack as ChoreBoard, Trip Split, and Book Club:</p>
+        <ul>
+          <li>A Yjs CRDT document on each participant's device.</li>
+          <li>End-to-end encrypted sync through the dumb relay — no central server ever reads the ideas.</li>
+          <li>An invite code gives "public-ish" participation without Postgres or accounts.</li>
+        </ul>
+        <div class="card">
+          <strong>Why this matters</strong>
+          The product story is local-first, and the Backlog proves it applies even to community input. Anyone with the room code can join, propose, and vote — and the only authority the owner keeps is the status of each idea.
+        </div>
+
+        <h2>Key flows</h2>
+        <ol>
+          <li><strong>Create</strong> — pick the Backlog template, name the idea pool, set up voters. Three starter ideas are seeded automatically (see below).</li>
+          <li><strong>Share</strong> — friends join with the room code and pick their voter profile (no accounts).</li>
+          <li><strong>Propose</strong> — anyone adds an idea: title, emoji, short pitch. New ideas start as <em>proposed</em>.</li>
+          <li><strong>Vote</strong> — one vote per person per idea, toggled on/off with a single button. The list re-sorts live by vote count, then recency, and the top idea earns a <code>#1</code> pill.</li>
+          <li><strong>Owner status control</strong> — only the room owner sees a status dropdown per idea and moves it through <em>proposed → building → shipped → parked</em>. Everyone else sees the status as a read-only pill on the idea card.</li>
+        </ol>
+
+        <h2>Seeded ideas (v1)</h2>
+        <p>On first setup, <code>initBoard</code> pre-loads three extension-template proposals (attributed to the organizer) so the room is never empty:</p>
+        <table>
+          <tr><th>Emoji</th><th>Idea</th><th>Pitch</th></tr>
+          <tr><td>🏠💡</td><td><strong>Roommate Ledger</strong></td><td>Ongoing household bills and shared costs — Trip Split for daily life, not just vacations.</td></tr>
+          <tr><td>🍿📺</td><td><strong>Watch Club</strong></td><td>Book Club for TV — current series, episode notes, queue the next binge.</td></tr>
+          <tr><td>🥗🍷</td><td><strong>Potluck</strong></td><td>Who brings what, dietary tags, and headcount for shared meals.</td></tr>
+        </table>
+        <p>Users can add more proposals anytime; seeds are ordinary ideas with no special treatment.</p>
+
+        <h2>Data model (<code>template.backlog.*</code>)</h2>
+        <table>
+          <tr><th>Key</th><th>Shape</th><th>Holds</th></tr>
+          <tr><td><code>template.backlog.board</code></td><td>Map</td><td><code>{ name, createdAt }</code> — a set <code>name</code> marks the room as initialized.</td></tr>
+          <tr><td><code>template.backlog.members</code></td><td>Map&lt;id, Member&gt;</td><td><code>{ id, name, color, joinedAt }</code> — the voters.</td></tr>
+          <tr><td><code>template.backlog.ideas</code></td><td>Map&lt;id, BacklogIdea&gt;</td><td><code>{ title, description, emoji, status, proposedById, proposedAt }</code>.</td></tr>
+          <tr><td><code>template.backlog.votes</code></td><td>Map&lt;ideaId, Map&lt;memberId, votedAt&gt;&gt;</td><td>One nested Y.Map per idea; a member's presence in it is their vote.</td></tr>
+        </table>
+        <p>Votes deliberately live in their own nested map rather than as a counter on the idea: presence/absence per member merges cleanly under CRDT semantics (two devices toggling concurrently can't double-count), and "one vote per person" falls out of the map key.</p>
+
+        <h2>Notable rules and edge cases</h2>
+        <ul>
+          <li><strong>Votes are a toggle</strong> — <code>toggleVote</code> deletes your entry if present, otherwise sets it with a timestamp. The vote count is just the nested map's size.</li>
+          <li><strong>Sorting is computed, not stored</strong> — <code>listIdeas</code> sorts by vote count descending, then <code>proposedAt</code> descending. Nothing persists ranking, so it is always consistent with the votes.</li>
+          <li><strong>Status is owner-only by UI, not cryptography</strong> — the dropdown renders only when <code>isOwner</code> is true. Suitable for a friendly idea pool; it is a convention, not an enforcement boundary.</li>
+          <li><strong>Setup gating</strong> — until the owner initializes the board, joiners see a "connecting" screen; afterwards, anyone without a member profile goes through the profile picker.</li>
+          <li><strong>Invite slots become voters</strong> — reserved invite slots are pre-created as members so invited friends land directly on their profile. Invites are optional (<code>minContacts: 0</code>); sharing the raw room code works the same.</li>
+          <li><strong>Single Yjs instance rule</strong> — the store imports <code>Y</code> from <code>@the-idea-guy/room-kit</code> (never <code>yjs</code> directly); a duplicate Yjs copy broke <code>instanceof Y.Map</code> checks (like the vote-bucket check) and corrupted CRDT state. Rooms created before that fix may need recreating.</li>
+        </ul>
+
+        <h2>Future direction</h2>
+        <ul>
+          <li>Link <em>shipped</em> ideas to a real template in the registry.</li>
+          <li>Optional read-only "showcase" room code on the marketing site — a public roadmap with no backend.</li>
+          <li>Import/export of the seed list.</li>
+        </ul>
+
+        <h2>Key code paths</h2>
+        <ul>
+          <li><code>apps/rooms/web/src/templates/backlog/BacklogApp.tsx</code> — entry point: loading → setup (owner) → profile picker → board view.</li>
+          <li><code>apps/rooms/web/src/templates/backlog/lib/store.ts</code> — <code>BacklogStore</code>: <code>initBoard</code> (incl. seeding), <code>toggleVote</code>, <code>listIdeas</code> sorting, <code>setStatus</code>.</li>
+          <li><code>apps/rooms/web/src/templates/backlog/lib/seed.ts</code> — <code>SEED_BACKLOG_IDEAS</code> (Roommate Ledger, Watch Club, Potluck).</li>
+          <li><code>apps/rooms/web/src/templates/backlog/lib/types.ts</code> — <code>IdeaStatus</code>, <code>BacklogIdea</code>, member colors.</li>
+          <li><code>apps/rooms/web/src/templates/backlog/components/BacklogView.tsx</code> — idea cards, vote button, owner status dropdown, invites and room-code share.</li>
+          <li><code>apps/rooms/web/src/templates/backlog/components/AddIdea.tsx</code> — the propose form.</li>
+        </ul>
+
+        <p class="footer">Sources: <code>docs_and_changelog/BACKLOG.md, apps/rooms/web/src/templates/backlog/lib/store.ts, apps/rooms/web/src/templates/backlog/lib/seed.ts, apps/rooms/web/src/templates/backlog/lib/types.ts, apps/rooms/web/src/templates/backlog/components/BacklogView.tsx</code> · Last synced 2026-06-10</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

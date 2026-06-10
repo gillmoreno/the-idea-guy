@@ -1,6 +1,6 @@
 # HTML business documentation system
 
-Browsable business-logic docs for humans (and agents), kept aligned with code via a manifest + git hooks + Cursor skill.
+Browsable business-logic docs for humans (and agents), kept aligned with code via a manifest + git hooks + agent skills (Claude Code `.claude/skills/html-docs`, legacy Cursor `.cursor/skills/html-docs`).
 
 ## Open locally
 
@@ -19,8 +19,8 @@ This installs `post-commit` and `pre-commit` hooks that run `scripts/check-html-
 ## When code changes
 
 1. Commit as usual.
-2. If related source files changed but HTML did not, the hook prints a warning and writes `.cursor/docs-sync-reminder.json`.
-3. In Cursor, ask: **"Sync HTML docs per the reminder"** (uses project skill **html-docs**, sync mode).
+2. If related source files changed but HTML did not, the hook prints a warning and writes `.cursor/docs-sync-reminder.json` (path shared by both skills).
+3. In Claude Code, say: **"sync the HTML docs"** (skill **html-docs**, sync mode). In Cursor: "Sync HTML docs per the reminder".
 
 Optional strict pre-commit (blocks if docs stale):
 
@@ -38,7 +38,11 @@ Ask the agent: **"Bootstrap HTML business docs"** (skill **html-docs**, bootstra
 |------|------|
 | `docs_and_changelog/html/` | HTML pages + `styles.css` |
 | `docs_and_changelog/html/doc-manifest.json` | Feature → sources → doc mapping |
-| `.cursor/skills/html-docs/SKILL.md` | Agent instructions (bootstrap + sync) |
+| `docs_and_changelog/html/backlog.html` | RICE-prioritized backlog (skill **rice-backlog**) |
+| `.claude/skills/html-docs/SKILL.md` | Claude Code skill (bootstrap + sync) |
+| `.claude/skills/rice-backlog/SKILL.md` | Claude Code skill (backlog scoring) |
+| `.claude/agents/doc-page-writer.md` | Subagent that writes one page per conventions |
+| `.cursor/skills/html-docs/SKILL.md` | Legacy Cursor skill (same manifest) |
 | `scripts/check-html-docs-sync.sh` | Staleness detector |
 | `.githooks/post-commit` | Runs check after commit |
 

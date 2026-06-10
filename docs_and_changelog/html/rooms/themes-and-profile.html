@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Themes, profile &amp; settings — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../backlog.html">Backlog &amp; priorities</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>Rooms platform</h2>
+      <a href="architecture.html">Architecture</a>
+      <a href="sync-and-local-first.html">Sync &amp; local-first</a>
+      <a href="security.html">Security &amp; invites</a>
+      <a href="personas-and-contacts.html">Personas &amp; contacts</a>
+      <a href="schema-engine.html">Schema engine</a>
+      <a href="themes-and-profile.html" class="active">Themes &amp; profile</a>
+      <h2>Templates</h2>
+      <a href="../templates/choreboard.html">ChoreBoard</a>
+      <a href="../templates/tripsplit.html">Trip Split</a>
+      <a href="../templates/bookclub.html">Book Club</a>
+      <a href="../templates/fitcrew.html">Fit Crew</a>
+      <a href="../templates/backlog-room.html">Backlog room</a>
+      <h2>Other apps</h2>
+      <a href="../secondbrain/overview.html">Second Brain</a>
+      <a href="../website/overview.html">Website</a>
+    </nav>
+    <main>
+      <article>
+        <h1>Themes, profile &amp; settings</h1>
+        <p class="lead">How Rooms gets a personal look — four CSS-only themes, a persona accent that recolors the whole app, and a small set of shared settings blocks every template reuses.</p>
+
+        <h2>The /profile page</h2>
+        <p>Profile (<code>/profile</code>) is the one place for everything about <em>you</em> on this device, separate from any individual room. It holds:</p>
+        <ul>
+          <li><strong>Persona</strong> — your name and avatar (the avatar brick: an emoji, default 😊, or a square-cropped photo rendered as a circle). The avatar shows in every room header via <code>TopbarPersona</code>, which also links back home.</li>
+          <li><strong>Accent color</strong> — a solid color or gradient picked with <code>AccentColorField</code> (curated swatch grid plus native color picker; 16 one-tap gradient presets).</li>
+          <li><strong>Look &amp; feel</strong> — the theme picker (<code>ThemeSwitcher</code>), which lives exclusively here since 2026-06-07.</li>
+          <li><strong>App lock</strong> — an optional device PIN (see settings below).</li>
+        </ul>
+        <p>The reasoning: room templates should stay focused on the room's job, while identity and appearance live in one predictable place that applies app-wide on the device.</p>
+
+        <h2>Four CSS-only themes</h2>
+        <p>Themes deliberately use no images — they're pure CSS variables and selectors keyed off <code>data-theme</code> on <code>&lt;html&gt;</code>, so switching is instant and snappy on mobile.</p>
+        <div class="card">
+          <table>
+            <tr><th>Theme</th><th>Vibe</th><th>Bottom-nav icon treatment</th></tr>
+            <tr><td><strong>Classic</strong></td><td>Clean, minimal baseline</td><td>Full-color emoji icons</td></tr>
+            <tr><td><strong>Paper</strong></td><td>Warm stone neutrals, flat cards</td><td>Softened inactive icons</td></tr>
+            <tr><td><strong>Signal</strong></td><td>Dot grid, cyan accent, sharp panels</td><td>Grayscale inactive, full color on active</td></tr>
+            <tr><td><strong>Glow</strong></td><td>Dark glass, gradient buttons</td><td>Floating glass bar with accent glow on the active tab</td></tr>
+          </table>
+        </div>
+        <p>The choice is stored in <code>localStorage</code> under <code>rooms.theme.v1</code> — per device, no server, no sync. <code>loadTheme()</code> falls back to Classic for unknown values and quietly migrates retired theme ids (the old "aurora" theme maps to Paper), so an old stored value never breaks the app. <code>saveTheme()</code> writes both localStorage and the <code>data-theme</code> attribute, so the change applies immediately to every screen, including the bottom navigation's icon style.</p>
+
+        <h2>Persona accent → <code>--primary</code></h2>
+        <p>Your accent color isn't decoration on the profile page — it becomes the app's primary color. <code>applyPersonaAccent()</code> sets inline CSS variables on <code>&lt;html&gt;</code> that override whatever the theme defines:</p>
+        <ul>
+          <li><code>--primary</code> — the accent itself (for gradients, the "from" color), driving buttons, links, and highlights.</li>
+          <li><code>--primary-dark</code> and <code>--primary-soft</code> — derived automatically with CSS <code>color-mix()</code> (78% toward black; 14% mixed into the surface color), so one picked color yields a coherent mini-palette with no manual tuning.</li>
+          <li><code>--primary-gradient</code> — set only when the accent is a gradient, removed otherwise.</li>
+        </ul>
+        <p>This is why theme and accent compose cleanly: themes define the canvas, the persona accent recolors the interactive layer on top of any of the four.</p>
+
+        <h2>Template icons</h2>
+        <p>Template emoji strings can contain two glyphs (Book Club is <code>📚☕</code>). Instead of rendering them as awkward stacked text, <code>TemplateIcon</code> draws an app-style tile: the primary glyph centered on a squircle tinted with <code>--template-accent</code>, and the secondary glyph in a small corner badge. Single-emoji templates get just the tile. <code>splitEmojiGlyphs()</code> parses the graphemes, so the registry's plain <code>emoji</code> field is unchanged. The tile appears on the Create picker, the home room list, loading screens, room invites, and the declarative room top bar; the older single-emoji "orb" survives only on record rows (ideas, prizes).</p>
+
+        <h2>Emoji picker</h2>
+        <p>One shared picker (<code>EmojiPicker</code> trigger + lazy-loaded <code>EmojiPickerPanel</code>) wraps <code>emoji-picker-react</code> v4: the full Unicode set with native system glyphs, search, category tabs, recents, and skin tones. It theme-follows Rooms — Classic and Paper get the light picker, Glow and Signal the dark one. Consumers today are declarative schema <code>emoji</code> fields and Backlog's "Propose an idea"; anything else that needs an emoji should use the same component rather than a text input.</p>
+
+        <h2>Settings architecture</h2>
+        <p>Templates don't write their own settings UIs; they compose shared shell blocks, so behavior and copy stay consistent across rooms:</p>
+        <div class="card">
+          <table>
+            <tr><th>Block</th><th>What it does</th></tr>
+            <tr><td><code>RelaySettings</code></td><td>Custom sync relay URL + reconnect. Hidden by default; the operator enables it at build time with <code>NEXT_PUBLIC_RELAY_SETTINGS_ENABLED</code> (the static export bakes flags in). Aimed at self-hosters and power users.</td></tr>
+            <tr><td><code>RoomInviteSettings</code></td><td>Invite mutual contacts into a room. Renders only for users with admin access (admin secret unlocked). Each template passes <code>onReserveMembers</code> so reserved member slots land in its own CRDT before inbox invites go out.</td></tr>
+            <tr><td><code>RoomCodeShare</code></td><td>Room code plus join QR.</td></tr>
+            <tr><td><code>AppLockSettings</code></td><td>Optional device PIN. Room codes and passphrases sit in localStorage, readable to anyone who opens the browser — the PIN encrypts the entire device vault, with the key derived via Argon2id. No server, no recovery: forget the PIN and you rejoin rooms from invite codes.</td></tr>
+            <tr><td><code>TopbarPersona</code> / <code>AppTabBar</code></td><td>Standard header with persona avatar, and pill tabs under the topbar (Trip Split, Book Club).</td></tr>
+          </table>
+        </div>
+
+        <h2>In progress: bottom navigation</h2>
+        <p>A new shared <code>BottomNav</code> component (uncommitted as of this writing, alongside related edits to <code>globals.css</code>, the theme definitions, and ChoreBoard's parent view) adds a fixed bottom tab bar for templates with 3–5 primary sections — ChoreBoard's parent view is the first adopter. Each <code>BottomNavItem</code> takes an emoji icon, label, active state, and an optional numeric badge (e.g. pending approvals). Its icon treatment is theme-driven, which is why the theme taglines now mention nav style: each of the four themes styles inactive/active tabs differently, with tap and active micro-animations defined under <code>.bottom-nav</code> in <code>globals.css</code>. Expect details to shift until this lands.</p>
+
+        <h2>Tradeoffs</h2>
+        <ul>
+          <li><strong>Per-device, not synced</strong> — theme and accent live in localStorage, so your phone and laptop can look different. Simple and private, at the cost of "set it twice".</li>
+          <li><strong>CSS-only themes</strong> — no imagery keeps switching instant and the bundle small, but limits how far apart the themes can feel; the bottom-nav icon treatments are how each theme earns a distinct personality cheaply.</li>
+          <li><strong>App lock has no recovery</strong> — consistent with the no-server philosophy: convenience traded away so a forgotten PIN can't be a support backdoor.</li>
+        </ul>
+
+        <h2>Key code paths</h2>
+        <ul>
+          <li><code>apps/rooms/web/src/app/profile/page.tsx</code></li>
+          <li><code>apps/rooms/web/src/shell/themes.ts</code></li>
+          <li><code>apps/rooms/web/src/shell/ThemeSwitcher.tsx</code></li>
+          <li><code>apps/rooms/web/src/lib/applyPersonaAccent.ts</code></li>
+          <li><code>apps/rooms/web/src/lib/accentValue.ts</code></li>
+          <li><code>apps/rooms/web/src/components/TemplateIcon.tsx</code></li>
+          <li><code>apps/rooms/web/src/components/EmojiPicker.tsx</code></li>
+          <li><code>apps/rooms/web/src/shell/RelaySettings.tsx</code></li>
+          <li><code>apps/rooms/web/src/shell/RoomInviteSettings.tsx</code></li>
+          <li><code>apps/rooms/web/src/shell/AppLockSettings.tsx</code></li>
+          <li><code>apps/rooms/web/src/shell/TopbarPersona.tsx</code></li>
+          <li><code>apps/rooms/web/src/shell/BottomNav.tsx</code> (in progress)</li>
+        </ul>
+
+        <p class="footer">Sources: <code>docs_and_changelog/ROOMS_SETTINGS.md, docs_and_changelog/BACKLOG.md, docs_and_changelog/TEMPLATE_ICON.md, docs_and_changelog/EMOJI_PICKER.md, docs_and_changelog/ROOM_SECURITY.md, apps/rooms/web/src/shell/themes.ts, apps/rooms/web/src/shell/ThemeSwitcher.tsx, apps/rooms/web/src/lib/applyPersonaAccent.ts, apps/rooms/web/src/shell/BottomNav.tsx, apps/rooms/web/src/app/profile/page.tsx</code> · Last synced 2026-06-10</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

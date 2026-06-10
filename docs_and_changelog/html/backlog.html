@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Backlog &amp; priorities — The Idea Guy</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+      <h2>Start</h2>
+      <a href="index.html">Overview</a>
+      <a href="backlog.html" class="active">Backlog &amp; priorities</a>
+      <a href="how-docs-work.html">How these docs work</a>
+      <h2>Rooms platform</h2>
+      <a href="rooms/architecture.html">Architecture</a>
+      <a href="rooms/sync-and-local-first.html">Sync &amp; local-first</a>
+      <a href="rooms/security.html">Security &amp; invites</a>
+      <a href="rooms/personas-and-contacts.html">Personas &amp; contacts</a>
+      <a href="rooms/schema-engine.html">Schema engine</a>
+      <a href="rooms/themes-and-profile.html">Themes &amp; profile</a>
+      <h2>Templates</h2>
+      <a href="templates/choreboard.html">ChoreBoard</a>
+      <a href="templates/tripsplit.html">Trip Split</a>
+      <a href="templates/bookclub.html">Book Club</a>
+      <a href="templates/fitcrew.html">Fit Crew</a>
+      <a href="templates/backlog-room.html">Backlog room</a>
+      <h2>Other apps</h2>
+      <a href="secondbrain/overview.html">Second Brain</a>
+      <a href="website/overview.html">Website</a>
+    </nav>
+    <main>
+      <article>
+        <h1>Backlog &amp; priorities (RICE)</h1>
+        <p class="lead">
+          Every candidate feature across the three projects, scored with RICE so the next thing
+          to build is always the top row.
+        </p>
+
+        <h2>The method</h2>
+        <p><strong>RICE</strong> = <strong>R</strong>each × <strong>I</strong>mpact × <strong>C</strong>onfidence ÷ <strong>E</strong>ffort.</p>
+        <table>
+          <tr><th>Factor</th><th>Question</th><th>Scale used here</th></tr>
+          <tr><td><strong>Reach</strong></td><td>How many people does this touch in the first ~3 months?</td><td>1–10 (relative — nothing is live yet, so these are share-of-audience guesses)</td></tr>
+          <tr><td><strong>Impact</strong></td><td>How much does it move the needle per person?</td><td>0.25 minimal · 0.5 low · 1 medium · 2 high · 3 massive</td></tr>
+          <tr><td><strong>Confidence</strong></td><td>How sure are we about the R and I estimates?</td><td>0.5 low · 0.7 medium · 0.8 good · 0.9–1.0 high</td></tr>
+          <tr><td><strong>Effort</strong></td><td>How much work?</td><td>Person-weeks (solo, AI-assisted)</td></tr>
+        </table>
+        <div class="card">
+          <strong>House rule: ship beats features</strong>
+          None of the three apps is online. Until something is deployed, every feature's real-world
+          Reach is zero — so deploys dominate the Now tier even where a feature has a juicier score on paper.
+        </div>
+
+        <h2>Scored backlog</h2>
+        <table>
+          <tr>
+            <th>#</th><th>Idea</th><th>Project</th>
+            <th>R</th><th>I</th><th>C</th><th>E (wk)</th><th>Score</th><th>Tier</th>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td><strong>Ship the website</strong> — deploy the marketing site (static export already builds; Cloudflare Pages playbook exists)</td>
+            <td>Website</td>
+            <td class="num">8</td><td class="num">2</td><td class="num">0.9</td><td class="num">1</td>
+            <td class="num"><span class="score">14.4</span></td>
+            <td><span class="tier tier-now">Now</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>Onboarding &amp; PWA install polish</strong> — install prompt, first-run hints, empty states in Rooms</td>
+            <td>Rooms</td>
+            <td class="num">8</td><td class="num">1</td><td class="num">0.8</td><td class="num">0.5</td>
+            <td class="num"><span class="score">12.8</span></td>
+            <td><span class="tier tier-now">Now</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>Ship Rooms</strong> — PWA on a real domain + relay in production (compaction on, backups), invite links that work outside localhost</td>
+            <td>Rooms</td>
+            <td class="num">9</td><td class="num">3</td><td class="num">0.8</td><td class="num">2</td>
+            <td class="num"><span class="score">10.8</span></td>
+            <td><span class="tier tier-now">Now</span></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>Roommate Ledger template</strong> — household bills, the most-voted seeded idea; reuses Trip Split math</td>
+            <td>Rooms</td>
+            <td class="num">6</td><td class="num">2</td><td class="num">0.8</td><td class="num">2</td>
+            <td class="num"><span class="score">4.8</span></td>
+            <td><span class="tier tier-next">Next</span></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>Public showcase Backlog room</strong> — read-only room code on the website; public roadmap people can vote on</td>
+            <td>Website + Rooms</td>
+            <td class="num">6</td><td class="num">1</td><td class="num">0.7</td><td class="num">1</td>
+            <td class="num"><span class="score">4.2</span></td>
+            <td><span class="tier tier-next">Next</span></td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><strong>How-to guides section</strong> — teaching content on the website (roadmap item #4 in IDEA_LOG_AND_TOOLS)</td>
+            <td>Website</td>
+            <td class="num">5</td><td class="num">1</td><td class="num">0.8</td><td class="num">1</td>
+            <td class="num"><span class="score">4.0</span></td>
+            <td><span class="tier tier-next">Next</span></td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><strong>Ship Second Brain</strong> — deploy as a personal instance + public demo vault (relay :4501 hosted)</td>
+            <td>Second Brain</td>
+            <td class="num">5</td><td class="num">2</td><td class="num">0.7</td><td class="num">2</td>
+            <td class="num"><span class="score">3.5</span></td>
+            <td><span class="tier tier-next">Next</span></td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td><strong>Push notifications</strong> — replace pull-only "Updated" badges with real push for room changes (service worker + push relay endpoint)</td>
+            <td>Rooms</td>
+            <td class="num">7</td><td class="num">2</td><td class="num">0.5</td><td class="num">3</td>
+            <td class="num"><span class="score">2.3</span></td>
+            <td><span class="tier tier-later">Later</span></td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td><strong>Potluck template</strong> — who brings what, dietary tags, headcount (seeded idea)</td>
+            <td>Rooms</td>
+            <td class="num">4</td><td class="num">1</td><td class="num">0.8</td><td class="num">1.5</td>
+            <td class="num"><span class="score">2.1</span></td>
+            <td><span class="tier tier-later">Later</span></td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td><strong>Watch Club template</strong> — Book Club for TV: series, episodes, queue (seeded idea)</td>
+            <td>Rooms</td>
+            <td class="num">5</td><td class="num">1</td><td class="num">0.8</td><td class="num">2</td>
+            <td class="num"><span class="score">2.0</span></td>
+            <td><span class="tier tier-later">Later</span></td>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td><strong>Idea Validator demo</strong> — interactive widget on the website (roadmap item #5 in IDEA_LOG_AND_TOOLS)</td>
+            <td>Website</td>
+            <td class="num">4</td><td class="num">1</td><td class="num">0.6</td><td class="num">2</td>
+            <td class="num"><span class="score">1.2</span></td>
+            <td><span class="tier tier-later">Later</span></td>
+          </tr>
+        </table>
+
+        <h2>Reading the tiers</h2>
+        <ul>
+          <li><span class="tier tier-now">Now</span> — get all three deploys-adjacent items done; the website first because it is the cheapest win and gives Rooms a landing page.</li>
+          <li><span class="tier tier-next">Next</span> — compounding items once something is live: the showcase room turns the website into a feedback loop for Rooms.</li>
+          <li><span class="tier tier-later">Later</span> — real, but either expensive (push), low-confidence, or waiting on demand signal (template votes in the live Backlog room).</li>
+        </ul>
+
+        <div class="card">
+          <strong>These scores are estimates — argue with them</strong>
+          R and I are pre-launch guesses. When the public Backlog room is live, real vote counts
+          should replace gut-feel Reach for template ideas.
+        </div>
+
+        <h2>How to update this page</h2>
+        <ul>
+          <li>In Claude Code, say <em>"add &lt;idea&gt; to the backlog"</em> or <em>"rescore the backlog"</em> — the <code>rice-backlog</code> skill (<code>.claude/skills/rice-backlog/</code>) scores it, re-sorts the table, and re-tiers.</li>
+          <li>Rows stay sorted by Score, descending. Tiers: roughly Score ≥ 8 → Now, 3–8 → Next, &lt; 3 → Later, with the "ship beats features" rule as an override.</li>
+          <li>When an idea ships, remove its row and note it in the matching doc page instead.</li>
+        </ul>
+
+        <p class="footer">Sources: <code>docs_and_changelog/BACKLOG.md, docs_and_changelog/IDEA_LOG_AND_TOOLS.md, docs_and_changelog/business-plan-and-next-steps.html</code> · Last synced 2026-06-10</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rooms architecture — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../backlog.html">Backlog &amp; priorities</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>Rooms platform</h2>
+      <a href="architecture.html" class="active">Architecture</a>
+      <a href="sync-and-local-first.html">Sync &amp; local-first</a>
+      <a href="security.html">Security &amp; invites</a>
+      <a href="personas-and-contacts.html">Personas &amp; contacts</a>
+      <a href="schema-engine.html">Schema engine</a>
+      <a href="themes-and-profile.html">Themes &amp; profile</a>
+      <h2>Templates</h2>
+      <a href="../templates/choreboard.html">ChoreBoard</a>
+      <a href="../templates/tripsplit.html">Trip Split</a>
+      <a href="../templates/bookclub.html">Book Club</a>
+      <a href="../templates/fitcrew.html">Fit Crew</a>
+      <a href="../templates/backlog-room.html">Backlog room</a>
+      <h2>Other apps</h2>
+      <a href="../secondbrain/overview.html">Second Brain</a>
+      <a href="../website/overview.html">Website</a>
+    </nav>
+    <main>
+      <article>
+        <h1>Rooms architecture</h1>
+        <p class="lead">Rooms is a meta-app: one installable PWA shell, one dumb relay server, and many "room templates" (ChoreBoard, Trip Split, Book Club, …) that plug in as views and data schemas — not as separate deploys.</p>
+
+        <h2>The meta-app idea</h2>
+        <p>Every small group app Gil wants to ship — family chores, trip expenses, a book club tracker — has the same skeleton: people join a shared space with an invite code, everyone's devices keep the data locally, and changes sync between devices through a server that can't read anything. Instead of building and deploying that skeleton over and over, Rooms builds it <em>once</em> and turns each product idea into a <strong>template</strong>.</p>
+        <p>The result is a "mini-app factory": shipping Trip Split after ChoreBoard meant adding a folder and a registry entry, not a new Cloudflare project, subdomain, relay, or PWA. Marketing can still say "ChoreBoard on Rooms" — the template is the brand, the platform is the plumbing.</p>
+
+        <div class="card">
+          <p><strong>One-sentence version:</strong> one PWA at <code>rooms.the-idea-guy.com</code>, one Go relay at <code>relay.the-idea-guy.com</code>, and N templates living inside them. A "room" is an invite code plus local device storage — never a subdomain, never a server-side account.</p>
+        </div>
+
+        <h2>The four layers</h2>
+        <div class="card">
+          <table>
+            <thead><tr><th>Layer</th><th>What it is</th><th>Lives in</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Shell</strong></td><td>Cross-template chrome: home (my rooms), create, join, room session, profile, themes, contacts, invites, settings. Owns the device vault, room metadata, and member roles.</td><td><code>apps/rooms/web/src/shell/</code> + routes in <code>src/app/</code></td></tr>
+              <tr><td><strong>Templates</strong></td><td>The actual products. Each template is a React UI plus a slice of CRDT data under its own <code>template.*</code> keys. Mounted by the shell once the room's synced metadata says which template it is.</td><td><code>apps/rooms/web/src/templates/</code></td></tr>
+              <tr><td><strong>Room kit</strong></td><td>Shared TypeScript library with no UI: crypto (key derivation, encrypt/decrypt), the <code>LocalFirstDoc</code> sync engine, relay protocol framing, invite links, the device vault, personas/contacts, and the single shared Yjs instance.</td><td><code>packages/room-kit/</code></td></tr>
+              <tr><td><strong>Relay</strong></td><td>A small Go WebSocket server that broadcasts and replays opaque encrypted blobs per room. No accounts, no auth, no app logic, no ability to decrypt. Shared by every template forever.</td><td><code>relay/</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The contract between layers is deliberately strict. The <strong>shell owns</strong> the <code>meta</code> and <code>members</code> maps in each room's CRDT document; <strong>templates own only</strong> their <code>template.*</code> namespace. The <strong>relay knows nothing</strong> — not even which template a room runs, because <code>templateId</code> lives inside the encrypted document and the relay room id is just a hash. This keeps every layer replaceable and keeps a misbehaving template from corrupting shell data.</p>
+
+        <h2>The template registry</h2>
+        <p>A template is a plugin, not a deploy. The registry at <code>apps/rooms/web/src/templates/registry.ts</code> lists each built-in template with an id, name, description, dual-emoji icon, and accent color — currently <strong>ChoreBoard, Trip Split, Book Club, Backlog, and Fit Crew</strong>. The create flow reads this list, the room page mounts the matching UI when the synced document reveals its <code>templateId</code>, and each template seeds its own <code>template.*</code> CRDT branches.</p>
+        <p>Two kinds of template exist:</p>
+        <ul>
+          <li><strong>Built-in</strong> — compiled React code under <code>src/templates/{id}/</code>. Some are flagged <code>ownerOnly</code> (e.g. Backlog) and hidden from public create unless allowlisted.</li>
+          <li><strong>Declarative</strong> — JSON-schema-defined rooms rendered by the schema engine, so a new room type can ship without writing React at all.</li>
+        </ul>
+        <p>Adding a built-in template takes three steps: add a registry entry, create <code>src/templates/{id}/</code> with UI and Yjs data under <code>template.{id}.*</code>, and mount it from the room page when the metadata matches.</p>
+
+        <h2>Why one app instead of many</h2>
+        <ul>
+          <li><strong>Zero marginal infrastructure per product.</strong> No new subdomain, Pages project, relay namespace, or deploy script per template. One static export serves them all; the relay isolates tenants by hashing the room id.</li>
+          <li><strong>Shared hard parts.</strong> E2E encryption, offline persistence, invite/role security, themes, personas, and background sync are solved once in the shell and room kit. ChoreBoard's two-channel public/admin security model became the precedent every template inherits.</li>
+          <li><strong>One install for users.</strong> A family that uses ChoreBoard already has Trip Split installed — every new template is instantly available on the same home screen, with the same vault and contacts.</li>
+          <li><strong>Cheap to run, low liability.</strong> Static files on a CDN cost pennies; the relay only moves blobs it cannot read. There is no per-app server holding user data (see the Sync &amp; local-first page).</li>
+        </ul>
+        <p>The main tradeoff: all templates ship in one bundle (mitigated by lazy loading) and share one version — a breaking shell change touches every product at once. For a solo builder, that coupling is mostly a feature: one codebase to reason about, one thing to deploy.</p>
+
+        <h2>URLs, ports &amp; dev commands</h2>
+        <p>All routes are client-side in a Next.js 15 static export: <code>/</code> (my rooms), <code>/create</code>, <code>/join?code=…</code>, <code>/room?c={roomCode}</code>, plus <code>/profile</code>, <code>/contacts</code>, and <code>/schema</code>. Secrets like admin keys ride in the URL <em>hash</em> so they never reach CDN logs.</p>
+        <div class="card">
+          <table>
+            <thead><tr><th>Thing</th><th>Where</th></tr></thead>
+            <tbody>
+              <tr><td>Web app (dev)</td><td><code>http://localhost:3300</code></td></tr>
+              <tr><td>Relay (dev)</td><td><code>ws://localhost:4500</code></td></tr>
+              <tr><td>Web app (prod)</td><td><code>https://rooms.the-idea-guy.com</code> (Cloudflare Pages)</td></tr>
+              <tr><td>Relay (prod)</td><td><code>wss://relay.the-idea-guy.com</code> (shared, tunneled)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>From <code>apps/rooms</code>: <code>make dev</code> starts relay + Next dev with hot reload (<code>make dev-stop</code> kills ports 4500/3300; <code>make dev-relay</code> / <code>make dev-web</code> for two terminals). <code>make preview-all</code> does a production-like static build served locally, with build-time env pointing at the local relay. Deploys: <code>./scripts/deploy-rooms.sh</code> for the frontend, <code>./scripts/deploy-relay.sh</code> for the relay.</p>
+
+        <h2>Key code paths</h2>
+        <ul>
+          <li><code>apps/rooms/web/src/shell/</code> — shell chrome, vault, room session, sync orchestration</li>
+          <li><code>apps/rooms/web/src/templates/registry.ts</code> — template registry (the one place new templates register)</li>
+          <li><code>apps/rooms/web/src/templates/</code> — template plugins (choreboard, tripsplit, bookclub, backlog, fitcrew)</li>
+          <li><code>apps/rooms/web/src/app/</code> — client-side routes (home, create, join, room, profile)</li>
+          <li><code>packages/room-kit/src/</code> — shared crypto, sync, vault, invites, relay protocol, types</li>
+          <li><code>relay/main.go</code> — the dumb Go relay</li>
+          <li><code>apps/rooms/Makefile</code> — dev/preview commands</li>
+        </ul>
+
+        <p class="footer">Sources: <code>docs_and_changelog/ROOM_KIT.md, docs_and_changelog/ROOM_KIT_ARCHITECTURE.md, docs_and_changelog/ARCHITECTURE.md, apps/rooms/web/package.json, apps/rooms/web/src/templates/registry.ts, packages/room-kit/src/types.ts</code> · Last synced 2026-06-10</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

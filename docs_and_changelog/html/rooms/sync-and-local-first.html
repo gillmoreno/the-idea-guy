@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sync &amp; local-first — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../backlog.html">Backlog &amp; priorities</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>Rooms platform</h2>
+      <a href="architecture.html">Architecture</a>
+      <a href="sync-and-local-first.html" class="active">Sync &amp; local-first</a>
+      <a href="security.html">Security &amp; invites</a>
+      <a href="personas-and-contacts.html">Personas &amp; contacts</a>
+      <a href="schema-engine.html">Schema engine</a>
+      <a href="themes-and-profile.html">Themes &amp; profile</a>
+      <h2>Templates</h2>
+      <a href="../templates/choreboard.html">ChoreBoard</a>
+      <a href="../templates/tripsplit.html">Trip Split</a>
+      <a href="../templates/bookclub.html">Book Club</a>
+      <a href="../templates/fitcrew.html">Fit Crew</a>
+      <a href="../templates/backlog-room.html">Backlog room</a>
+      <h2>Other apps</h2>
+      <a href="../secondbrain/overview.html">Second Brain</a>
+      <a href="../website/overview.html">Website</a>
+    </nav>
+    <main>
+      <article>
+        <h1>Sync &amp; local-first</h1>
+        <p class="lead">Room data lives on users' devices as encrypted Yjs CRDT documents; a dumb relay only ferries opaque blobs between peers, so the app works offline, syncs conflict-free, and nobody — including the operator — can read anyone's data.</p>
+
+        <h2>The core principle</h2>
+        <p><strong>Serving the app is not the same as storing the data.</strong> Serving static HTML/JS from a CDN is nearly free and scales to thousands of users. Storing user data is the expensive, liability-heavy part — so Rooms simply doesn't centralize it. The app is distributed centrally and cheaply; the data stays owned by the people who created it. That's the local-first philosophy, and it doubles as the business model: free hosted tier costs near nothing to run, self-hosting the relay is possible (one small Go binary / Docker image), and a paid managed-sync tier is the only place infra money changes hands.</p>
+
+        <h2>On the device: Yjs + IndexedDB</h2>
+        <p>Each room channel (public, and admin for owners/admins) is one <strong>Yjs CRDT document</strong>. CRDTs merge concurrent edits from multiple devices without conflicts — two kids checking off chores offline at the same time both win. The document is persisted locally with <strong>y-indexeddb</strong>, so the room opens instantly from disk before any network is involved, and keeps working with no connection at all.</p>
+        <p>The room kit wraps all of this in <code>LocalFirstDoc</code>: it derives the encryption key and relay room id from the invite code, loads the local IndexedDB copy, connects to the relay, and merges whatever arrives. Local edits are encrypted and pushed as they happen; the relay connection can drop and reconnect freely because IndexedDB is always the source of truth on-device.</p>
+
+        <div class="card">
+          <p><strong>Offline behavior:</strong> everything works. Reads come from IndexedDB; writes are applied to the local doc immediately and queued by Yjs semantics — the next time any relay connection succeeds, the merged state flows both ways. There is no "offline mode" to enter; offline is the default assumption.</p>
+        </div>
+
+        <h2>End-to-end encryption: the relay is blind</h2>
+        <p>Every Yjs update is encrypted on the client before it leaves the device, with an AES key derived from the room's invite code (plus an optional Argon2id-strengthened passphrase for extra-sensitive rooms). The relay room id is itself a SHA-256 hash, so the relay never even sees the invite code. What the relay stores and broadcasts is pure ciphertext — it has no accounts, no auth, no idea which template a room runs, and no ability to read anything. Access control <em>is</em> the key: if you have the invite code, you can decrypt; if you don't, the blobs are noise. Public and admin channels use different key material, which is how member/admin separation is enforced cryptographically rather than by server logic.</p>
+
+        <h2>The relay protocol, briefly</h2>
+        <p>The relay (<code>relay/main.go</code>) is a Go WebSocket server with one real endpoint: <code>/sync?room={hash}</code>. Per room it keeps a replay log of encrypted frames in memory (optionally on disk) and broadcasts new frames to connected peers. The wire protocol is a single unencrypted prefix byte on each frame:</p>
+        <div class="card">
+          <table>
+            <thead><tr><th>Frame</th><th>Direction</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>0x00</code> update</td><td>client → relay</td><td>Incremental encrypted edit — append to the room log and broadcast</td></tr>
+              <tr><td><code>0x01</code> checkpoint</td><td>client → relay</td><td>Full merged encrypted state — <em>replace</em> the room log with this one frame</td></tr>
+              <tr><td><code>0xFE</code> sync end</td><td>relay → client</td><td>Backlog replay finished; client may now checkpoint</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The relay does zero parsing of ciphertext — a one-byte tag check, a 32&nbsp;MiB size ceiling, append/broadcast, done. That minimalism is a performance principle as much as a privacy one.</p>
+
+        <h2>Log compaction</h2>
+        <p>An append-only log would grow forever, and every reconnect used to push a full snapshot. The fix is <strong>client-driven checkpoint compaction</strong>: after a client replays the backlog and merges it with its local IndexedDB state, it sends one checkpoint frame containing the whole merged document, and the relay collapses the room's log to that single entry. Incremental updates append again until the next checkpoint. Tradeoffs accepted by design: compaction only happens when a device connects (no background GC on the server), and the relay retains no edit history beyond the latest checkpoint — which is a privacy feature. Clients also have a local <code>compactStorage</code> path to prune CRDT history after large payloads like inline images.</p>
+
+        <h2>Background sync &amp; "Updated" badges — no push</h2>
+        <p>Rooms deliberately has no push notifications and no lock-screen alerts. Instead, when the <strong>home screen</strong> is open and the app is foregrounded, the shell quietly pulls each vault room: <code>pullRoomPublicChannel</code> opens a short-lived WebSocket, replays the relay backlog into local IndexedDB, sends a checkpoint (helping compaction for free), and disconnects. Up to three rooms sync in parallel; triggers are home mount and the app returning to foreground.</p>
+        <p>Each room's state is fingerprinted with a SHA-256 hash of its Yjs state vector. If the hash differs from the baseline saved when the user last opened that room, the room card shows an <strong>Updated</strong> badge. Opening the room clears the badge and refreshes the baseline. Only the public channel is checked in v1 — admin-only edits don't badge. The whole feature is a user toggle (<em>Profile → Check rooms on home</em>, default on).</p>
+        <div class="card">
+          <p><strong>Why this design:</strong> push notifications require a server that knows who you are and what changed — exactly the infrastructure (and liability) this architecture avoids. "Awareness while you're already in the app" gets most of the value at zero infra cost and zero privacy cost. Accepted limits: no semantic summaries ("2 chores done"), no sync while the app is closed, staleness up to one foreground return.</p>
+        </div>
+
+        <h2>The Yjs single-instance rule</h2>
+        <p>One sharp edge worth knowing: app code and template stores must import <code>Y</code> from <code>@the-idea-guy/room-kit</code> — never from <code>yjs</code> directly. Webpack is aliased so exactly one copy of Yjs is bundled for the app and the room kit. When two copies snuck in, <code>instanceof Y.Map</code> checks failed across bundle boundaries and actually corrupted CRDT state (upstream issue yjs#438); some rooms created before the fix had to be recreated. The kit also exports a duck-typed <code>isYMap</code> helper that stays safe even across duplicate bundles.</p>
+
+        <h2>What local-first buys, in one table</h2>
+        <div class="card">
+          <table>
+            <thead><tr><th>Property</th><th>How</th></tr></thead>
+            <tbody>
+              <tr><td>Works offline</td><td>App + data live on the device (PWA + IndexedDB)</td></tr>
+              <tr><td>Cross-device sync</td><td>CRDT updates merge conflict-free via the relay</td></tr>
+              <tr><td>User owns the data</td><td>Data never leaves devices in readable form</td></tr>
+              <tr><td>Operator can't read it</td><td>E2E encryption with a key derived from the invite code</td></tr>
+              <tr><td>Cheap to operate</td><td>Relay only passes/stores opaque blobs; logs self-compact</td></tr>
+              <tr><td>Self-hostable</td><td>Relay is one small Go binary / Docker image</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Key code paths</h2>
+        <ul>
+          <li><code>packages/room-kit/src/sync.ts</code> — <code>LocalFirstDoc</code>: IndexedDB + encrypted relay sync + reconnect + checkpoints</li>
+          <li><code>packages/room-kit/src/pullRoomSync.ts</code> — one-shot background pull (connect, replay, checkpoint, close)</li>
+          <li><code>packages/room-kit/src/docStateHash.ts</code> — state-vector fingerprint behind the Updated badge</li>
+          <li><code>packages/room-kit/src/relayProtocol.ts</code> — frame tags (update / checkpoint / sync-end)</li>
+          <li><code>packages/room-kit/src/crypto.ts</code> — key + relay-room derivation, encrypt/decrypt</li>
+          <li><code>packages/room-kit/src/yjs.ts</code> — the single shared Yjs instance</li>
+          <li><code>apps/rooms/web/src/shell/backgroundRoomSyncManager.ts</code> and <code>useBackgroundRoomSync.ts</code> — home-screen sync orchestration</li>
+          <li><code>relay/main.go</code> — the relay hub, replay log, and compaction</li>
+        </ul>
+
+        <p class="footer">Sources: <code>docs_and_changelog/LOCAL_FIRST_KIT.md, docs_and_changelog/BACKGROUND_ROOM_SYNC.md, docs_and_changelog/RELAY_LOG_COMPACTION.md, docs_and_changelog/BACKLOG.md, packages/room-kit/src/sync.ts, packages/room-kit/src/pullRoomSync.ts, relay/main.go</code> · Last synced 2026-06-10</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Personas &amp; contacts — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+<div class="layout">
+<nav>
+  <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+  <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+  <h2>Start</h2>
+  <a href="../index.html">Overview</a>
+  <a href="../backlog.html">Backlog &amp; priorities</a>
+  <a href="../how-docs-work.html">How these docs work</a>
+  <h2>Rooms platform</h2>
+  <a href="architecture.html">Architecture</a>
+  <a href="sync-and-local-first.html">Sync &amp; local-first</a>
+  <a href="security.html">Security &amp; invites</a>
+  <a href="personas-and-contacts.html" class="active">Personas &amp; contacts</a>
+  <a href="schema-engine.html">Schema engine</a>
+  <a href="themes-and-profile.html">Themes &amp; profile</a>
+  <h2>Templates</h2>
+  <a href="../templates/choreboard.html">ChoreBoard</a>
+  <a href="../templates/tripsplit.html">Trip Split</a>
+  <a href="../templates/bookclub.html">Book Club</a>
+  <a href="../templates/fitcrew.html">Fit Crew</a>
+  <a href="../templates/backlog-room.html">Backlog room</a>
+  <h2>Other apps</h2>
+  <a href="../secondbrain/overview.html">Second Brain</a>
+  <a href="../website/overview.html">Website</a>
+</nav>
+<main>
+<article>
+  <h1>Personas &amp; contacts</h1>
+  <p class="lead">Your identity in Rooms is a keypair generated on your device — no account, no email, no server that knows who you are.</p>
+
+  <h2>Why there are no server accounts</h2>
+  <p>Most apps put identity on a server: you sign up, the server stores your profile, and every social action goes through it. Rooms deliberately skips all of that. On your first visit, the app generates an <strong>X25519 keypair</strong> in the browser and stores it in the device vault. Your public key <em>is</em> your identity; the private key never leaves the device, and the relay never sees it.</p>
+  <div class="card">
+    <strong>Why this way?</strong>
+    No accounts means no password database to breach, no email harvesting, no identity the operator could be compelled to hand over — and friction-free onboarding (you have an identity before you've typed anything). The cost: identity is per-device, and if you lose the device without a backup path, you lose that persona. That tradeoff is consistent with the rest of the platform's "your device holds the secrets" philosophy.
+  </div>
+
+  <h2>The persona</h2>
+  <p>A persona is the keypair plus the things friends actually see:</p>
+  <ul>
+    <li><strong>Display name</strong> — whatever you type, no uniqueness, no verification.</li>
+    <li><strong>Avatar</strong> — an emoji (default 😊) or a photo, chosen at onboarding or later in <code>/profile</code>.</li>
+    <li><strong>Accent color</strong> — a solid color or gradient that personalizes the whole app.</li>
+  </ul>
+  <p>Everything lives in the local vault. The Profile page (<code>/profile</code>) also hosts Look &amp; feel themes; tapping your avatar in any room header takes you home.</p>
+
+  <h2>Contact codes and QR exchange</h2>
+  <p>To connect with someone, you share a <strong>contact card</strong>: a small string starting with <code>rooms1.</code> that base64url-encodes your public key, optional name, and optional emoji avatar. It travels as a QR code or pasted text.</p>
+  <ul>
+    <li><strong>Scan</strong> — the contacts page has a camera scanner that reads the other person's QR.</li>
+    <li><strong>Paste</strong> — paste the code (or even a URL containing it) into the add-contact field; the input normalizer extracts a valid card from query params, URL hashes, or surrounding text.</li>
+  </ul>
+  <p>Photo avatars are intentionally <em>not</em> in the QR (they'd make it unscannable) — they sync later over the encrypted inbox during the friend request/accept exchange.</p>
+
+  <h2>Contact states: one list, not two</h2>
+  <p>Instead of separate allow/deny lists, every contact has a single status:</p>
+  <table>
+    <tr><th>Status</th><th>Meaning</th></tr>
+    <tr><td><code>pending_out</code></td><td>You added them; waiting for their accept (or a mutual add)</td></tr>
+    <tr><td><code>pending_in</code></td><td>They want to connect — you must tap Accept</td></tr>
+    <tr><td><code>mutual</code></td><td>Both sides agreed; messages and room invites can flow</td></tr>
+    <tr><td><code>blocked</code></td><td>You blocked them — nothing sent or received, unilateral</td></tr>
+  </table>
+  <p><code>mutual</code> is the allow list, <code>blocked</code> is the deny list. Room invites and messages only flow between mutual contacts — the same gate everywhere. Friend requests from blocked senders are simply ignored, and either party can block unilaterally at any time.</p>
+  <div class="card">
+    <strong>Typical flow:</strong>
+    Gil shares his QR with Matt → Matt scans it (status <code>pending_out</code>, an encrypted friend request goes out) → Gil sees an incoming request and taps Accept (or both added each other, which auto-resolves to mutual) → status becomes <code>mutual</code> on both sides → only now can either send the other a room invite.
+  </div>
+
+  <h2>How two devices talk without a server account</h2>
+  <p>Contacts communicate over a <strong>pairwise encrypted inbox</strong> on the same dumb relay used for room sync. Both peers independently derive the same relay room id from their sorted public keys, and the same AES key from an X25519 ECDH shared secret — so neither needs the server to introduce them. Friend requests, accepts, and room invites are just encrypted blobs; the relay sees ciphertext between two opaque ids and learns nothing about who is talking.</p>
+
+  <h2>Avatars: emoji or photo, always a circle</h2>
+  <p>Avatars are a reusable "brick" with two kinds: an emoji, or an image (inline WebP or https URL). Photo uploads are force-cropped square, capped at 256px and roughly 80&nbsp;KB as WebP — tighter than the general image brick, because avatars get embedded in synced messages and need to stay small. The UI always renders them as a circle.</p>
+
+  <h2>Accent colors that follow you into rooms</h2>
+  <p>Your accent is stored as a CSS background value — a solid hex or a gradient (40 curated solid swatches plus a native picker, and 16 one-tap gradient presets). When the app loads your persona, it applies the accent as the global <code>--primary</code> CSS variable (with derived dark and soft variants), so buttons, links, and highlights across every room reflect <em>your</em> color regardless of the room's template or theme. Your avatar's initials background and photo ring use the same value, so gradients render consistently.</p>
+  <p>The point: rooms are shared spaces, but your identity stays yours — name, face, and color travel with the persona, not with any individual room.</p>
+
+  <h2>Key code paths</h2>
+  <ul>
+    <li><code>packages/room-kit/src/persona.ts</code> — X25519 keypair generation, contact card encode/parse</li>
+    <li><code>packages/room-kit/src/contacts.ts</code> — contact status rules (mutual gate, request/block logic)</li>
+    <li><code>packages/room-kit/src/pairInbox.ts</code> — pairwise relay room + ECDH key derivation, inbox messages</li>
+    <li><code>packages/room-kit/src/vault.ts</code> — device vault (persona + contacts storage)</li>
+    <li><code>apps/rooms/web/src/shell/PersonaContactsProvider.tsx</code> — UI state + inbox sync, send/accept</li>
+    <li><code>apps/rooms/web/src/app/contacts/page.tsx</code> — contacts page with QR scanner</li>
+    <li><code>apps/rooms/web/src/lib/contactCode.ts</code> — normalizes pasted text/QR/URLs into a contact card</li>
+    <li><code>apps/rooms/web/src/lib/avatarValue.ts</code>, <code>apps/rooms/web/src/components/AvatarField.tsx</code>, <code>apps/rooms/web/src/components/PersonaAvatar.tsx</code> — avatar brick</li>
+    <li><code>apps/rooms/web/src/lib/accentValue.ts</code>, <code>apps/rooms/web/src/lib/applyPersonaAccent.ts</code>, <code>apps/rooms/web/src/components/AccentColorField.tsx</code> — accent brick</li>
+  </ul>
+
+  <p class="footer">Sources: <code>docs_and_changelog/PERSONA_CONTACTS.md, docs_and_changelog/AVATAR_BRICK.md, docs_and_changelog/ACCENT_COLOR_BRICK.md, packages/room-kit/src/persona.ts, packages/room-kit/src/contacts.ts, packages/room-kit/src/pairInbox.ts, apps/rooms/web/src/lib/contactCode.ts, apps/rooms/web/src/lib/applyPersonaAccent.ts</code> · Last synced 2026-06-10</p>
+</article>
+</main>
+</div>
+</body>
+</html>

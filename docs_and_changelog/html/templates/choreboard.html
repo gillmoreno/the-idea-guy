@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChoreBoard — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+<div class="layout">
+<nav>
+  <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+  <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+  <h2>Start</h2>
+  <a href="../index.html">Overview</a>
+  <a href="../backlog.html">Backlog &amp; priorities</a>
+  <a href="../how-docs-work.html">How these docs work</a>
+  <h2>Rooms platform</h2>
+  <a href="../rooms/architecture.html">Architecture</a>
+  <a href="../rooms/sync-and-local-first.html">Sync &amp; local-first</a>
+  <a href="../rooms/security.html">Security &amp; invites</a>
+  <a href="../rooms/personas-and-contacts.html">Personas &amp; contacts</a>
+  <a href="../rooms/schema-engine.html">Schema engine</a>
+  <a href="../rooms/themes-and-profile.html">Themes &amp; profile</a>
+  <h2>Templates</h2>
+  <a href="choreboard.html" class="active">ChoreBoard</a>
+  <a href="tripsplit.html">Trip Split</a>
+  <a href="bookclub.html">Book Club</a>
+  <a href="fitcrew.html">Fit Crew</a>
+  <a href="backlog-room.html">Backlog room</a>
+  <h2>Other apps</h2>
+  <a href="../secondbrain/overview.html">Second Brain</a>
+  <a href="../website/overview.html">Website</a>
+</nav>
+<main>
+<article>
+  <h1>ChoreBoard</h1>
+  <p class="lead">A family chores-and-allowance room: parents publish a priced chore catalog, kids mark chores done, and approvals roll up into a running balance that gets settled on payday.</p>
+
+  <h2>The problem</h2>
+  <p>Turning kids' chores into a fair, motivating allowance is messy. There's rarely a shared, agreed list of which chores exist or what each is worth, kids can't watch their money grow, parents lose track of what was actually done during the week, and payday becomes guesswork ("how much do I owe you?"). Paper charts get erased, spreadsheets are joyless, and existing allowance apps are cloud SaaS that hold your family's data with subscriptions and ads.</p>
+
+  <h2>The solution</h2>
+  <p>ChoreBoard is the first Rooms template: a local-first, phone-friendly chore + allowance tracker where the family owns its data. Everything lives in Yjs CRDT documents on the family's own devices, synced end-to-end encrypted through the thin relay — no server ever sees chores, balances, or kids' names.</p>
+  <div class="card">
+    <strong>A note on history</strong>
+    A standalone predecessor of this app exists at <code>choreboard/</code> in the repo root (its own web app and relay). It was folded into the Rooms platform; this page documents the current template at <code>apps/rooms/web/src/templates/choreboard/</code>, which is the live version.
+  </div>
+
+  <h2>Roles: parent vs kid</h2>
+  <p>Every member has a role of <code>parent</code> or <code>kid</code>. The split is enforced with cryptography, not just UI — there are three secrets, each unlocking a different power:</p>
+  <table>
+    <tr><th>Secret</th><th>Who has it</th><th>What it unlocks</th></tr>
+    <tr><td>Family code</td><td>Every device</td><td>Public channel: members, published catalog, completions, kid proposals</td></tr>
+    <tr><td>Parent secret</td><td>Parents only</td><td>Admin channel: edit chores, payments, settings, permission policy</td></tr>
+    <tr><td>Member device link</td><td>One kid profile per device</td><td>HMAC-signs that kid's completions so a parent can verify them</td></tr>
+  </table>
+  <p>The room has two encrypted relay channels. Kids holding only the family code never receive the admin channel's ciphertext, so they mathematically cannot edit chore prices, approve completions, or run payday — even with a modified client. All secrets are 16 random bytes (~128 bits), not guessable word phrases.</p>
+
+  <h2>Permissions (what kids see)</h2>
+  <p>On top of the crypto split, parents configure per-kid <em>visibility</em> permissions (Settings → Kid permissions): see chore rewards, see own/pending/week balance, see sibling balances (off by default), mark done, suggest chores, and see activity history. Defaults plus per-kid overrides are authored on the admin doc and published to the public doc so kid devices can apply them. Honest limit: these are UI policy on data already in the public sync doc — a modified client could ignore them. Member device-link signatures are the stronger accountability tool.</p>
+
+  <h2>Key flows</h2>
+  <ul>
+    <li><strong>Setup</strong> — a parent creates the room, names the family, sets currency (default USD) and payday weekday, adds members, and gets a seeded chore catalog to edit.</li>
+    <li><strong>Kid daily use</strong> (<code>KidView</code>) — pick your profile, see the published catalog with difficulty and cadence pills, tap ✓ to mark done. A "balance hero" shows money so far, pending approval, and this-week earnings (each gated by permissions). Kids can also suggest new chores.</li>
+    <li><strong>Approvals</strong> — chores with <code>requiresApproval</code> create <code>pending</code> completions; ones without are auto-approved (<code>approvedBy: "auto"</code>). Parents approve or reject from the Approvals tab, which also surfaces kid chore proposals — approving a proposal promotes it into the catalog (with approval required and the default 1/day limit).</li>
+    <li><strong>Penalties</strong> — parents can add a negative completion (e.g. "left bike outside, −$1"); it nets against the balance automatically.</li>
+    <li><strong>Payday</strong> — the parent dashboard shows what's owed per kid (sum of approved completions). "Mark paid" snapshots them into a <code>Payment</code> record on the admin doc and flips those completions to <code>paid</code>.</li>
+  </ul>
+  <div class="card">
+    <strong>Parent dashboard layout (current, includes uncommitted changes)</strong>
+    <code>ParentView.tsx</code> currently uses the new shared <code>BottomNav</code> with five tabs: Home (total owed + per-kid cards), Approvals (with a pending + proposals badge), Chores (catalog CRUD via <code>ChoreForm</code>), Payday, and Settings (members, permissions, invites/QR, relay, reset history). This BottomNav switch is an uncommitted work-in-progress change.
+  </div>
+
+  <h2>Chore frequency limits</h2>
+  <p>Kids can only mark a chore done a limited number of times per period, which stops repeat-tapping from stacking rewards. Parents set "Times per day/week/month/ever" (or no limit) on each chore; new chores default to once per day. Rules that matter:</p>
+  <ul>
+    <li>Enforced in store logic (<code>ChoreStore.markDone</code> checks <code>canMarkChoreDone</code>), not just by disabling the button.</li>
+    <li>Pending completions count toward the limit; rejected ones free the slot; paid ones still count within the current period.</li>
+    <li>Legacy chores without a <code>frequencyLimit</code> fall back to the old <code>recurrence</code> field (daily → 1/day, weekly → 1/week, one-off → once ever, anytime → unlimited).</li>
+    <li>Kid UI disables the ✓ and shows status like "Done for today" or "2/3 this week".</li>
+  </ul>
+
+  <h2>Payments &amp; ledger</h2>
+  <p>The ledger is the completions map: every entry has a signed <code>amount</code> snapshot (positive reward, negative penalty) captured at completion time, so later price edits never rewrite history. Derived numbers are pure reductions over it: <em>balance</em> = sum of approved amounts, <em>pending</em> = sum of pending, <em>this week</em> = approved + paid within the Monday–Sunday range. <code>markPaid</code> creates a <code>Payment</code> with the period (earliest approved date → today), total, and the exact completion ids it covers — an audit trail on the parent-only admin doc. Parents can also "Reset history" (wipes completions, proposals, payments; keeps chores, members, settings).</p>
+
+  <h2>Data model (Yjs keys)</h2>
+  <p>Everything lives under the <code>template.choreboard</code> branch, split across the two docs:</p>
+  <table>
+    <tr><th>Doc</th><th>Key</th><th>Holds</th></tr>
+    <tr><td rowspan="6">Public</td><td><code>family</code></td><td>name, currency, payday weekday, createdAt</td></tr>
+    <tr><td><code>members</code></td><td>Map of <code>{ id, name, role, color, pin?, createdAt }</code></td></tr>
+    <tr><td><code>catalog</code></td><td>Published copy of active chores (read-only for kids)</td></tr>
+    <tr><td><code>completions</code></td><td>Map of <code>{ choreId?, label, memberId, date, kind, status, amount, sig?, approvedBy? }</code></td></tr>
+    <tr><td><code>proposals</code></td><td>Kid chore suggestions awaiting a parent</td></tr>
+    <tr><td><code>permDefaults</code> / <code>permOverrides</code></td><td>Published kid-permission policy</td></tr>
+    <tr><td rowspan="3">Admin</td><td><code>chores</code></td><td>Source-of-truth catalog incl. archived; edits republished to public <code>catalog</code></td></tr>
+    <tr><td><code>payments</code></td><td>Payday records <code>{ memberId, periodStart, periodEnd, total, completionIds[], paidDate }</code></td></tr>
+    <tr><td><code>family</code>, <code>permDefaults</code>, <code>permOverrides</code></td><td>Admin-authored mirrors, published to public on change</td></tr>
+  </table>
+  <p>The publish step (<code>publishCatalog</code> / <code>publishPermissions</code>) copies admin truth onto the public doc whenever a parent edits — that's how kids see only active chores and current policy without ever holding the admin key.</p>
+
+  <h2>Notable rules &amp; edge cases</h2>
+  <ul>
+    <li>One price per chore, the same for every kid (locked v1 decision).</li>
+    <li>Unsigned completions are allowed (e.g. a shared tablet without a device link); parents see a verification warning instead of a hard block. Penalties and auto-approved completions skip signature checks.</li>
+    <li>Chores are archived, not deleted, so historical completions keep their labels (the label is also snapshotted on each completion).</li>
+    <li>Week math is Monday–Sunday regardless of the configured payday weekday; payday weekday is informational for the dashboard.</li>
+    <li>Kid PINs are an optional profile-picker convenience on shared devices, not a security boundary.</li>
+  </ul>
+
+  <h2>Key code paths</h2>
+  <ul>
+    <li><code>apps/rooms/web/src/templates/choreboard/lib/store.ts</code> — <code>ChoreStore</code>: dual-doc binding, publish steps, completions, payday.</li>
+    <li><code>apps/rooms/web/src/templates/choreboard/lib/types.ts</code> — all data shapes and enums.</li>
+    <li><code>apps/rooms/web/src/templates/choreboard/lib/frequency.ts</code> — limit resolution, counting, and kid-facing labels.</li>
+    <li><code>apps/rooms/web/src/templates/choreboard/lib/permissions.ts</code> + <code>memberSecrets.ts</code> — effective permissions and device-link secrets.</li>
+    <li><code>apps/rooms/web/src/templates/choreboard/components/ParentView.tsx</code> / <code>KidView.tsx</code> — the two role dashboards (ParentView has uncommitted BottomNav changes).</li>
+    <li><code>apps/rooms/web/src/templates/choreboard/ChoreBoardApp.tsx</code>, <code>components/Setup.tsx</code>, <code>ParentGate.tsx</code>, <code>ProfilePicker.tsx</code> — shell, onboarding, and role gating.</li>
+  </ul>
+
+  <p class="footer">Sources: <code>docs_and_changelog/CHOREBOARD_SPEC.md, docs_and_changelog/CHOREBOARD_PERMISSIONS.md, docs_and_changelog/CHOREBOARD_FREQUENCY_LIMITS.md, apps/rooms/web/src/templates/choreboard/</code> · Last synced 2026-06-10</p>
+</article>
+</main>
+</div>
+</body>
+</html>

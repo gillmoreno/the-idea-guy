@@ -21,6 +21,7 @@ import { resolveFrequencyLimit } from "@/templates/choreboard/lib/frequency";
 import { CATEGORY_META, MEMBER_COLORS, Role } from "@/templates/choreboard/lib/types";
 import { formatMoney, formatDate, weekdayName } from "@/templates/choreboard/lib/format";
 import { TopbarPersona } from "@/shell/TopbarPersona";
+import { BottomNav, BottomNavItem } from "@/shell/BottomNav";
 import { Avatar, CadencePill, DiffPill, Money, SyncBadge } from "./ui";
 import { ChoreForm } from "./ChoreForm";
 import { ConfirmModal } from "@/components/ConfirmModal";
@@ -53,28 +54,20 @@ export function ParentView({ memberId }: { memberId: string }) {
         {tab === "settings" && <SettingsTab />}
       </div>
 
-      <nav className="bottom-nav">
-        <NavBtn label="Home" ico="🏠" active={tab === "home"} onClick={() => setTab("home")} />
-        <NavBtn
+      <BottomNav>
+        <BottomNavItem label="Home" icon="🏠" active={tab === "home"} onClick={() => setTab("home")} />
+        <BottomNavItem
           label="Approvals"
-          ico={approvalBadge ? `🔔${approvalBadge}` : "🔔"}
+          icon="🔔"
+          badge={approvalBadge > 0 ? approvalBadge : undefined}
           active={tab === "approvals"}
           onClick={() => setTab("approvals")}
         />
-        <NavBtn label="Chores" ico="🧹" active={tab === "chores"} onClick={() => setTab("chores")} />
-        <NavBtn label="Payday" ico="💰" active={tab === "payday"} onClick={() => setTab("payday")} />
-        <NavBtn label="Settings" ico="⚙️" active={tab === "settings"} onClick={() => setTab("settings")} />
-      </nav>
+        <BottomNavItem label="Chores" icon="🧹" active={tab === "chores"} onClick={() => setTab("chores")} />
+        <BottomNavItem label="Payday" icon="💰" active={tab === "payday"} onClick={() => setTab("payday")} />
+        <BottomNavItem label="Settings" icon="⚙️" active={tab === "settings"} onClick={() => setTab("settings")} />
+      </BottomNav>
     </div>
-  );
-}
-
-function NavBtn({ label, ico, active, onClick }: { label: string; ico: string; active: boolean; onClick: () => void }) {
-  return (
-    <button className={active ? "active" : ""} onClick={onClick}>
-      <span className="ico">{ico}</span>
-      {label}
-    </button>
   );
 }
 

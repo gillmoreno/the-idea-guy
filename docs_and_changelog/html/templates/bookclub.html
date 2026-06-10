@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Book Club — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+<div class="layout">
+<nav>
+  <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+  <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+  <h2>Start</h2>
+  <a href="../index.html">Overview</a>
+  <a href="../backlog.html">Backlog &amp; priorities</a>
+  <a href="../how-docs-work.html">How these docs work</a>
+  <h2>Rooms platform</h2>
+  <a href="../rooms/architecture.html">Architecture</a>
+  <a href="../rooms/sync-and-local-first.html">Sync &amp; local-first</a>
+  <a href="../rooms/security.html">Security &amp; invites</a>
+  <a href="../rooms/personas-and-contacts.html">Personas &amp; contacts</a>
+  <a href="../rooms/schema-engine.html">Schema engine</a>
+  <a href="../rooms/themes-and-profile.html">Themes &amp; profile</a>
+  <h2>Templates</h2>
+  <a href="choreboard.html">ChoreBoard</a>
+  <a href="tripsplit.html">Trip Split</a>
+  <a href="bookclub.html" class="active">Book Club</a>
+  <a href="fitcrew.html">Fit Crew</a>
+  <a href="backlog-room.html">Backlog room</a>
+  <h2>Other apps</h2>
+  <a href="../secondbrain/overview.html">Second Brain</a>
+  <a href="../website/overview.html">Website</a>
+</nav>
+<main>
+<article>
+  <h1>Book Club</h1>
+  <p class="lead">A shared reading room for small groups: one current book with a meeting date and discussion notes, a queue of suggestions, and an archive of everything the club has finished.</p>
+
+  <h2>The problem</h2>
+  <p>Small book clubs run on scattered group chats: "what are we reading again?", "when do we meet?", and half-remembered suggestions that get lost between meetings. Thoughts people wanted to bring to the discussion evaporate before the gathering. General-purpose tools (Goodreads groups, chat threads) are either too heavy or too lossy for a five-person club.</p>
+
+  <h2>The solution</h2>
+  <p>Book Club is the third Rooms template. The club is a room: members join with the invite code, everyone sees the same current book, meeting date, queue, and notes — synced local-first (Yjs CRDT on-device, end-to-end encrypted relay), so the club's reading history and discussion notes live on members' own phones, not a service.</p>
+
+  <h2>Key flows</h2>
+  <ul>
+    <li><strong>Create &amp; join</strong> — pick Book Club, name the club, add members (minimum 2). Share the room code; each device picks "who's on this device" via the profile picker.</li>
+    <li><strong>Current book &amp; progress</strong> (Reading tab) — exactly one book can be <code>reading</code> at a time. It carries an editable <strong>meeting date</strong> for the next discussion. Members add text <strong>notes</strong> attributed to them (newest first) to bring to the meetup. There is no page-count or "% read" tracking in v1 — progress is the book's status plus the meeting date.</li>
+    <li><strong>Queue</strong> (Queue tab) — anyone suggests upcoming titles (title + author, attributed via <code>addedById</code>). Queued books are ordered first-suggested-first. Anyone can tap <strong>"Start reading this"</strong> to promote a queued book to current — there is no voting in v1; promotion is first-come.</li>
+    <li><strong>Archive</strong> (Archive tab) — finished books, newest finish first. Books arrive here two ways: explicitly via <strong>Mark done</strong>, or automatically — starting a new book auto-archives whatever was being read.</li>
+  </ul>
+  <div class="card">
+    <strong>The archive flow in one line</strong>
+    <code>startReading(bookId)</code> walks all books in one transaction: any other book with status <code>reading</code> is flipped to <code>done</code> (stamped <code>finishedAt</code>, meeting date cleared), then the target becomes <code>reading</code>. This is what guarantees the single-current-book invariant even when two members promote different books concurrently — the CRDT merges and the later write wins, with the loser ending up archived rather than duplicated.
+  </div>
+
+  <h2>Data model (Yjs keys)</h2>
+  <p>Public branch only — no admin-only club data.</p>
+  <table>
+    <tr><th>Key</th><th>Holds</th></tr>
+    <tr><td><code>template.bookclub.club</code></td><td><code>{ name, createdAt }</code></td></tr>
+    <tr><td><code>template.bookclub.members</code></td><td>Map of <code>{ id, name, color, joinedAt }</code></td></tr>
+    <tr><td><code>template.bookclub.books</code></td><td>Map of <code>{ id, title, author, status, meetingDate?, addedById, addedAt, finishedAt? }</code> — <code>status</code> is <code>reading | queued | done</code></td></tr>
+    <tr><td><code>template.bookclub.notes</code></td><td>Map of <code>{ id, bookId, authorId, body, createdAt }</code></td></tr>
+  </table>
+
+  <h2>Notable rules &amp; edge cases</h2>
+  <ul>
+    <li>The "one current book" rule is enforced by the write path (<code>startReading</code>), not a schema constraint; <code>getCurrentBook()</code> just returns the first <code>reading</code> book.</li>
+    <li>Marking a book done or replacing it clears its <code>meetingDate</code> — meeting dates only belong to the active read.</li>
+    <li>Notes are keyed by <code>bookId</code> and survive archiving in the data, but the UI only shows notes on the current book — archived titles don't display their old notes in v1.</li>
+    <li>Books added with a status can start life directly as <code>reading</code> (used at setup) instead of going through the queue.</li>
+    <li>Intentional v1 limits: no queue voting, members added at setup only, no page progress tracking, no editing/deleting notes.</li>
+  </ul>
+
+  <h2>Key code paths</h2>
+  <ul>
+    <li><code>apps/rooms/web/src/templates/bookclub/lib/store.ts</code> — <code>BookClubStore</code>: club/members/books/notes CRUD, <code>startReading</code>, <code>markDone</code>, <code>updateMeetingDate</code>, status-aware sorting in <code>listBooks</code>.</li>
+    <li><code>apps/rooms/web/src/templates/bookclub/lib/types.ts</code> — <code>Book</code>, <code>Note</code>, <code>BookStatus</code> shapes.</li>
+    <li><code>apps/rooms/web/src/templates/bookclub/BookClubApp.tsx</code> — shell: loading → setup → profile → main.</li>
+    <li><code>apps/rooms/web/src/templates/bookclub/components/ClubView.tsx</code> — the Reading / Queue / Archive tabs on the shared <code>AppTabBar</code>.</li>
+    <li><code>apps/rooms/web/src/templates/bookclub/components/AddBook.tsx</code>, <code>Setup.tsx</code>, <code>ProfilePicker.tsx</code> — forms and onboarding.</li>
+  </ul>
+
+  <p class="footer">Sources: <code>docs_and_changelog/BOOK_CLUB.md, apps/rooms/web/src/templates/bookclub/</code> · Last synced 2026-06-10</p>
+</article>
+</main>
+</div>
+</body>
+</html>

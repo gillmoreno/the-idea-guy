@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Declarative schema engine — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../backlog.html">Backlog &amp; priorities</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>Rooms platform</h2>
+      <a href="architecture.html">Architecture</a>
+      <a href="sync-and-local-first.html">Sync &amp; local-first</a>
+      <a href="security.html">Security &amp; invites</a>
+      <a href="personas-and-contacts.html">Personas &amp; contacts</a>
+      <a href="schema-engine.html" class="active">Schema engine</a>
+      <a href="themes-and-profile.html">Themes &amp; profile</a>
+      <h2>Templates</h2>
+      <a href="../templates/choreboard.html">ChoreBoard</a>
+      <a href="../templates/tripsplit.html">Trip Split</a>
+      <a href="../templates/bookclub.html">Book Club</a>
+      <a href="../templates/fitcrew.html">Fit Crew</a>
+      <a href="../templates/backlog-room.html">Backlog room</a>
+      <h2>Other apps</h2>
+      <a href="../secondbrain/overview.html">Second Brain</a>
+      <a href="../website/overview.html">Website</a>
+    </nav>
+    <main>
+      <article>
+        <h1>Declarative schema engine</h1>
+        <p class="lead">A versioned "Lego bricks" JSON format that lets users (often with an AI chatbot's help) describe a new room type, which a shared engine then renders — no new code, no new deploy.</p>
+
+        <h2>Why it exists</h2>
+        <p>Every built-in room (ChoreBoard, Trip Split, Book Club, Fit Crew) is hand-written React: a store, views, setup flow, settings. That is the right call for rich apps, but it makes "I want a room for X" a multi-day engineering task. The declarative schema engine flips that: a room type becomes a small JSON document — name, emoji, accent color, collections of records with typed fields, and optional features like votes — and one shared runtime (the SchemaEngine) renders any such document. New templates go from days of coding to minutes of describing.</p>
+        <div class="card">
+          <strong>The pitch in one line</strong>
+          Users paste a system prompt into ChatGPT / Claude / Grok, describe the room they want, paste the JSON back into Rooms, hit Validate, and have a working synced room.
+        </div>
+
+        <h2>Builtin vs declarative rooms</h2>
+        <table>
+          <tr><th></th><th>Builtin</th><th>Declarative</th></tr>
+          <tr><td>Who builds it</td><td>Gil (compiled React per template)</td><td>User + AI (JSON schema)</td></tr>
+          <tr><td>Runtime</td><td>Lazy-loaded app per template</td><td>One shared SchemaEngine</td></tr>
+          <tr><td>Where the definition lives</td><td>In the app bundle</td><td>Inside the encrypted room document (<code>meta.schema</code>)</td></tr>
+          <tr><td>Distribution</td><td>Create → share invite</td><td>Same invite flow; schema travels with the synced doc</td></tr>
+        </table>
+        <p>The relay is unchanged either way — it remains a dumb encrypted-blob pipe and never sees schemas or data. <code>TemplateApp.tsx</code> routes a room to the right runtime based on <code>meta.templateKind</code> (<code>"builtin"</code> or <code>"declarative"</code>). Joiners briefly use a <code>_pending</code> template id until the synced doc reveals the real type.</p>
+
+        <h2>The schema spec (v1)</h2>
+        <p>A schema is a <code>RoomSchema</code>: id, name, description, emoji, optional accent color, a list of collections (each with typed fields), and optional features. Fields and features are the "bricks".</p>
+        <div class="card">
+          <strong>v1 field bricks (record fields)</strong>
+          <table>
+            <tr><th>Type</th><th>Stored as</th><th>UI</th></tr>
+            <tr><td><code>text</code></td><td>string</td><td>Single-line input; titles on cards</td></tr>
+            <tr><td><code>textarea</code></td><td>string</td><td>Multi-line notes / pitch under the title</td></tr>
+            <tr><td><code>tags</code></td><td>string array</td><td>Comma-separated input rendered as pills</td></tr>
+            <tr><td><code>emoji</code></td><td>string</td><td>Shared EmojiPicker (search, categories, recents); shown as a small icon tile on the record</td></tr>
+            <tr><td><code>image</code></td><td>string (JSON)</td><td>Shared ImageField — upload (auto-crop WebP ≤ 300 KB inline) or public URL</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <strong>v1 feature bricks (behavior on a collection)</strong>
+          <table>
+            <tr><th>Type</th><th>What users see</th></tr>
+            <tr><td><code>votes</code></td><td>Per-member upvote button on each record; the list re-sorts by count</td></tr>
+            <tr><td><code>status</code></td><td>An enum dropdown on records; <code>setBy</code> decides whether only the owner or any member can change it</td></tr>
+          </table>
+        </div>
+        <p>Related bricks live outside record schemas but follow the same "one brick = one reusable component" philosophy: the <strong>accent</strong> brick (solid hex or one-tap gradient presets, picked with <code>AccentColorField</code>) and the <strong>avatar</strong> brick (emoji or square-cropped ≤ 80 KB WebP photo, picked with <code>AvatarField</code>) are used in persona onboarding and the profile page. Candidates earmarked for v2 — <code>number</code>, <code>date</code>, <code>select</code>, <code>money</code>, <code>member</code> fields and <code>assign</code>, <code>dueDate</code>, <code>tally</code>, <code>reactions</code> features — are deliberately not valid in v1 AI output, so the prompt can't generate bricks the engine doesn't render yet.</p>
+
+        <h2>Versioning &amp; migrations</h2>
+        <p>Schemas live inside long-lived encrypted room documents on people's devices, so the format must evolve without ever breaking an existing room. Two version numbers handle the two directions of change:</p>
+        <ul>
+          <li><strong><code>schemaVersion</code></strong> — the shape of the JSON document. On load, <code>migrate.ts</code> upgrades older schemas in place with additive-only changes (e.g. filling in defaults for fields that didn't exist yet).</li>
+          <li><strong><code>engineVersion</code></strong> — the minimum app build that understands all the features a schema uses. If a room needs a newer engine than the one running, the user sees a friendly "Update required" screen instead of a broken room.</li>
+          <li><strong>Unknown brick types are skipped, never executed.</strong> An older engine that meets a schema with a field or feature type it doesn't know simply ignores it (unknown fields render as read-only text), so new bricks can ship without invalidating old apps.</li>
+          <li><strong><code>extensions</code></strong> — a reserved object on the schema for future per-room metadata without a version bump.</li>
+        </ul>
+        <p>One accepted tradeoff: editing an existing room's schema after creation is <em>not</em> in v1 — it was judged too complex. Rooms keep working as-is while the engine gains bricks around them.</p>
+
+        <h2>How the SchemaEngine renders a room</h2>
+        <p>A declarative room stores its full schema at <code>meta.schema</code> in the CRDT, and its live data under <code>template.declarative.*</code> (board name, members, <code>data.{collectionId}.{recordId}</code> records, and per-member vote maps). When the room loads, <code>DeclarativeApp.tsx</code> walks a guard chain:</p>
+        <ul>
+          <li>Show loading screens (tinted with the schema's accent) until the local doc is ready.</li>
+          <li>Parse and migrate the schema; show "Update required" if <code>engineVersion</code> is too new.</li>
+          <li>If the room data isn't initialized yet: the owner gets the setup flow, joiners get a "connecting to the organizer" screen.</li>
+          <li>If the device has no member identity yet, show the profile picker.</li>
+          <li>Finally render <code>CollectionView</code> for the schema's collections — <code>RecordCard</code> per record, <code>FieldInput</code> per field type in the add form, vote buttons and status dropdowns where features declare them — under the standard shell (persona top bar, sync badge, invite settings, room code share).</li>
+        </ul>
+        <p>The room's <code>accent</code> becomes a <code>--template-accent</code> CSS variable, so every declarative room gets its own tint with zero custom CSS.</p>
+
+        <h2>Creating a declarative room</h2>
+        <ul>
+          <li><strong>Official catalog</strong> — curated schemas in <code>public/catalog/v1.json</code> (a marketplace seeded from the Backlog room's best ideas).</li>
+          <li><strong>Paste JSON</strong> — Create → Paste JSON → Copy system prompt → describe the room to an AI → paste the JSON back → Validate → Create. <code>validate.ts</code> is the gate: bad JSON never reaches the CRDT; valid schemas are stashed in sessionStorage until the owner's setup writes them into the room doc.</li>
+          <li><strong>One-tap examples</strong> — Watch Club and Weekend Plans buttons on the Create screen, for trying it without an AI.</li>
+        </ul>
+        <p>The system prompt itself ships in the app (<code>schema/prompt.ts</code> is the source of truth, mirrored to <code>public/prompts/room-schema-v1.txt</code>) so it can constrain AI output to exactly the v1 brick set.</p>
+
+        <h2>The QA harness</h2>
+        <p>Because one engine renders arbitrary user schemas, a CSS regression in <code>RecordCard</code> can break every declarative room at once. The defense is an automated UI gate, run with <code>npm run qa:schema-ui</code> (or <code>make schema-qa</code> from <code>apps/rooms</code>, with the dev server running):</p>
+        <ul>
+          <li><strong>No vision models</strong> — the v1 philosophy is deterministic browser geometry. A Playwright script loads <code>/schema/preview</code>, which renders fixed fixtures (a long-title Watch Club card, a brick fixture exercising every v1 element, a minimal schema) across themes without creating a room or syncing.</li>
+          <li><strong>Three hard rules</strong> — no overlapping text blocks (pairwise <code>getBoundingClientRect</code> intersection), computed font size ≥ 12px on schema text, and titles not clipped (<code>scrollHeight</code> vs <code>clientHeight</code>).</li>
+          <li><strong>On failure</strong> — JSON issues plus a screenshot at <code>qa-output/schema-preview-fail.png</code> for the fix loop.</li>
+        </ul>
+        <p>The gate must pass before merging SchemaEngine CSS changes; a manual checklist (<code>SCHEMA_BRICKS_CHECKLIST.md</code>) covers what geometry can't, like vote toggling, owner-vs-member status permissions, and a quick repeat on the Glow and Paper themes. Screenshot + LLM aesthetic review may be layered on later, but the hard rules stay programmatic.</p>
+
+        <h2>Tradeoffs</h2>
+        <ul>
+          <li><strong>Expressiveness vs safety</strong> — v1 bricks are intentionally few and declarative-only; unknown types are inert data, never executed code, so a malicious or buggy schema can't do anything beyond rendering oddly.</li>
+          <li><strong>No schema editing after create</strong> — simpler engine and no migration-of-live-data problem, at the cost of "recreate the room" being the answer to schema mistakes.</li>
+          <li><strong>One shared renderer</strong> — declarative rooms all look like "collections of cards"; anything richer (ChoreBoard's payday flow, Trip Split's balances) still earns a builtin template.</li>
+        </ul>
+
+        <h2>Key code paths</h2>
+        <ul>
+          <li><code>apps/rooms/web/src/schema/types.ts</code></li>
+          <li><code>apps/rooms/web/src/schema/validate.ts</code></li>
+          <li><code>apps/rooms/web/src/schema/migrate.ts</code></li>
+          <li><code>apps/rooms/web/src/schema/store.ts</code></li>
+          <li><code>apps/rooms/web/src/schema/prompt.ts</code></li>
+          <li><code>apps/rooms/web/src/schema/engine/DeclarativeApp.tsx</code></li>
+          <li><code>apps/rooms/web/src/schema/engine/CollectionView.tsx</code></li>
+          <li><code>apps/rooms/web/src/schema/engine/RecordCard.tsx</code></li>
+          <li><code>apps/rooms/web/src/schema/engine/FieldInput.tsx</code></li>
+          <li><code>apps/rooms/web/src/templates/TemplateApp.tsx</code></li>
+          <li><code>apps/rooms/web/scripts/schema-ui-quality.mjs</code></li>
+          <li><code>apps/rooms/web/public/catalog/v1.json</code></li>
+        </ul>
+
+        <p class="footer">Sources: <code>docs_and_changelog/SCHEMA_SPEC_V1.md, docs_and_changelog/DECLARATIVE_SCHEMAS.md, docs_and_changelog/SCHEMA_BRICKS_CHECKLIST.md, docs_and_changelog/SCHEMA_UI_QA.md, docs_and_changelog/ACCENT_COLOR_BRICK.md, docs_and_changelog/AVATAR_BRICK.md, apps/rooms/web/src/schema/</code> · Last synced 2026-06-10</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

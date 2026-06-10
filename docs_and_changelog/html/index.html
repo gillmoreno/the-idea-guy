@@ -3,56 +3,72 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Business logic docs — The Idea Guy</title>
+  <title>Technical docs — The Idea Guy</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="layout">
     <nav>
       <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
-      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Business logic docs</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
       <h2>Start</h2>
       <a href="index.html" class="active">Overview</a>
+      <a href="backlog.html">Backlog &amp; priorities</a>
       <a href="how-docs-work.html">How these docs work</a>
-      <h2>ChoreBoard</h2>
-      <a href="choreboard/overview.html">Product overview</a>
-      <a href="choreboard/local-first.html">Local-first &amp; relay</a>
-      <a href="choreboard/keys-and-access.html">Keys &amp; access</a>
-      <a href="choreboard/permissions.html">Kid permissions</a>
-      <a href="choreboard/flows.html">User flows</a>
-      <a href="choreboard/qr-and-onboarding.html">QR &amp; onboarding</a>
+      <h2>Rooms platform</h2>
+      <a href="rooms/architecture.html">Architecture</a>
+      <a href="rooms/sync-and-local-first.html">Sync &amp; local-first</a>
+      <a href="rooms/security.html">Security &amp; invites</a>
+      <a href="rooms/personas-and-contacts.html">Personas &amp; contacts</a>
+      <a href="rooms/schema-engine.html">Schema engine</a>
+      <a href="rooms/themes-and-profile.html">Themes &amp; profile</a>
+      <h2>Templates</h2>
+      <a href="templates/choreboard.html">ChoreBoard</a>
+      <a href="templates/tripsplit.html">Trip Split</a>
+      <a href="templates/bookclub.html">Book Club</a>
+      <a href="templates/fitcrew.html">Fit Crew</a>
+      <a href="templates/backlog-room.html">Backlog room</a>
+      <h2>Other apps</h2>
+      <a href="secondbrain/overview.html">Second Brain</a>
+      <a href="website/overview.html">Website</a>
     </nav>
     <main>
       <article>
-        <h1>Business logic documentation</h1>
+        <h1>Technical documentation</h1>
         <p class="lead">
-          Plain-language explanation of <em>why</em> we built things this way — not a line-by-line
-          code reference. Kept in sync with the repo via a manifest and git hooks.
+          Plain-language docs for everything in this repo — what each piece is, why it was built
+          that way, and where the code lives. Kept in sync with the repo via a manifest, git hooks,
+          and the <code>html-docs</code> Claude Code skill.
         </p>
 
-        <h2>What lives here</h2>
+        <h2>The three products</h2>
+        <div class="card">
+          <strong>Rooms <span class="tag">apps/rooms</span></strong>
+          One installable PWA, many room templates (ChoreBoard, Trip Split, Book Club, Fit Crew,
+          Backlog). Local-first: Yjs CRDTs on each device, E2E-encrypted sync through a dumb relay
+          that never reads your data. Not deployed yet.
+        </div>
+        <div class="card">
+          <strong>Second Brain <span class="tag">secondbrain/</span></strong>
+          Obsidian-style notes vault in the browser — internal links, backlinks graph, full-text
+          search, HTML pages/blocks, AI chat (OpenAI or local Ollama). Same local-first kit.
+          Not deployed yet.
+        </div>
+        <div class="card">
+          <strong>Website <span class="tag">frontend/ + backend/</span></strong>
+          Personal brand site: shipped builds, public idea log, tools &amp; workflow. Next.js static
+          export + Go API behind nginx. Not deployed yet.
+        </div>
+
+        <h2>Where to start</h2>
         <ul>
-          <li><strong>ChoreBoard</strong> — family chores + allowance, local-first, encrypted sync.</li>
-          <li><strong>Local-First Kit</strong> — reusable sync/encryption pattern for future mini-apps (documented inside ChoreBoard pages).</li>
+          <li><a href="backlog.html"><strong>Backlog &amp; priorities</strong></a> — what to build next, RICE-scored across all three products.</li>
+          <li><a href="rooms/architecture.html">Rooms architecture</a> — the meta-app idea: shell + templates + room-kit + relay.</li>
+          <li><a href="rooms/security.html">Security &amp; invites</a> — hash-based invite links, passphrases, device PIN.</li>
+          <li><a href="how-docs-work.html">How these docs work</a> — manifest, git hooks, and the skills that keep this site honest.</li>
         </ul>
 
-        <h2>ChoreBoard at a glance</h2>
-        <div class="card">
-          <strong>Problem</strong>
-          Parents need chores tied to allowance; kids need motivation; data should stay in the family.
-        </div>
-        <div class="card">
-          <strong>Approach</strong>
-          Installable web app (PWA). Data on devices. A small <em>relay</em> only moves encrypted blobs — never reads chores or amounts.
-        </div>
-        <div class="card">
-          <strong>Roles</strong>
-          Parents hold an extra <em>parent secret</em> for admin actions. Kids use a <em>family code</em> only. Optional per-kid permissions and device links.
-        </div>
-
-        <p>Start with <a href="choreboard/overview.html">ChoreBoard overview</a> or <a href="how-docs-work.html">how these docs stay updated</a>.</p>
-
-        <p class="footer">Source manifest: <code>docs_and_changelog/html/doc-manifest.json</code></p>
+        <p class="footer">Source manifest: <code>docs_and_changelog/html/doc-manifest.json</code> · Last synced 2026-06-10</p>
       </article>
     </main>
   </div>

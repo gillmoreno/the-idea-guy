@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rooms — Business Plan & Next Steps</title>
+<style>
+  :root{
+    --bg:#0b0e16;
+    --panel:#121726;
+    --panel-2:#0f1422;
+    --ink:#e8ecf6;
+    --muted:#9aa6c0;
+    --line:#222a3d;
+    --primary:#6366f1;
+    --primary-soft:rgba(99,102,241,.14);
+    --green:#22c55e;
+    --amber:#f59e0b;
+    --red:#ef4444;
+    --cyan:#22d3ee;
+    --maxw:920px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--primary);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  header.hero{
+    background:
+      radial-gradient(1200px 400px at 20% -10%, rgba(99,102,241,.35), transparent 60%),
+      radial-gradient(900px 380px at 90% 0%, rgba(34,211,238,.18), transparent 55%),
+      linear-gradient(180deg,#0d1322,#0b0e16);
+    border-bottom:1px solid var(--line);
+    padding:64px 0 40px;
+  }
+  .eyebrow{color:var(--cyan);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px;margin:0 0 12px}
+  h1{font-size:40px;line-height:1.1;margin:0 0 14px;letter-spacing:-.02em}
+  .tagline{font-size:20px;color:var(--muted);max-width:680px;margin:0}
+  .meta{margin-top:20px;color:var(--muted);font-size:13px}
+  .pill{display:inline-block;background:var(--primary-soft);color:#c3c6ff;border:1px solid #2c2f5a;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;margin-right:6px}
+  nav.toc{
+    position:sticky;top:0;z-index:5;background:rgba(11,14,22,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:10px 0;
+  }
+  nav.toc .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+  nav.toc a{color:var(--muted);font-weight:600}
+  nav.toc a:hover{color:var(--ink);text-decoration:none}
+  section{padding:40px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+  h2 .num{color:var(--primary);font-weight:800;margin-right:10px}
+  h3{font-size:18px;margin:26px 0 8px}
+  p{margin:12px 0}
+  .lead{color:var(--muted);font-size:17px;margin-top:0}
+  ul,ol{margin:12px 0;padding-left:22px}
+  li{margin:6px 0}
+  code{background:#0e1424;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px;color:#bfe0ff}
+  .grid{display:grid;gap:14px}
+  @media(min-width:640px){.grid.cols-2{grid-template-columns:1fr 1fr}.grid.cols-3{grid-template-columns:1fr 1fr 1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card h4{margin:0 0 6px;font-size:15px}
+  .card p{margin:6px 0;color:var(--muted);font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#0e1424;color:#c7d2f0;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  tr:last-child td{border-bottom:none}
+  .callout{border-radius:14px;padding:16px 18px;margin:18px 0;border:1px solid}
+  .callout .k{font-weight:700;display:block;margin-bottom:4px}
+  .callout.good{background:rgba(34,197,94,.08);border-color:#1f5135}
+  .callout.warn{background:rgba(245,158,11,.08);border-color:#5b4516}
+  .callout.bad{background:rgba(239,68,68,.08);border-color:#5a2222}
+  .callout.key{background:var(--primary-soft);border-color:#2c2f5a}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .ascii{background:#0a0f1c;border:1px solid var(--line);border-radius:12px;padding:16px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.5;color:#a9c7ff}
+  .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+  .tag.free{background:rgba(34,197,94,.16);color:#86efac}
+  .tag.byok{background:rgba(34,211,238,.16);color:#a5f3fc}
+  .tag.plus{background:rgba(99,102,241,.18);color:#c3c6ff}
+  .big{font-size:30px;font-weight:800;letter-spacing:-.02em}
+  .big.green{color:var(--green)} .big.amber{color:var(--amber)}
+  footer{padding:36px 0 60px;color:var(--muted);font-size:13px}
+  .two-lane{display:grid;gap:14px}
+  @media(min-width:720px){.two-lane{grid-template-columns:1fr 1fr}}
+  .legend{font-size:13px;color:var(--muted);margin-top:6px}
+  hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Business Plan &amp; Next Steps</p>
+    <h1>Rooms</h1>
+    <p class="tagline">Conjure a tiny app for your people in one sentence. No accounts, no noise, and nobody can read it but you.</p>
+    <div class="meta">
+      <span class="pill">Local-first</span>
+      <span class="pill">Zero-access encryption</span>
+      <span class="pill">AI-native</span>
+      <span class="pill">Calm by design</span>
+      <br><br>
+      Draft · June 2026 · internal strategy document
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#vision">Vision</a>
+    <a href="#product">Product</a>
+    <a href="#ai">AI strategy</a>
+    <a href="#privacy">Data privacy</a>
+    <a href="#cost">Operational cost</a>
+    <a href="#money">Monetization</a>
+    <a href="#investor">Investor angle</a>
+    <a href="#risks">Risks</a>
+    <a href="#next">Next steps</a>
+  </div>
+</nav>
+
+<main>
+
+<section id="vision">
+  <div class="wrap">
+    <h2><span class="num">01</span>Vision</h2>
+    <p class="lead">We are not building a better group app. We are building the first tool where you describe software to your friends and it simply exists — private, calm, and quietly intelligent — with no company in the middle.</p>
+    <p>Almost every group product optimizes for <strong>time-on-app</strong>: notifications, feeds, streaks, badges that nag. Rooms makes a series of decisions that reject that entire model:</p>
+    <div class="grid cols-3">
+      <div class="card"><h4>Dumb relay</h4><p>The server only moves encrypted blobs. We cannot surveil users even if we wanted to.</p></div>
+      <div class="card"><h4>Local-first + E2E</h4><p>The data is theirs, on their devices. We hold ciphertext we cannot read.</p></div>
+      <div class="card"><h4>No accounts</h4><p>No profile to mine, no funnel to optimize, no PII to leak.</p></div>
+      <div class="card"><h4>No push</h4><p>We don't interrupt your life. Awareness happens only when you open the app.</p></div>
+      <div class="card"><h4>AI builds the apps</h4><p>Describe a room → it exists. The "wow" is one sentence away.</p></div>
+      <div class="card"><h4>Calm, not addictive</h4><p>We monetize creation and value, never attention.</p></div>
+    </div>
+    <p>Individually these are engineering choices. Together they are a <strong>philosophy</strong> — and that philosophy is the moat. Incumbents can't copy "we can't read your data and we won't notify you" without breaking their own business model.</p>
+  </div>
+</section>
+
+<section id="product">
+  <div class="wrap">
+    <h2><span class="num">02</span>The product &amp; the hero moment</h2>
+    <p class="lead">One PWA. One dumb relay. Many room templates — built-in (ChoreBoard, Trip Split, Book Club, FitCrew) and declarative mini-apps anyone (or AI) can spin up from building blocks.</p>
+
+    <h3>The one magical moment to obsess over</h3>
+    <div class="ascii">You type:   "a place where my 4 roommates vote on what to cook this week"
+3 seconds:  the app exists, on screen, working
+You tap:    Share → roommates are using it in 30 seconds, no signup</div>
+    <p><strong>Speak-it-into-existence + zero-friction-join.</strong> No other product does both. Notion needs accounts. ChatGPT can't make a shared multiplayer thing. Glide/Bubble need logins and dashboards. We do it in a sentence and a link.</p>
+
+    <h3>The growth loop is the product</h3>
+    <p>We don't need ads. The room <em>is</em> the marketing:</p>
+    <div class="ascii">make a room → share a link → friend joins (no signup) →
+friend sees how easy it was → friend makes their own room → repeat</div>
+    <p>The calm stance <em>helps</em> virality: people share things they trust and are proud of. They don't share the app that nags their friends.</p>
+
+    <div class="callout warn">
+      <span class="k">The discipline</span>
+      The hero moment cannot require pasting an API key (see §03). And the building blocks must get richer fast (dates, numbers, money, reminders) or the "build anything" promise breaks on contact with real use.
+    </div>
+  </div>
+</section>
+
+<section id="ai">
+  <div class="wrap">
+    <h2><span class="num">03</span>AI strategy — two workloads, opposite economics</h2>
+    <p class="lead">The mistake is treating "AI in Rooms" as one thing. It's two, and conflating them is what created the API-key friction problem.</p>
+
+    <table>
+      <thead><tr><th></th><th>Generation <span class="legend">(the hero moment)</span></th><th>Operation <span class="legend">(ongoing helper)</span></th></tr></thead>
+      <tbody>
+        <tr><td><strong>What</strong></td><td>One sentence → room schema JSON</td><td>Weekly suggestions, digests, summaries</td></tr>
+        <tr><td><strong>Frequency</strong></td><td>Once per room + a few retries</td><td>Recurring, per room, forever</td></tr>
+        <tr><td><strong>Tokens</strong></td><td>Tiny, one-shot, structured</td><td>Larger context, repeated</td></tr>
+        <tr><td><strong>Touches private room data?</strong></td><td><strong style="color:var(--green)">No</strong> — just "design me a chore app"</td><td><strong style="color:var(--amber)">Yes</strong> — reads members' content</td></tr>
+        <tr><td><strong>Who pays</strong></td><td><strong>We subsidize it</strong> (it's basically free)</td><td>BYOK / Ollama, or a paid tier</td></tr>
+      </tbody>
+    </table>
+
+    <h3>The cost math: generation is nearly free</h3>
+    <p>A schema generation is the cheapest kind of AI call — small system prompt, tiny input, short structured output: <strong>≈ 2,000 tokens</strong> per generation. At a cheap fast tier (~$0.15/1M in, ~$0.60/1M out):</p>
+    <table>
+      <thead><tr><th>Volume</th><th>Approx cost</th></tr></thead>
+      <tbody>
+        <tr><td>1 generation</td><td><span class="mono">~$0.0006</span> (6 hundredths of a cent)</td></tr>
+        <tr><td>1 user × 10 retries</td><td><span class="mono">~$0.006</span></td></tr>
+        <tr><td>10,000 users × 10 each</td><td><span class="mono">~$60</span></td></tr>
+        <tr><td>1,000,000 generations</td><td class="big green">~$600</td></tr>
+      </tbody>
+    </table>
+    <p>We can give every new user <strong>~15 free "spells"</strong> and the entire hero-moment experience is rounding-error money. The friction was self-inflicted: we only reached for BYOK because we assumed <em>all</em> AI must be BYOK. It doesn't.</p>
+
+    <h3>Why a generation proxy does <em>not</em> betray "the relay is dumb"</h3>
+    <p>We can run <strong>two backends with completely different trust profiles</strong>. They don't contaminate each other:</p>
+    <div class="ascii">DEVICE (local-first, E2E)            BACKENDS
+┌────────────────────────┐      ┌───────────────────────────────────┐
+│ Rooms PWA              │◀────▶│ RELAY — DUMB                       │
+│ Room content (Yjs/IDB) │ enc. │ sees only ciphertext · the backbone│
+└──────────┬─────────────┘ blobs└───────────────────────────────────┘
+           │ "make a chore voting app"
+           ▼                     ┌───────────────────────────────────┐
+                                 │ GENERATION PROXY — STATELESS       │
+        schema JSON  ◀───────────│ holds platform AI key · no DB      │
+                                 │ no accounts · never room content   │
+                                 └───────────────────────────────────┘</div>
+    <div class="callout key">
+      <span class="k">The privacy line that protects the brand</span>
+      Generation never touches private data. "A chore app where roommates vote" is an app description the user chooses to send to AI — not E2E room content. The schema returned is a public-ish app definition. Routing it through a stateless function leaks nothing our encryption promise covers. The relay stays dumb and ciphertext-only; the proxy is an optional faucet, not a vault.
+    </div>
+
+    <h3>The ambient room helper (no extra server)</h3>
+    <p>Cloud AI can't reach a room while everyone is offline — but rooms are <strong>social</strong>, so somebody usually opens the app. Store AI intents in the room CRDT (<em>"every Friday, propose 3 ideas"</em>). When any member opens the app and background sync runs, their device checks for a due task, claims it via a CRDT lock, runs it (BYOK on-device, or via the proxy for paid users), and writes results back. <strong>Your friends' devices are the cloud.</strong> Ambient, scheduled-feeling AI with zero servers — fully private.</p>
+
+    <div class="callout good">
+      <span class="k">Calm + AI = value-per-open, not opens-per-day</span>
+      The deepest risk to calm software is being forgotten. The fix: the AI prepares value silently, so your rare visits are delightful. We already ship the awareness layer (background sync + "Updated" badges). The helper makes each open worth it: the weekend options are already drafted, the changes already summarized. Open occasionally → something good is waiting → leave. The healthiest loop in software.
+    </div>
+  </div>
+</section>
+
+<section id="privacy">
+  <div class="wrap">
+    <h2><span class="num">04</span>Data privacy — the honest, and better, story</h2>
+    <p class="lead">Yes: the relay holds the encrypted current state of every room at all times (in RAM, and on disk if persistence is on). That sounds like a liability. The honest framing turns it into the strongest part of the pitch.</p>
+
+    <h3>The reality (no spin)</h3>
+    <ul>
+      <li>The relay stores <code>room.log</code> per room — after checkpoint compaction, usually <strong>one encrypted blob</strong> (the current document), not full history.</li>
+      <li>This is needed so an <strong>offline device</strong> or a <strong>brand-new member</strong> can catch up even when no other peer is online. Pure peer-to-peer would break async groups (a chore board checked once a day).</li>
+      <li>So yes — we hold all rooms' data. But it is <strong>ciphertext we cannot decrypt</strong>. We hold no keys.</li>
+    </ul>
+
+    <div class="callout key">
+      <span class="k">The reframe that fixes everything: the relay is a cache, not a vault</span>
+      The canonical copy of a room lives on <strong>members' devices</strong>. The relay is a convenience rendezvous so peers who are never online at the same time can still sync. This single idea improves the privacy story, the deletion story, and the biggest cost driver (RAM) — all at once.
+    </div>
+
+    <h3>Zero-access encryption</h3>
+    <p>Keys derive from the <strong>room code</strong>, which never reaches the relay — only a one-way <code>SHA-256</code>-derived room id does. A breach yields ciphertext without keys: noise. This is the same model trusted password managers and encrypted backups use ("zero-knowledge").</p>
+
+    <h3>Data that dies when you stop caring</h3>
+    <p>Because the relay is a cache, we can let it forget:</p>
+    <table>
+      <thead><tr><th>Room state</th><th>Relay behavior</th></tr></thead>
+      <tbody>
+        <tr><td>Active (recent connections)</td><td>In RAM + disk for instant catch-up</td></tr>
+        <tr><td>Idle for N days</td><td>Evict from RAM, keep small blob on disk</td></tr>
+        <tr><td>Idle for N weeks/months</td><td>Delete from disk entirely</td></tr>
+        <tr><td>A member reconnects later</td><td><strong>Self-healing</strong>: their device re-seeds the relay with a checkpoint</td></tr>
+        <tr><td>Nobody holds a copy anymore</td><td>Data is simply gone — by design</td></tr>
+      </tbody>
+    </table>
+    <p>This is a beautiful, honest line: <em>your data outlives our servers and dies when you all let it go.</em></p>
+
+    <h3>The right to destroy</h3>
+    <ul>
+      <li><strong>Explicit delete:</strong> a room owner sends a signed tombstone (authorized by the admin secret) → relay purges the room file + RAM. Needs care because the relay has no accounts; the admin-secret signature is the authorization.</li>
+      <li><strong>Natural expiry:</strong> idle-room eviction above gives erasure for free.</li>
+      <li><strong>Local wipe:</strong> already supported on-device ("Remove from this device"). Combined with relay expiry, the data evaporates everywhere.</li>
+    </ul>
+
+    <h3>Honest limitations (say these out loud)</h3>
+    <div class="grid cols-2">
+      <div class="card"><h4>Metadata is visible</h4><p>The relay sees hashed room ids, connection times, IPs, blob sizes. Mitigate: don't log IPs, minimal retention. Content stays encrypted.</p></div>
+      <div class="card"><h4>The room code is the key</h4><p>Anyone with the invite code can read &amp; join. Protect links. We never see the code (only a one-way hash).</p></div>
+      <div class="card"><h4>No public-channel revocation</h4><p>Removing a member doesn't re-key the public room; anyone who had the code can still read. Admin channel can rotate its secret.</p></div>
+      <div class="card"><h4>Generation prompt leaves the device</h4><p>App-design prompts go to the proxy/AI — never room content. BYOK/Ollama avoids even that.</p></div>
+    </div>
+
+    <h3>Compliance is light by design</h3>
+    <p>No accounts, no PII, no plaintext → strong <strong>data minimization</strong>. Right to erasure satisfied by delete + eviction. Breach-notification risk is low (encrypted, no identities). This is a far lighter compliance burden than typical SaaS, and a real trust asset for clubs, families, and privacy-conscious users.</p>
+
+    <div class="callout good">
+      <span class="k">How to communicate it</span>
+      "We store encrypted blocks we cannot read. Your devices are the source of truth — our servers are just a cache. Your data self-destructs when you let it, and you can delete a room anytime. A breach of our servers gives an attacker noise." Contrast with Big Tech: they hold plaintext, profile you, and can't truly delete. We hold ciphertext, can't profile, and the data dies with your attention.
+    </div>
+  </div>
+</section>
+
+<section id="cost">
+  <div class="wrap">
+    <h2><span class="num">05</span>Operational cost — where the big items really are</h2>
+    <p class="lead">The instinct "we'll need many servers holding everyone's data" overestimates the hard part. Because the relay is a cache (not the source of truth), durability is cheap and the only real pressure is live RAM and connections.</p>
+
+    <table>
+      <thead><tr><th>Cost item</th><th>Driver</th><th>Severity</th><th>Lever</th></tr></thead>
+      <tbody>
+        <tr><td><strong>RAM</strong></td><td>Current code loads <em>every</em> persisted room into memory at startup</td><td><span style="color:var(--red)">High — #1 item</span></td><td>Lazy-load on connect + evict idle rooms. Caps RAM at <em>active</em> rooms, not all-rooms-ever.</td></tr>
+        <tr><td><strong>Concurrency / connections</strong></td><td>One WebSocket per active peer; background sync adds brief bursts</td><td><span style="color:var(--amber)">Medium</span></td><td>Go handles many cheaply; shard by room id across relays when needed.</td></tr>
+        <tr><td><strong>Bandwidth</strong></td><td>Backlog replay on reconnect; background "sync all on home" pulls many rooms</td><td><span style="color:var(--amber)">Medium — watch it</span></td><td>Checkpoints keep payloads small; cap parallel pulls; only sync on foreground.</td></tr>
+        <tr><td><strong>Disk</strong></td><td>One small blob file per room</td><td><span style="color:var(--green)">Low</span></td><td>1M rooms × 100KB ≈ 100GB ≈ a few $/mo. Tiered + expiry.</td></tr>
+        <tr><td><strong>Durability / backups</strong></td><td>Relay disk failure</td><td><span style="color:var(--green)">Low</span></td><td><strong>Members' devices are the backup.</strong> Relays can be semi-disposable caches — no expensive replication needed.</td></tr>
+        <tr><td><strong>AI generation proxy</strong></td><td>Hero-moment calls</td><td><span style="color:var(--green)">Low</span></td><td>~$0.0006/call (see §03). Subsidize freely.</td></tr>
+        <tr><td><strong>AI ambient helper</strong></td><td>Recurring per-room tasks</td><td><span style="color:var(--green)">Low</span></td><td>Device-hosted/BYOK = $0 to us. Platform-hosted ≈ $0.01–0.02/room/month.</td></tr>
+        <tr><td><strong>Multi-region / sharding</strong></td><td>Global scale, latency</td><td><span style="color:var(--amber)">Later</span></td><td>Room-id sharding; geo relays via relay-url override. Not needed pre-PMF.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>The RAM picture, concretely</h3>
+    <div class="ascii">Today (all rooms resident):   1,000,000 rooms × 100KB  ≈ 100 GB RAM   ← expensive
+With eviction (active only):  ~1–5% active            ≈ 1–5 GB RAM    ← cheap</div>
+    <p>Eviction is <strong>safe</strong> because of self-healing: if a member reconnects to an evicted room, their client sends a checkpoint and re-populates the relay. The work is already half-done — checkpoints exist; we just need lazy-load + an idle sweeper.</p>
+
+    <div class="callout good">
+      <span class="k">The cost reframe for investors and ops</span>
+      We are not running a database of everyone's data. We're running a <strong>stateless-ish cache</strong> in front of millions of self-backing devices. That makes us cheap to operate, cheap to scale horizontally, and resilient to data loss — the canonical data isn't ours to lose.
+    </div>
+  </div>
+</section>
+
+<section id="money">
+  <div class="wrap">
+    <h2><span class="num">06</span>Monetization</h2>
+    <p class="lead">Charge for the magic and the convenience — at the highest-intent moment (creation) — never for attention. Users self-select into three lanes.</p>
+    <div class="grid cols-3">
+      <div class="card">
+        <span class="tag free">FREE</span>
+        <h4 style="margin-top:8px">Everyone</h4>
+        <p>~15 free generations. The frictionless front door. Costs us cents. This is the growth engine, not a loss leader to minimize.</p>
+      </div>
+      <div class="card">
+        <span class="tag byok">BYOK / OLLAMA</span>
+        <h4 style="margin-top:8px">Developers, privacy folks</h4>
+        <p>Unlimited generation + on-device ambient helper. $0 to us. High setup friction — but this group <em>wants</em> it.</p>
+      </div>
+      <div class="card">
+        <span class="tag plus">ROOMS PLUS · ~$3–5/mo</span>
+        <h4 style="margin-top:8px">Mainstream fans</h4>
+        <p>Unlimited generation + platform-hosted ambient helper, one tap, no key. AI cost ≈ pennies/user → fat margins.</p>
+      </div>
+    </div>
+
+    <h3>Unit economics (Plus)</h3>
+    <ul>
+      <li>Heavy user with 10 active helper rooms: ~$0.20/month AI cost against a $3–5 sub.</li>
+      <li>Only way this gets expensive: big models, huge context, streaming chat — none of which this product needs.</li>
+      <li>Relay marginal cost per user is dominated by RAM of <em>active</em> rooms, which eviction keeps tiny.</li>
+    </ul>
+    <h3>Abuse control without accounts</h3>
+    <ul>
+      <li>Constrain output to a valid <code>RoomSchema</code> + hard token cap → useless as a free general LLM.</li>
+      <li>Sign generation requests with the existing <strong>persona keypair</strong> → rate-limit per public key (no accounts needed).</li>
+      <li>Edge IP rate limits + a device-side free-generation counter for the honest majority.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="investor">
+  <div class="wrap">
+    <h2><span class="num">07</span>Investor angle</h2>
+    <div class="grid cols-2">
+      <div class="card"><h4>Near-zero marginal cost of the "wow"</h4><p>Structured one-shot generation, not chat. The thing that makes it magical is the thing that's cheap.</p></div>
+      <div class="card"><h4>Built-in, signup-free viral loop</h4><p>Every room is a shareable, no-account demo. CAC trends toward zero.</p></div>
+      <div class="card"><h4>Cheap, resilient infra</h4><p>A cache in front of self-backing devices — not a vault of everyone's data. Low ops cost, low durability burden.</p></div>
+      <div class="card"><h4>A moat incumbents can't copy</h4><p>Calm + private + sovereign + ambient AI. They can't ship "we can't read you and won't notify you" without self-harm.</p></div>
+      <div class="card"><h4>Charge at intent, not attention</h4><p>Monetizing creation sidesteps the "calm products don't convert" trap.</p></div>
+      <div class="card"><h4>Light compliance posture</h4><p>No PII, no plaintext, erasure by design — a real enterprise/club trust asset.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="risks">
+  <div class="wrap">
+    <h2><span class="num">08</span>Risks &amp; honest watch-outs</h2>
+    <div class="grid cols-2">
+      <div class="card"><h4>Messaging the privacy line</h4><p>"Local-first &amp; E2E" <em>but</em> "generation uses our proxy" must be crystal clear (app definitions ≠ room content). Muddle it and we lose the trust moat. Load-bearing copywriting.</p></div>
+      <div class="card"><h4>Conversion, not acquisition</h4><p>Calm products see lower daily engagement → fewer paywall hits. Counter: paywall <em>create</em> and <em>helper</em>, the high-intent moments.</p></div>
+      <div class="card"><h4>Thin building blocks</h4><p>Today: text, tags, votes, status. The promise breaks the moment someone needs dates, money, RSVPs. Richer bricks are the #1 roadmap item after in-app generation.</p></div>
+      <div class="card"><h4>Cold-start loneliness</h4><p>A one-person room is sad. Push toward "share now" and seed AI starter content so a joining friend sees life, not a blank list.</p></div>
+      <div class="card"><h4>Free-generation abuse</h4><p>Manageable (schema-only output, signed requests, rate limits), but real. Monitor.</p></div>
+      <div class="card"><h4>Calm ≠ forgotten</h4><p>Solved by value-per-open (ambient helper + digests), but must actually ship, or retention suffers.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="next">
+  <div class="wrap">
+    <h2><span class="num">09</span>Next steps</h2>
+    <p class="lead">Ordered by leverage. Each builds on what already ships (background sync + "Updated" badges are done).</p>
+    <ol>
+      <li><strong>Write <code>ROOM_AI.md</code></strong> — lock the two-workload split, the privacy boundary, the stateless proxy contract (schema-validated output, persona-signed, rate-limited), and the Free/BYOK/Plus lanes. Agree before any code.</li>
+      <li><strong>Stateless generation proxy</strong> — one edge function holding the platform key; the hero moment, frictionless, no API key. BYOK wired as the power-user fallback.</li>
+      <li><strong>In-app "speak it into existence"</strong> — type a sentence → schema appears live → create → share. Replace copy-paste-to-ChatGPT as the front door.</li>
+      <li><strong>Richer building blocks</strong> — add <code>date</code>, <code>number</code>, <code>money</code>, <code>assignee</code>, <code>reminder</code> bricks (forward-compatible via existing <code>schemaVersion</code>/<code>engineVersion</code>).</li>
+      <li><strong>Relay: lazy-load + idle eviction</strong> — cap RAM at active rooms; rely on self-healing checkpoints. The #1 cost lever.</li>
+      <li><strong>Room delete (signed tombstone)</strong> — admin-secret-authorized purge on the relay; "right to destroy" as a visible feature.</li>
+      <li><strong>Ambient room helper</strong> — AI intents in the CRDT, device-claimed and executed; "while you were away" digests on open.</li>
+      <li><strong>Position &amp; name around the stance</strong> — calm, sovereign, conjure-an-app. The product is ready for a bigger story than "rooms for small groups."</li>
+    </ol>
+    <div class="callout key">
+      <span class="k">The one-line bet</span>
+      The legendary version isn't "a better group app." It's the first tool where you describe software to your friends and it simply exists — private, calm, and quietly intelligent — with no company in the middle. The architecture is already shaped like that product. The work is finishing the hero moment and telling the story out loud.
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Rooms — internal strategy draft. Pairs with <code>BACKGROUND_ROOM_SYNC.md</code>, <code>RELAY_LOG_COMPACTION.md</code>, <code>ROOM_KIT_ARCHITECTURE.md</code>, and <code>DECLARATIVE_SCHEMAS.md</code>.
+  </div>
+</footer>
+
+</body>
+</html>

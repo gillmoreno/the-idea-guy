@@ -10,6 +10,10 @@ Room templates should reuse shell settings blocks instead of one-off copies:
 | `RoomInviteSettings` | `apps/rooms/web/src/shell/RoomInviteSettings.tsx` | Invite mutual contacts (admin only) |
 | `RoomCodeShare` | `apps/rooms/web/src/shell/RoomCodeShare.tsx` | Room code + join QR |
 | `TopbarPersona` | `apps/rooms/web/src/shell/TopbarPersona.tsx` | Header avatar + link to home (`/`) |
+| `AppTabBar` | `apps/rooms/web/src/shell/AppTabBar.tsx` | Pill tabs under topbar (Trip Split, Book Club) |
+| `BottomNav` | `apps/rooms/web/src/shell/BottomNav.tsx` | Fixed bottom tab bar (3–5 sections; ChoreBoard parent) |
+
+**Bottom nav & Look & feel:** Icon treatment is theme-driven via `data-theme` on `<html>` (Profile → Look & feel). Classic uses full-color emoji; Paper softens inactive icons; Signal uses grayscale inactive + full color on active; Glow adds a floating glass bar with accent glow on the active tab. Tap/active micro-animations live in `globals.css` under `.bottom-nav`.
 
 Import in any template Settings tab:
 

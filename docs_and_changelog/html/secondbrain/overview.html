@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Second Brain — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+<div class="layout">
+<nav>
+  <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+  <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+  <h2>Start</h2>
+  <a href="../index.html">Overview</a>
+  <a href="../backlog.html">Backlog &amp; priorities</a>
+  <a href="../how-docs-work.html">How these docs work</a>
+  <h2>Rooms platform</h2>
+  <a href="../rooms/architecture.html">Architecture</a>
+  <a href="../rooms/sync-and-local-first.html">Sync &amp; local-first</a>
+  <a href="../rooms/security.html">Security &amp; invites</a>
+  <a href="../rooms/personas-and-contacts.html">Personas &amp; contacts</a>
+  <a href="../rooms/schema-engine.html">Schema engine</a>
+  <a href="../rooms/themes-and-profile.html">Themes &amp; profile</a>
+  <h2>Templates</h2>
+  <a href="../templates/choreboard.html">ChoreBoard</a>
+  <a href="../templates/tripsplit.html">Trip Split</a>
+  <a href="../templates/bookclub.html">Book Club</a>
+  <a href="../templates/fitcrew.html">Fit Crew</a>
+  <a href="../templates/backlog-room.html">Backlog room</a>
+  <h2>Other apps</h2>
+  <a href="overview.html" class="active">Second Brain</a>
+  <a href="../website/overview.html">Website</a>
+</nav>
+<main>
+<article>
+
+<h1>Second Brain</h1>
+<p class="lead">A local-first personal notes vault in the Obsidian spirit — rich-text notes with wiki-style links, full-text search, a link graph, AI chat over your own notes, and end-to-end encrypted sync — built as mini-app #3 on the same local-first kit as the Rooms platform.</p>
+
+<h2>What it is</h2>
+<p>Second Brain is a personal knowledge vault that runs entirely in the browser. Notes live in a Yjs CRDT document persisted to IndexedDB, so everything works offline and the app never depends on a server to read or write. You edit notes in a Tiptap rich-text editor, connect them with <code>[[internal links]]</code> that automatically build a backlink index, search everything instantly with MiniSearch, and see how your ideas connect in a D3 force-directed graph driven by the same link index.</p>
+
+<div class="card">
+<p><strong>Status: not deployed.</strong> Second Brain runs locally only. <code>make dev</code> inside <code>secondbrain/</code> starts the web app on <code>:3200</code> and its Go relay on <code>:4501</code>. There is no hosted instance yet.</p>
+</div>
+
+<h2>Why it was built this way</h2>
+<p>The design goal is the same one that drives the Rooms apps: your data should not live on someone else's server in readable form. Second Brain takes the proven room-kit pattern — a Yjs document, IndexedDB persistence, and an encrypted blob relay — and applies it to a single-person (or small shared) notes vault instead of a multi-member room.</p>
+<ul>
+  <li><strong>Local-first, not cloud-first.</strong> The vault is the Yjs doc on your device. Sync is optional and additive.</li>
+  <li><strong>The relay is dumb on purpose.</strong> It moves opaque encrypted CRDT blobs between devices; it cannot read note content. Operators run sync only.</li>
+  <li><strong>AI is owned by the user, not the operator.</strong> API keys live inside the encrypted vault settings, never in relay environment variables.</li>
+  <li><strong>Shared kit, shared lessons.</strong> The <code>kit/</code> sync layer mirrors the room-kit used by ChoreBoard, Trip Split, and friends, so fixes and patterns flow between apps.</li>
+</ul>
+
+<h2>What users see</h2>
+
+<h3>Notes and editing</h3>
+<p>A sidebar lists folders and notes (with sizes and relative timestamps); the main pane is a Tiptap editor with a toolbar for headings, bold/italic, lists, code, quotes, and callout blocks (info / tip / warning / success — a custom Tiptap node stored as <code>&lt;div data-callout&gt;</code>). Images can be uploaded (max 4&nbsp;MB), pasted, dragged in, or linked by URL; they are embedded as base64 in the note HTML so they sync encrypted with the vault. Each note's content is its own <code>Y.XmlFragment</code>, edited through Tiptap's collaboration extension, so concurrent edits from two devices merge cleanly.</p>
+
+<h3>Links, search, and graph</h3>
+<ul>
+  <li><strong>Internal links</strong> — type <code>[[</code> to link another note. Links are stored as <code>&lt;a data-note-id&gt;</code> anchors and indexed in a <code>linkIndex</code> map (outgoing and incoming per note), which powers the backlinks panel.</li>
+  <li><strong>Full-text search</strong> — a MiniSearch index is rebuilt on save and reads live text from the Yjs fragments (so search never lags behind the editor).</li>
+  <li><strong>Graph view</strong> — a force-directed D3 graph rendered straight from <code>linkIndex</code>, with theme-aware glow.</li>
+</ul>
+
+<h3>HTML blocks and HTML pages</h3>
+<p>Two experimental features let notes break out of rich text:</p>
+<div class="card">
+<table>
+  <tr><th></th><th>HTML block (toolbar → Lab)</th><th>HTML page note</th></tr>
+  <tr><td><strong>Scope</strong></td><td>One block inside a normal rich-text note</td><td>The entire note (<code>contentType: "htmlPage"</code>)</td></tr>
+  <tr><td><strong>Editor</strong></td><td>Tiptap chip with HTML + CSS textareas and live preview</td><td>Full-page preview plus a code pane</td></tr>
+  <tr><td><strong>Use case</strong></td><td>Styled cards, mini layouts, static charts</td><td>Dashboards, visual reports, landing-style posts</td></tr>
+</table>
+</div>
+<p>Both render inside a <strong>sandboxed iframe</strong> (<code>sandbox=""</code> — no scripts, no navigation, no form submission to the parent). This was a deliberate choice over raw HTML in the editor DOM (breaks the Tiptap schema, XSS risk) or <code>dangerouslySetInnerHTML</code> (custom CSS would leak into the app UI). The block's HTML and CSS are node attributes that sync over Yjs like any other content, and search/AI tools index the plain text stripped from them.</p>
+<p>AI can author full pages: the sidebar's "HTML page" button plus an "AI generate page" flow gives the assistant suggestion chips, lets it read the vault with its tools, then call <code>set_html_page({ html, css, title? })</code>. The same tool works in normal chat — with a note open you can ask "turn this into a pull-up stats dashboard" and the agent converts it to an HTML page.</p>
+
+<h3>AI chat with vault tools</h3>
+<p>The AI panel is an agentic chat that does not guess from random excerpts. It calls read-only tools that run <em>in the browser</em> against the NoteStore and MiniSearch — <code>search_notes</code> (with date filters), <code>get_note</code>, <code>count_notes</code>, <code>list_notes</code>, <code>list_folders</code>, <code>list_tags</code>, <code>get_links</code>, <code>vault_summary</code> — and sends compact JSON results to the model. Answers render as markdown with clickable citation chips that open the cited note while keeping the panel open.</p>
+<p>Two providers, both bring-your-own:</p>
+<ul>
+  <li><strong>OpenAI</strong> — you paste your own API key in Settings → AI. The key is stored in the vault's encrypted settings map and syncs end-to-end across your devices; the relay never holds it.</li>
+  <li><strong>Ollama (local)</strong> — point at a local Ollama server (default <code>http://127.0.0.1:11434</code>); Settings auto-detects installed models via <code>GET /api/tags</code>. No key needed.</li>
+</ul>
+<p>When the browser can't reach the provider directly (CORS), the relay's <code>/ai/forward</code> endpoint acts as a dumb pass-through tunnel: it forwards the chat-completion request (including <code>tool_calls</code>) with the user's own Bearer token and holds no server-side API key. Tradeoff acknowledged in the docs: the forward endpoint sees the token in transit over HTTPS, so privacy-maximal users should self-host the relay.</p>
+
+<h3>Sync and storage</h3>
+<p>Sync uses Second Brain's own relay on port 4501 (<code>appId: secondbrain</code>) following the kit pattern: the relay's <code>/sync</code> endpoint shuttles opaque encrypted CRDT blobs, and an invite code lets another device (or person) join the vault. Anyone with the invite code can decrypt the doc — the docs call it "a family secret." Offline state shows a badge; edits queue locally and merge when back online.</p>
+<p>Storage is made visible: per-note byte sizes in the sidebar and editor meta row, and a Settings → Storage panel showing vault content total, on-device CRDT size, browser quota, and the largest notes. Because CRDT history can outlive deleted content (especially big inline images), deleting ≥48&nbsp;KB of image data auto-compacts the doc, and a manual "Compact sync data" button prunes history and pushes a fresh checkpoint to the relay.</p>
+
+<h2>Tradeoffs</h2>
+<ul>
+  <li><strong>Invite code = full access.</strong> One secret both joins and decrypts the vault; there is no per-device revocation.</li>
+  <li><strong>Base64 images bloat the doc.</strong> Simple and encrypted-by-default, but storage and sync grow fast — hence the compaction tooling.</li>
+  <li><strong>Sandboxed HTML means no JS widgets.</strong> Blocks and pages are static HTML/CSS only; an opt-in <code>allow-scripts</code> mode is a possible future step.</li>
+  <li><strong>BYO AI keys trade convenience for ownership.</strong> No server key means zero setup is impossible, but the operator never touches your credentials or note text.</li>
+</ul>
+
+<h2>Key code paths</h2>
+<div class="card">
+<ul>
+  <li><code>secondbrain/web/src/lib/store.ts</code> — NoteStore domain model on the Y.Doc (notes, folders, linkIndex, settings)</li>
+  <li><code>secondbrain/web/src/lib/search.ts</code>, <code>lib/fragmentText.ts</code> — MiniSearch index and live plain text from Yjs fragments</li>
+  <li><code>secondbrain/web/src/lib/vaultAgent.ts</code>, <code>lib/vaultTools.ts</code>, <code>lib/aiChat.ts</code>, <code>lib/ollamaClient.ts</code> — agent loop, in-browser tools, providers</li>
+  <li><code>secondbrain/web/src/lib/htmlBlockExtension.ts</code>, <code>lib/htmlPageDefaults.ts</code>, <code>lib/calloutExtension.ts</code> — custom Tiptap nodes</li>
+  <li><code>secondbrain/web/src/components/VaultApp.tsx</code>, <code>NoteEditor.tsx</code>, <code>HtmlPageEditor.tsx</code>, <code>AIPanel.tsx</code>, <code>GraphView.tsx</code>, <code>BacklinksPanel.tsx</code>, <code>StoragePanel.tsx</code> — main UI</li>
+  <li><code>secondbrain/web/src/kit/</code> — shared local-first sync layer (LocalFirstDoc → encrypted relay)</li>
+  <li><code>secondbrain/relay/</code> — Go relay: <code>/sync</code> blob relay and <code>/ai/forward</code> tunnel</li>
+  <li><code>secondbrain/Makefile</code> — <code>make dev</code> runs relay <code>:4501</code> + web <code>:3200</code></li>
+</ul>
+</div>
+
+<p class="footer">Sources: <code>docs_and_changelog/SECOND_BRAIN.md, docs_and_changelog/SECOND_BRAIN_UI.md, docs_and_changelog/SECOND_BRAIN_AI.md, docs_and_changelog/SECOND_BRAIN_HTML_BLOCKS.md, docs_and_changelog/SECOND_BRAIN_HTML_PAGES.md, secondbrain/web/src/, secondbrain/Makefile</code> · Last synced 2026-06-10</p>
+
+</article>
+</main>
+</div>
+</body>
+</html>

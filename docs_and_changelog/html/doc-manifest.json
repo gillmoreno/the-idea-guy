@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "description": "Maps business-logic HTML pages to source paths. Used by scripts/check-html-docs-sync.sh and the html-docs agent skill.",
+  "version": 2,
+  "description": "Maps technical HTML doc pages to source paths. Used by scripts/check-html-docs-sync.sh, the .claude/skills/html-docs skill, and the legacy .cursor html-docs skill.",
   "features": [
     {
       "id": "docs-meta",
@@ -8,79 +8,174 @@
       "doc": "docs_and_changelog/html/how-docs-work.html",
       "sources": [
         "docs_and_changelog/html/doc-manifest.json",
-        ".cursor/skills/html-docs/",
+        ".claude/skills/html-docs/",
+        ".claude/agents/doc-page-writer.md",
         "scripts/check-html-docs-sync.sh",
         "scripts/install-git-hooks.sh",
         ".githooks/"
       ]
     },
     {
-      "id": "choreboard-overview",
-      "title": "ChoreBoard product overview",
-      "doc": "docs_and_changelog/html/choreboard/overview.html",
+      "id": "backlog-rice",
+      "title": "Backlog & RICE priorities",
+      "doc": "docs_and_changelog/html/backlog.html",
       "sources": [
-        "choreboard/README.md",
-        "choreboard/web/src/app/page.tsx",
-        "choreboard/web/src/components/Welcome.tsx",
-        "choreboard/web/src/components/Setup.tsx",
-        "docs_and_changelog/CHOREBOARD_SPEC.md"
+        "docs_and_changelog/BACKLOG.md",
+        "docs_and_changelog/IDEA_LOG_AND_TOOLS.md",
+        "docs_and_changelog/business-plan-and-next-steps.html",
+        ".claude/skills/rice-backlog/"
       ]
     },
     {
-      "id": "choreboard-local-first",
-      "title": "Local-first and relay",
-      "doc": "docs_and_changelog/html/choreboard/local-first.html",
+      "id": "rooms-architecture",
+      "title": "Rooms architecture",
+      "doc": "docs_and_changelog/html/rooms/architecture.html",
       "sources": [
-        "choreboard/web/src/kit/sync.ts",
-        "choreboard/web/src/kit/crypto.ts",
-        "choreboard/relay/",
-        "docs_and_changelog/LOCAL_FIRST_KIT.md"
+        "docs_and_changelog/ROOM_KIT.md",
+        "docs_and_changelog/ROOM_KIT_ARCHITECTURE.md",
+        "docs_and_changelog/ARCHITECTURE.md",
+        "apps/rooms/web/src/shell/",
+        "apps/rooms/web/src/app/",
+        "packages/room-kit/src/types.ts"
       ]
     },
     {
-      "id": "choreboard-keys",
-      "title": "Keys and access",
-      "doc": "docs_and_changelog/html/choreboard/keys-and-access.html",
+      "id": "rooms-sync",
+      "title": "Sync & local-first",
+      "doc": "docs_and_changelog/html/rooms/sync-and-local-first.html",
       "sources": [
-        "choreboard/web/src/kit/invite.ts",
-        "choreboard/web/src/kit/crypto.ts",
-        "choreboard/web/src/lib/ChoreBoardContext.tsx",
-        "choreboard/web/src/lib/store.ts",
-        "choreboard/web/src/components/ParentGate.tsx",
-        "docs_and_changelog/CHOREBOARD_PERMISSIONS.md"
+        "docs_and_changelog/LOCAL_FIRST_KIT.md",
+        "docs_and_changelog/BACKGROUND_ROOM_SYNC.md",
+        "docs_and_changelog/RELAY_LOG_COMPACTION.md",
+        "packages/room-kit/src/sync.ts",
+        "relay/"
       ]
     },
     {
-      "id": "choreboard-permissions",
-      "title": "Kid permissions",
-      "doc": "docs_and_changelog/html/choreboard/permissions.html",
+      "id": "rooms-security",
+      "title": "Security & invites",
+      "doc": "docs_and_changelog/html/rooms/security.html",
       "sources": [
-        "choreboard/web/src/lib/permissions.ts",
-        "choreboard/web/src/lib/types.ts",
-        "choreboard/web/src/components/PermissionsSettings.tsx",
-        "choreboard/web/src/components/KidView.tsx"
+        "docs_and_changelog/ROOM_SECURITY.md",
+        "docs_and_changelog/ROOM_INVITES.md",
+        "docs_and_changelog/ROOM_DEVICE_DATA.md",
+        "packages/room-kit/src/crypto.ts",
+        "packages/room-kit/src/vaultLock.ts",
+        "packages/room-kit/src/links.ts",
+        "apps/rooms/web/src/shell/AppLockSettings.tsx"
       ]
     },
     {
-      "id": "choreboard-flows",
-      "title": "User flows",
-      "doc": "docs_and_changelog/html/choreboard/flows.html",
+      "id": "rooms-personas",
+      "title": "Personas & contacts",
+      "doc": "docs_and_changelog/html/rooms/personas-and-contacts.html",
       "sources": [
-        "choreboard/web/src/app/page.tsx",
-        "choreboard/web/src/components/ProfilePicker.tsx",
-        "choreboard/web/src/components/KidView.tsx",
-        "choreboard/web/src/components/ParentView.tsx",
-        "choreboard/web/src/lib/store.ts"
+        "docs_and_changelog/PERSONA_CONTACTS.md",
+        "docs_and_changelog/AVATAR_BRICK.md",
+        "docs_and_changelog/ACCENT_COLOR_BRICK.md",
+        "apps/rooms/web/src/shell/PersonaContactsProvider.tsx",
+        "apps/rooms/web/src/lib/contactCode.ts",
+        "apps/rooms/web/src/shell/contacts/"
       ]
     },
     {
-      "id": "choreboard-qr",
-      "title": "QR and onboarding",
-      "doc": "docs_and_changelog/html/choreboard/qr-and-onboarding.html",
+      "id": "rooms-schema",
+      "title": "Declarative schema engine",
+      "doc": "docs_and_changelog/html/rooms/schema-engine.html",
       "sources": [
-        "choreboard/web/src/kit/qr.ts",
-        "choreboard/web/src/components/QRBlock.tsx",
-        "choreboard/web/src/lib/memberSecrets.ts"
+        "docs_and_changelog/SCHEMA_SPEC_V1.md",
+        "docs_and_changelog/DECLARATIVE_SCHEMAS.md",
+        "docs_and_changelog/SCHEMA_BRICKS_CHECKLIST.md",
+        "docs_and_changelog/SCHEMA_UI_QA.md",
+        "apps/rooms/web/src/schema/"
+      ]
+    },
+    {
+      "id": "rooms-themes",
+      "title": "Themes, profile & settings",
+      "doc": "docs_and_changelog/html/rooms/themes-and-profile.html",
+      "sources": [
+        "docs_and_changelog/ROOMS_SETTINGS.md",
+        "docs_and_changelog/TEMPLATE_ICON.md",
+        "docs_and_changelog/EMOJI_PICKER.md",
+        "apps/rooms/web/src/shell/themes.ts",
+        "apps/rooms/web/src/shell/ThemeSwitcher.tsx",
+        "apps/rooms/web/src/lib/applyPersonaAccent.ts",
+        "apps/rooms/web/src/app/globals.css"
+      ]
+    },
+    {
+      "id": "template-choreboard",
+      "title": "ChoreBoard template",
+      "doc": "docs_and_changelog/html/templates/choreboard.html",
+      "sources": [
+        "docs_and_changelog/CHOREBOARD_SPEC.md",
+        "docs_and_changelog/CHOREBOARD_PERMISSIONS.md",
+        "docs_and_changelog/CHOREBOARD_FREQUENCY_LIMITS.md",
+        "apps/rooms/web/src/templates/choreboard/"
+      ]
+    },
+    {
+      "id": "template-tripsplit",
+      "title": "Trip Split template",
+      "doc": "docs_and_changelog/html/templates/tripsplit.html",
+      "sources": [
+        "docs_and_changelog/TRIP_SPLIT.md",
+        "apps/rooms/web/src/templates/tripsplit/"
+      ]
+    },
+    {
+      "id": "template-bookclub",
+      "title": "Book Club template",
+      "doc": "docs_and_changelog/html/templates/bookclub.html",
+      "sources": [
+        "docs_and_changelog/BOOK_CLUB.md",
+        "apps/rooms/web/src/templates/bookclub/"
+      ]
+    },
+    {
+      "id": "template-fitcrew",
+      "title": "Fit Crew template",
+      "doc": "docs_and_changelog/html/templates/fitcrew.html",
+      "sources": [
+        "docs_and_changelog/FIT_CREW.md",
+        "apps/rooms/web/src/templates/fitcrew/"
+      ]
+    },
+    {
+      "id": "template-backlog",
+      "title": "Backlog room template",
+      "doc": "docs_and_changelog/html/templates/backlog-room.html",
+      "sources": [
+        "docs_and_changelog/BACKLOG.md",
+        "apps/rooms/web/src/templates/backlog/"
+      ]
+    },
+    {
+      "id": "secondbrain",
+      "title": "Second Brain",
+      "doc": "docs_and_changelog/html/secondbrain/overview.html",
+      "sources": [
+        "docs_and_changelog/SECOND_BRAIN.md",
+        "docs_and_changelog/SECOND_BRAIN_UI.md",
+        "docs_and_changelog/SECOND_BRAIN_AI.md",
+        "docs_and_changelog/SECOND_BRAIN_HTML_BLOCKS.md",
+        "docs_and_changelog/SECOND_BRAIN_HTML_PAGES.md",
+        "secondbrain/web/src/",
+        "secondbrain/relay/"
+      ]
+    },
+    {
+      "id": "website",
+      "title": "The Idea Guy website",
+      "doc": "docs_and_changelog/html/website/overview.html",
+      "sources": [
+        "docs_and_changelog/IDEA_LOG_AND_TOOLS.md",
+        "docs_and_changelog/BUILDS_SECTION.md",
+        "docs_and_changelog/CONTENT_API.md",
+        "docs_and_changelog/POSITIONING_LENS.md",
+        "frontend/src/",
+        "backend/"
       ]
     }
   ]

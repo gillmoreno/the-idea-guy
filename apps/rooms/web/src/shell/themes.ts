@@ -7,10 +7,10 @@ export interface ThemeDef {
 }
 
 export const THEMES: ThemeDef[] = [
-  { id: "classic", name: "Classic", tagline: "Clean & minimal (current)" },
-  { id: "paper", name: "Paper", tagline: "Warm neutrals, flat surfaces" },
-  { id: "signal", name: "Signal", tagline: "Grid, contrast, control-panel" },
-  { id: "glow", name: "Glow", tagline: "Glass depth & accent shine" },
+  { id: "classic", name: "Classic", tagline: "Clean & minimal — full-color nav" },
+  { id: "paper", name: "Paper", tagline: "Warm neutrals, soft nav icons" },
+  { id: "signal", name: "Signal", tagline: "Control panel — mono nav, color on active" },
+  { id: "glow", name: "Glow", tagline: "Floating glass bar, accent glow on active" },
 ];
 
 export const THEME_STORAGE_KEY = "rooms.theme.v1";

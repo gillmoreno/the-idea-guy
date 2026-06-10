@@ -12,7 +12,7 @@ export function ThemeSwitcher({ compact }: { compact?: boolean }) {
       {!compact && (
         <p className="muted" style={{ fontSize: 13 }}>
           Four CSS-only themes — no images, snappy on mobile. Applies to every screen in Rooms on
-          this device.
+          this device, including bottom navigation icon style.
         </p>
       )}
       <div className="theme-grid">
