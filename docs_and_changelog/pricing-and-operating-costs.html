@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rooms — Pricing &amp; Operating Costs</title>
+<style>
+  :root{
+    --bg:#0b0e16;
+    --panel:#121726;
+    --panel-2:#0f1422;
+    --ink:#e8ecf6;
+    --muted:#9aa6c0;
+    --line:#222a3d;
+    --primary:#6366f1;
+    --primary-soft:rgba(99,102,241,.14);
+    --green:#22c55e;
+    --amber:#f59e0b;
+    --red:#ef4444;
+    --cyan:#22d3ee;
+    --maxw:920px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--primary);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  header.hero{
+    background:
+      radial-gradient(1200px 400px at 20% -10%, rgba(99,102,241,.35), transparent 60%),
+      radial-gradient(900px 380px at 90% 0%, rgba(34,211,238,.18), transparent 55%),
+      linear-gradient(180deg,#0d1322,#0b0e16);
+    border-bottom:1px solid var(--line);
+    padding:64px 0 40px;
+  }
+  .eyebrow{color:var(--cyan);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px;margin:0 0 12px}
+  h1{font-size:40px;line-height:1.1;margin:0 0 14px;letter-spacing:-.02em}
+  .tagline{font-size:20px;color:var(--muted);max-width:680px;margin:0}
+  .meta{margin-top:20px;color:var(--muted);font-size:13px}
+  .pill{display:inline-block;background:var(--primary-soft);color:#c3c6ff;border:1px solid #2c2f5a;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;margin-right:6px}
+  nav.toc{
+    position:sticky;top:0;z-index:5;background:rgba(11,14,22,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:10px 0;
+  }
+  nav.toc .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+  nav.toc a{color:var(--muted);font-weight:600}
+  nav.toc a:hover{color:var(--ink);text-decoration:none}
+  section{padding:40px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+  h2 .num{color:var(--primary);font-weight:800;margin-right:10px}
+  h3{font-size:18px;margin:26px 0 8px}
+  p{margin:12px 0}
+  .lead{color:var(--muted);font-size:17px;margin-top:0}
+  ul,ol{margin:12px 0;padding-left:22px}
+  li{margin:6px 0}
+  code{background:#0e1424;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px;color:#bfe0ff}
+  .grid{display:grid;gap:14px}
+  @media(min-width:640px){.grid.cols-2{grid-template-columns:1fr 1fr}.grid.cols-3{grid-template-columns:1fr 1fr 1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card h4{margin:0 0 6px;font-size:15px}
+  .card p{margin:6px 0;color:var(--muted);font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#0e1424;color:#c7d2f0;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  tr:last-child td{border-bottom:none}
+  .callout{border-radius:14px;padding:16px 18px;margin:18px 0;border:1px solid}
+  .callout .k{font-weight:700;display:block;margin-bottom:4px}
+  .callout.good{background:rgba(34,197,94,.08);border-color:#1f5135}
+  .callout.warn{background:rgba(245,158,11,.08);border-color:#5b4516}
+  .callout.bad{background:rgba(239,68,68,.08);border-color:#5a2222}
+  .callout.key{background:var(--primary-soft);border-color:#2c2f5a}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .ascii{background:#0a0f1c;border:1px solid var(--line);border-radius:12px;padding:16px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.5;color:#a9c7ff}
+  .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+  .tag.free{background:rgba(34,197,94,.16);color:#86efac}
+  .tag.byok{background:rgba(34,211,238,.16);color:#a5f3fc}
+  .tag.plus{background:rgba(99,102,241,.18);color:#c3c6ff}
+  .big{font-size:30px;font-weight:800;letter-spacing:-.02em}
+  .big.green{color:var(--green)} .big.amber{color:var(--amber)}
+  footer{padding:36px 0 60px;color:var(--muted);font-size:13px}
+  hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Pricing &amp; Operating Costs</p>
+    <h1>Rooms</h1>
+    <p class="tagline">A free tier generous enough to go viral, a paid tier worth paying for, and a worst-case monthly bill that is a number we choose — not one that happens to us.</p>
+    <div class="meta">
+      <span class="pill">Viral surface = free</span>
+      <span class="pill">Costly surface = paid</span>
+      <span class="pill">Hard spend caps</span>
+      <br><br>
+      Draft · June 2026 · internal strategy document · pairs with <a href="business-plan-and-next-steps.html">Business Plan &amp; Next Steps</a> and <a href="go-to-market.html">Go-to-Market</a>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#principle">The principle</a>
+    <a href="#per-user">Cost per user</a>
+    <a href="#burn">Monthly burn</a>
+    <a href="#free">Free tier</a>
+    <a href="#paid">Why people pay</a>
+    <a href="#rails">Budget safety rails</a>
+    <a href="#sequence">Rollout sequence</a>
+    <a href="#decisions">Open decisions</a>
+  </div>
+</nav>
+
+<main>
+
+<section id="principle">
+  <div class="wrap">
+    <h2><span class="num">01</span>The principle: the viral surface is free, the costly surface is paid</h2>
+    <p class="lead">Rooms splits cleanly into two surfaces with opposite economics. The whole pricing strategy is: never confuse them.</p>
+    <table>
+      <thead><tr><th>Surface</th><th>What's on it</th><th>Marginal cost to us</th><th>Policy</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Viral surface</strong></td>
+          <td>Joining rooms, using rooms, sharing links/QR, built-in templates, catalog rooms, number of rooms &amp; members</td>
+          <td><span style="color:var(--green)">≈ $0</span> (once relay eviction ships, a room costs ~100KB of RAM only while active)</td>
+          <td><strong>Free forever, never gated.</strong> Every limit here is a hole in the growth loop.</td>
+        </tr>
+        <tr>
+          <td><strong>Costly surface</strong></td>
+          <td>AI generation (one-shot, ~$0.0006/call) and the ambient helper (recurring, ~$0.01–0.02/room/mo platform-hosted)</td>
+          <td><span style="color:var(--amber)">Real but tiny</span> — and entirely AI, not infra</td>
+          <td><strong>Metered free taste, then paid.</strong> The only place money is charged is the only place money is spent.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout key">
+      <span class="k">Why this resolves the virality-vs-budget tension</span>
+      The thing that spreads the product (join → use → share → make your own) and the thing that costs money (AI calls) are <em>different features</em>. So the free tier can be unlimited on every viral dimension without the bill scaling with virality. A million people joining rooms costs roughly one VPS; a million people <em>generating</em> is the only thing that scales spend — and that is capped, rate-limited, and cheap per unit.
+    </div>
+  </div>
+</section>
+
+<section id="per-user">
+  <div class="wrap">
+    <h2><span class="num">02</span>What each kind of user actually costs</h2>
+    <p class="lead">Assumes the two launch gates have shipped: relay lazy-load + idle eviction, and the stateless generation proxy. Generation ≈ 2,000 tokens at a cheap fast tier ≈ $0.0006/call (business plan §03).</p>
+    <table>
+      <thead><tr><th>User type</th><th>What they do</th><th>Cost to us</th><th>Revenue</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Joiner</strong> (most users — the viral edge)</td>
+          <td>Scans a QR, uses rooms, never generates</td>
+          <td><span class="mono">≈ $0.001–0.002/mo</span> (share of relay RAM + bandwidth)</td>
+          <td>$0 — and that's correct; they are the distribution channel</td>
+        </tr>
+        <tr>
+          <td><strong>Free creator</strong></td>
+          <td>Uses up to 15 free generations, makes rooms, shares them</td>
+          <td><span class="mono">≤ $0.009 lifetime</span> AI + relay pennies</td>
+          <td>$0 — the growth engine, not a loss leader to minimize</td>
+        </tr>
+        <tr>
+          <td><strong>BYOK / Ollama / self-host</strong></td>
+          <td>Unlimited generation + on-device helper on their own key/hardware</td>
+          <td><span class="mono">$0</span></td>
+          <td>$0 — buys goodwill with the exact audience that amplifies us</td>
+        </tr>
+        <tr>
+          <td><strong>Rooms Plus subscriber</strong></td>
+          <td>Unlimited one-tap generation + platform-hosted ambient helper (say 10 active helper rooms)</td>
+          <td><span class="mono">≈ $0.20–0.40/mo</span> AI + relay pennies</td>
+          <td>$3–5/mo → <strong style="color:var(--green)">~90% gross margin</strong></td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The asymmetry to internalize: <strong>one Plus subscriber pays for the AI of ~500 free creators or the relay share of thousands of joiners.</strong> Even a 1% conversion rate is comfortably profitable.</p>
+  </div>
+</section>
+
+<section id="burn">
+  <div class="wrap">
+    <h2><span class="num">03</span>Monthly burn at different scales</h2>
+    <p class="lead">Expected vs worst-case, with the safety rails of §06 in place. Assumptions: ~30% of monthly actives are new; ~25% of users ever generate; average 3 generations per creator (cap 15). Relay on a commodity VPS (Hetzner/Fly class).</p>
+    <table>
+      <thead><tr><th>Scale (MAU)</th><th>Relay (RAM + bandwidth + disk)</th><th>AI generation subsidy</th><th>Expected total</th><th>Worst case (every creator maxes 15 spells)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1,000</strong></td><td>$6–12 (one small VPS)</td><td>~$0.15</td><td class="mono">&lt; $15/mo</td><td class="mono">~$13 AI → still &lt; $25/mo</td></tr>
+        <tr><td><strong>10,000</strong></td><td>$12–25</td><td>~$1.50</td><td class="mono">&lt; $30/mo</td><td class="mono">~$135 AI → capped at the §06 spend ceiling</td></tr>
+        <tr><td><strong>100,000</strong></td><td>$40–100 (bigger box or 2 shards)</td><td>~$15</td><td class="mono">&lt; $120/mo</td><td class="mono">capped — proxy degrades gracefully, see §06</td></tr>
+      </tbody>
+    </table>
+    <div class="callout good">
+      <span class="k">The headline</span>
+      At 10,000 monthly actives the expected bill is <span class="mono">~$30/mo</span> — less than one Plus subscriber per thousand users needs to cover. The platform is structurally cheap because the expensive thing (storing and serving everyone's data) is done by the users' own devices.
+    </div>
+    <div class="callout warn">
+      <span class="k">The two things that would break this table</span>
+      (1) Relay without eviction: RAM scales with all-rooms-ever instead of active rooms — that's why it's a hard launch gate. (2) Unmetered generation: without the spell cap + rate limits, a scripted abuser, not real users, sets the AI bill. Both are solved by design, not by hoping.
+    </div>
+    <p><em>All numbers are pre-launch estimates. Phase 0 (§07) exists to replace them with measured generations-per-user, %-creators, and real room sizes.</em></p>
+  </div>
+</section>
+
+<section id="free">
+  <div class="wrap">
+    <h2><span class="num">04</span>Free tier design — the virality engine</h2>
+    <div class="grid cols-2">
+      <div class="card"><h4>Unlimited, forever, never gated</h4><p>Joining, using, sharing, built-in templates, catalog rooms, room count, member count. No accounts, no trials, no watermarks on the viral path.</p></div>
+      <div class="card"><h4>15 free "spells" (AI generations)</h4><p>Enough to feel the magic several times and build 2–3 real custom rooms. Device-counted + persona-signed (rate-limitable without accounts). Lifetime cost ceiling: ~$0.009/user.</p></div>
+      <div class="card"><h4>Viral refill: earn spells by growing the product</h4><p><strong>+5 spells when a new persona joins a room you generated</strong> (capped, e.g. +30/mo). The scarce resource is paid out for exactly the behavior that spreads Rooms — and each reward costs us ~$0.003. Growth and generosity point the same direction.</p></div>
+      <div class="card"><h4>BYOK / Ollama: the pressure valve</h4><p>Unlimited everything on your own key or hardware, $0 to us. Kills the "greedy paywall" criticism before it exists and serves the privacy audience that markets us.</p></div>
+    </div>
+    <div class="callout key">
+      <span class="k">Design intent</span>
+      A free user should never hit a wall while <em>using or sharing</em> Rooms — only while <em>creating new software with our AI money</em>. By the time someone exhausts 15+ spells they have made several rooms, invited friends, and proven intent: that's the conversion moment, not an annoyance.
+    </div>
+  </div>
+</section>
+
+<section id="paid">
+  <div class="wrap">
+    <h2><span class="num">05</span>Why people pay — the incentive has to be recurring</h2>
+    <p class="lead">"Unlimited generations" alone is a weak subscription: creation is bursty, and a one-time need converts once then churns. The strong incentive is the <strong>ambient helper</strong> — the only feature with ongoing marginal cost is also the only one with ongoing value.</p>
+    <div class="grid cols-3">
+      <div class="card">
+        <span class="tag free">FREE</span>
+        <h4 style="margin-top:8px">Everyone</h4>
+        <p>Unlimited use + share. 15 spells + viral refills. The growth engine.</p>
+      </div>
+      <div class="card">
+        <span class="tag byok">BYOK / OLLAMA</span>
+        <h4 style="margin-top:8px">Developers, privacy folks</h4>
+        <p>Unlimited generation + on-device helper. $0 to us, goodwill to them.</p>
+      </div>
+      <div class="card">
+        <span class="tag plus">ROOMS PLUS · $4/mo</span>
+        <h4 style="margin-top:8px">Mainstream fans</h4>
+        <p>Unlimited one-tap generation + platform-hosted ambient helper: weekly proposals, "while you were away" digests, rooms that feel alive.</p>
+      </div>
+    </div>
+    <h3>Where conversion happens (high-intent moments only)</h3>
+    <ul>
+      <li><strong>The 16th spell</strong> — "you've built 3 rooms your friends use; keep conjuring for $4/mo (or plug in your own key for free)".</li>
+      <li><strong>The helper toggle</strong> — "let AI keep this room fresh every week" inside a room people already love. This is the moment recurring value is obvious.</li>
+      <li>Never on join, never on open, never via nag — calm stance applies to monetization too.</li>
+    </ul>
+    <h3>Price point</h3>
+    <p>Anchor at <strong>$4/mo or $40/yr</strong> (test $3 vs $5 later — at 90% margins, conversion rate matters far more than the digit). One paid tier only; complexity is a tax on a solo operator.</p>
+  </div>
+</section>
+
+<section id="rails">
+  <div class="wrap">
+    <h2><span class="num">06</span>Budget safety rails — the bill is a chosen number</h2>
+    <p class="lead">"I don't have infinite money" is a design constraint, so the worst case must be engineered, not hoped for.</p>
+    <table>
+      <thead><tr><th>Rail</th><th>Mechanism</th><th>What it bounds</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Hard monthly spend cap on the proxy</strong></td><td>Pick a number (e.g. $50/mo). When hit, free generation degrades gracefully: the app falls back to BYOK + the existing copy-paste prompt flow, with an honest message. Nothing breaks — generation is an enhancement, not a dependency.</td><td>The absolute worst-case AI bill</td></tr>
+        <tr><td><strong>Schema-constrained output</strong></td><td>Proxy only returns a valid <code>RoomSchema</code> with a hard token cap — useless as a free general-purpose LLM</td><td>Abuse value of the free tier</td></tr>
+        <tr><td><strong>Signed requests, no accounts</strong></td><td>Generation requests signed with the existing persona keypair → per-key rate limits; plus edge IP limits and the device-side spell counter</td><td>Scripted farming of free spells</td></tr>
+        <tr><td><strong>Relay eviction + caps</strong></td><td>Lazy-load on connect, idle eviction (self-healing via checkpoints), max blob size, per-IP room-creation caps</td><td>RAM, disk, and storage abuse — the relay can't be used as a free encrypted dropbox</td></tr>
+        <tr><td><strong>Helper is paid-only</strong></td><td>The only recurring AI cost never runs for free users (BYOK runs it on their own key/device)</td><td>The only cost that compounds over time</td></tr>
+      </tbody>
+    </table>
+    <div class="callout good">
+      <span class="k">Net effect</span>
+      Fixed floor ≈ one VPS + domains (~$15–30/mo). Variable ceiling ≈ the proxy spend cap you choose. Everything else is structurally $0. A viral moment can max out the generation budget for the month — it cannot generate a surprise invoice.
+    </div>
+  </div>
+</section>
+
+<section id="sequence">
+  <div class="wrap">
+    <h2><span class="num">07</span>Rollout sequence — don't charge before the recurring value exists</h2>
+    <ol>
+      <li><strong>Phase 0 · Friends &amp; family (now):</strong> everything free, BYOK wired. <em>Measure:</em> generations per creator, % of users who create vs join, room sizes, retention per template. These numbers replace every guess in §02–§03.</li>
+      <li><strong>Phase 1 · Public launch:</strong> Free (15 spells + viral refill) + BYOK. <strong>No paid tier yet</strong> — charging for unlimited generations alone is a weak offer, and an empty paywall at launch dampens the viral loop precisely when it matters most. Optional: an "early supporter" tip with a founder badge, grandfathered into Plus later.</li>
+      <li><strong>Phase 2 · Rooms Plus (when the ambient helper ships):</strong> $4/mo at the two high-intent moments (§05). The helper is the reason the subscription exists; launching them together makes the offer honest.</li>
+    </ol>
+    <div class="callout warn">
+      <span class="k">The discipline this requires</span>
+      Phase 1 will earn $0 by design. The temptation to bolt on a paywall early should be answered with: conversion needs recurring value, recurring value needs the helper, and meanwhile the entire platform costs less per month than a dinner out (§03).
+    </div>
+  </div>
+</section>
+
+<section id="decisions">
+  <div class="wrap">
+    <h2><span class="num">08</span>Open decisions (Gil's call)</h2>
+    <ul>
+      <li><strong>Proxy spend cap:</strong> the worst-case monthly AI number — $25? $50? $100?</li>
+      <li><strong>Spell count:</strong> 15 is the working number; phase 0 data may say 10 or 25.</li>
+      <li><strong>Viral refill mechanic:</strong> in or out? (Recommended in — it aligns the scarce resource with growth; needs anti-gaming caps: unique personas only, per-room and per-month limits.)</li>
+      <li><strong>Price point:</strong> $3 / $4 / $5 — recommend $4, decide before Phase 2 only.</li>
+      <li><strong>Proxy model/provider:</strong> any cheap fast tier works at ~2k tokens/call (Haiku-class, Flash-class); pick on JSON reliability, not price — the call is $0.0006 either way.</li>
+      <li><strong>Relay hosting:</strong> Hetzner-class VPS (cheapest, generous bandwidth) vs Fly.io (easier multi-region later). Either fits the §03 table.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Rooms — internal strategy draft. Pairs with <a href="business-plan-and-next-steps.html">Business Plan &amp; Next Steps</a> · <a href="go-to-market.html">Go-to-Market</a> · cost/AI groundwork in business plan §03–§06.
+  </div>
+</footer>
+
+</body>
+</html>

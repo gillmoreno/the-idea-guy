@@ -8,6 +8,13 @@ services:
     environment:
       RELAY_ADDR: ":4500"
       RELAY_DATA_DIR: "/data"
+      # Cache behavior + abuse caps (defaults shown; see docs_and_changelog/CHOREBOARD_RELAY.md)
+      # RELAY_EVICT_AFTER: "30m"            # evict idle peer-less rooms from RAM (0 = never)
+      # RELAY_EXPIRE_AFTER: "0"             # delete room files idle this long from disk (0 = never)
+      # RELAY_MAX_MSG_BYTES: "8388608"      # 8 MiB per encrypted frame
+      # RELAY_MAX_ROOM_LOG_BYTES: "67108864" # 64 MiB per-room backlog before a checkpoint is required
+      # RELAY_MAX_CONNS_PER_IP: "128"
+      # RELAY_ROOM_CREATES_PER_IP_HOUR: "120"
     volumes:
       - choreboard-relay-data:/data
     restart: unless-stopped

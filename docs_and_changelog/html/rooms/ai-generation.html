@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI generation — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../backlog.html">Backlog &amp; priorities</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>Rooms platform</h2>
+      <a href="architecture.html">Architecture</a>
+      <a href="sync-and-local-first.html">Sync &amp; local-first</a>
+      <a href="security.html">Security &amp; invites</a>
+      <a href="personas-and-contacts.html">Personas &amp; contacts</a>
+      <a href="schema-engine.html">Schema engine</a>
+      <a href="ai-generation.html" class="active">AI generation</a>
+      <a href="themes-and-profile.html">Themes &amp; profile</a>
+      <h2>Templates</h2>
+      <a href="../templates/choreboard.html">ChoreBoard</a>
+      <a href="../templates/tripsplit.html">Trip Split</a>
+      <a href="../templates/bookclub.html">Book Club</a>
+      <a href="../templates/fitcrew.html">Fit Crew</a>
+      <a href="../templates/backlog-room.html">Backlog room</a>
+      <h2>Other apps</h2>
+      <a href="../secondbrain/overview.html">Second Brain</a>
+      <a href="../website/overview.html">Website</a>
+      <a href="../inkanto/overview.html">Inkanto</a>
+    </nav>
+    <main>
+      <article>
+        <h1>AI generation</h1>
+        <p class="lead">Type one sentence on the Create screen, tap ✨ Generate room, and a validated RoomSchema lands in the JSON box — ready to create and share — without any room content ever touching an AI.</p>
+
+        <h2>What it is</h2>
+        <p>The schema engine already lets anyone build a room from JSON, but the original flow asked users to copy a system prompt into their own AI chat and paste the output back. AI generation removes that round trip: Create → Paste JSON → "Describe it" shows a textarea ("my 4 roommates vote on what to cook this week"), a single button does the AI call, and the result drops into the same JSON box the paste flow uses. The existing validator and create flow take it from there — generation adds an on-ramp, it doesn't add a new path.</p>
+        <div class="card">
+          <strong>The hero moment</strong>
+          One plain sentence becomes a working, synced, shareable app in seconds. Everything underneath — validation, the encrypted room document, the invite flow — is the machinery that already existed for pasted schemas.
+        </div>
+
+        <h2>The privacy boundary</h2>
+        <p>This is the load-bearing decision. Rooms has exactly two backends with two very different trust profiles, and generation never blurs the line:</p>
+        <table>
+          <tr><th></th><th>Relay (:4500)</th><th>Genproxy (:4600)</th></tr>
+          <tr><td>Sees</td><td>Opaque encrypted blobs only</td><td>The user's app <em>description</em> only</td></tr>
+          <tr><td>Touches room content?</td><td>Never (ciphertext)</td><td>Never (descriptions aren't room data)</td></tr>
+          <tr><td>State</td><td>Encrypted snapshots</td><td>None — one monthly spend counter</td></tr>
+          <tr><td>Who chose to send it</td><td>Automatic sync</td><td>The user, explicitly, by typing it</td></tr>
+        </table>
+        <p>A generation prompt is an app description the user deliberately sends to an AI ("a chore app where roommates vote") — never end-to-end-encrypted room content. The relay is untouched by all of this and stays dumb. Two AI workloads exist in the plan; this is <strong>generation</strong> only. The ambient helper (digests that would read room content) is a separate, later spec with its own consent model.</p>
+
+        <h2>The stateless proxy</h2>
+        <p><code>genproxy/</code> is a small separate Go service that exists so the platform AI key never reaches a browser. It holds the key and the system prompt server-side, takes <code>POST /generate</code> with a ≤500-character description, calls the upstream model, strips markdown fences, sanity-checks the shape, and returns <code>{"schema": …}</code>. Full validation stays client-side, same as for pasted JSON.</p>
+        <p>It is deliberately useless to abusers and cheap to run:</p>
+        <ul>
+          <li><strong>Not a free LLM.</strong> The system prompt is server-controlled, output is JSON-constrained, and a low <code>max_tokens</code> cap (1600) means there is nothing to extract except room schemas.</li>
+          <li><strong>Per-IP token bucket</strong> — 20 generations per hour by default (same mechanism as the relay's limiter; trusts <code>CF-Connecting-IP</code>/<code>X-Forwarded-For</code> because production sits behind a proxy).</li>
+          <li><strong>Hard monthly spend cap</strong> — default $10. The proxy's only state is a small spend counter (optionally a JSON file so restarts don't reset the meter). The worst-case AI bill is a chosen number, not a surprise.</li>
+          <li><strong>No database, no logs of descriptions, no stored outputs, no accounts.</strong></li>
+        </ul>
+        <div class="card">
+          <strong>Graceful degradation, by contract</strong>
+          When the budget is gone, <code>/generate</code> returns <code>429 budget_exhausted</code> and the app shows "Free generation is resting this month" — pointing at the copy-paste prompt flow, which works with any AI chat, free and unlimited. The same fallback message covers rate limits, network failures, and unusable model output. Generation is an enhancement, never a dependency; the paste-JSON path is the universal fallback underneath.
+        </div>
+
+        <h2>Free "spells"</h2>
+        <p>Each device gets 15 free generations, counted in <code>localStorage</code>. This is openly <em>honest-majority</em> enforcement in v1 — clearing storage resets it — because the proxy's per-IP and monthly caps are the real rails; the device counter just sets expectations ("12 of 15 free generations left on this device") and nudges heavy users toward the unlimited copy-paste flow. Persona-signed budgets with per-key limits and viral refills (invite friends, earn spells) are the planned v2, once personas ship request signing.</p>
+
+        <h2>Upstream: swappable by design</h2>
+        <p>Three lanes, picked entirely by env — the rails (budget, rate limits, schema checks) are identical in all of them:</p>
+        <ul>
+          <li><strong><code>GENPROXY_PROVIDER=anthropic</code> (default):</strong> the official Anthropic Go SDK → Claude Messages API with <code>claude-haiku-4-5</code> (~$0.0035 per generation; the $10 budget ≈ 2,800 generations). Needs an Anthropic API key.</li>
+          <li><strong><code>GENPROXY_PROVIDER=openai</code>:</strong> any OpenAI-compatible chat-completions endpoint — e.g. OpenCode Zen with <code>deepseek-v4-flash</code> (~$0.0004 per generation, needs a funded Zen balance).</li>
+          <li><strong>Phase 0, no API billing — the claude-sidecar:</strong> <code>genproxy/claude-sidecar/</code> applies the Inkanto pattern (<code>inkanto/ai-sidecar/</code>): a localhost Node adapter wrapping the Claude Agent SDK, authenticated with <code>CLAUDE_CODE_OAUTH_TOKEN</code> from <code>claude setup-token</code>, drawing from the Claude subscription's monthly Agent SDK credit. It exposes the OpenAI shape on <code>127.0.0.1:4601</code>, so genproxy points the <code>openai</code> provider at it with zeroed $ prices. Personal-use lane only — swap to a real key for public launch.</li>
+        </ul>
+        <table>
+          <tr><th>Variable</th><th>Default</th><th>Notes</th></tr>
+          <tr><td><code>GENPROXY_ADDR</code></td><td><code>:4600</code></td><td>Listen address</td></tr>
+          <tr><td><code>GENPROXY_PROVIDER</code></td><td><code>anthropic</code></td><td><code>anthropic</code> (Claude SDK) or <code>openai</code> (OpenAI-compatible)</td></tr>
+          <tr><td><code>GENPROXY_UPSTREAM_URL</code></td><td>OpenCode Zen chat completions</td><td><code>openai</code> provider only</td></tr>
+          <tr><td><code>GENPROXY_API_KEY</code></td><td>(required)</td><td>Platform key; never reaches clients. <code>ANTHROPIC_API_KEY</code> works as fallback on the anthropic provider</td></tr>
+          <tr><td><code>GENPROXY_MODEL</code></td><td><code>claude-haiku-4-5</code> / <code>deepseek-v4-flash</code></td><td>Per-provider default</td></tr>
+          <tr><td><code>GENPROXY_MAX_TOKENS</code></td><td><code>1600</code></td><td>Output cap</td></tr>
+          <tr><td><code>GENPROXY_MAX_DESC_CHARS</code></td><td><code>500</code></td><td>Input cap</td></tr>
+          <tr><td><code>GENPROXY_GENS_PER_IP_HOUR</code></td><td><code>20</code></td><td>Token bucket; <code>0</code> = unlimited</td></tr>
+          <tr><td><code>GENPROXY_MONTHLY_BUDGET_USD</code></td><td><code>10</code></td><td>Hard cap → <code>budget_exhausted</code></td></tr>
+          <tr><td><code>GENPROXY_PRICE_IN_USD</code> / <code>GENPROXY_PRICE_OUT_USD</code></td><td><code>1.00</code>/<code>5.00</code> or <code>0.14</code>/<code>0.28</code></td><td>$ per 1M tokens, feeds the spend counter; per-provider default</td></tr>
+          <tr><td><code>GENPROXY_DATA_DIR</code></td><td>(empty)</td><td>Persist the monthly counter across restarts</td></tr>
+          <tr><td><code>GENPROXY_ALLOW_ORIGIN</code></td><td><code>*</code></td><td>CORS for the PWA origin</td></tr>
+        </table>
+        <p>On the client, <code>NEXT_PUBLIC_GENPROXY_URL</code> points the PWA at the proxy (defaults to <code>http://localhost:4600</code> in dev). When it's unset in a prod build, the "Describe it" section is hidden entirely and the panel falls back to copy-paste only — the feature flag is the URL itself.</p>
+
+        <h2>Behavior users see</h2>
+        <ul>
+          <li>"Describe it" at the top of the Paste JSON panel: a 3-row textarea (capped at 500 chars), the ✨ Generate room button, and the spell counter.</li>
+          <li>"Conjuring…" while it runs; on success the pretty-printed schema appears in the JSON box and one spell is spent.</li>
+          <li>On any failure — rate limit, exhausted budget, network, garbage output — a short friendly message always routes to the copy-paste prompt below as the no-limits alternative.</li>
+          <li>The copy-paste section ("Or use your own AI chat") and one-tap examples remain right underneath, unchanged.</li>
+        </ul>
+
+        <h2>Tradeoffs</h2>
+        <ul>
+          <li><strong>Honest device counter</strong> — trivially resettable, accepted because the server-side caps bound real cost; signing waits for personas v2.</li>
+          <li><strong>Two prompts to keep in sync</strong> — the canonical prompt lives in <code>schema/prompt.ts</code>; the proxy embeds an API-adapted copy (<code>genproxy/prompt.txt</code>). When the schema spec evolves, both must move.</li>
+          <li><strong>No streaming, no in-app BYOK</strong> — schemas are small enough that a spinner is fine, and the copy-paste flow already serves power users. Both deliberately out of v1.</li>
+          <li><strong>Hard budget means hard stops</strong> — late in a busy month, free generation can be off for everyone. That's the point: the fallback is free, and the bill is bounded.</li>
+        </ul>
+
+        <h2>Key code paths</h2>
+        <ul>
+          <li><code>genproxy/main.go</code></li>
+          <li><code>genproxy/budget.go</code></li>
+          <li><code>genproxy/limits.go</code></li>
+          <li><code>genproxy/prompt.txt</code></li>
+          <li><code>apps/rooms/web/src/schema/generate.ts</code></li>
+          <li><code>apps/rooms/web/src/schema/spells.ts</code></li>
+          <li><code>apps/rooms/web/src/schema/engine/SchemaPromptPanel.tsx</code></li>
+          <li><code>apps/rooms/web/src/schema/prompt.ts</code></li>
+        </ul>
+        <p>The full generation contract — error codes, hard rules, what's explicitly out of v1 — lives in <code>docs_and_changelog/ROOM_AI.md</code>; this page doesn't duplicate it.</p>
+
+        <p class="footer">Sources: <code>docs_and_changelog/ROOM_AI.md, genproxy/, apps/rooms/web/src/schema/generate.ts, apps/rooms/web/src/schema/spells.ts, apps/rooms/web/src/schema/engine/SchemaPromptPanel.tsx</code> · Last synced 2026-06-10</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>

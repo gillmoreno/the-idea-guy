@@ -1,0 +1,398 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Theme tokens — every theme defines the same set of variables.
+   Switch with <html data-theme="duo|notion|notte|carta"> (see theme.ts).
+--------------------------------------------------------------------------- */
+
+:root,
+[data-theme="duo"] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f4f4f2;
+  --line: #e5e5e2;
+  --fg: #4b4b4b;
+  --muted: #94948e;
+  --accent: #58cc02;
+  --accent-edge: #46a302;
+  --accent-fg: #ffffff;
+  --pop: #ce82ff;
+  --pop-edge: #a568cf;
+  --pop-fg: #3a1d52;
+  --link: #1cb0f6;
+  --danger: #ea2b2b;
+  --radius: 16px;
+  --btn-edge: 4px;
+  --shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+  --font-display: "Nunito", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+}
+
+[data-theme="notion"] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f7f7f5;
+  --line: #e9e9e7;
+  --fg: #37352f;
+  --muted: #91918c;
+  --accent: #2e75cc;
+  --accent-edge: #2e75cc;
+  --accent-fg: #ffffff;
+  --pop: #d9730d;
+  --pop-edge: #d9730d;
+  --pop-fg: #ffffff;
+  --link: #2e75cc;
+  --danger: #e03e3e;
+  --radius: 8px;
+  --btn-edge: 0px;
+  --shadow: 0 1px 2px rgb(15 15 15 / 0.04);
+  --font-display: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, sans-serif;
+  --font-body: ui-sans-serif, -apple-system, "Segoe UI", Helvetica, sans-serif;
+}
+
+[data-theme="notte"] {
+  color-scheme: dark;
+  --bg: #12101f;
+  --surface: #1c1930;
+  --surface-2: #262240;
+  --line: #353052;
+  --fg: #e8e2d4;
+  --muted: #9b94b8;
+  --accent: #d4a843;
+  --accent-edge: #a07c25;
+  --accent-fg: #1f1605;
+  --pop: #8d7bc7;
+  --pop-edge: #6c5da3;
+  --pop-fg: #f1edff;
+  --link: #b9aef0;
+  --danger: #ff7b7b;
+  --radius: 14px;
+  --btn-edge: 0px;
+  --shadow: 0 8px 24px rgb(0 0 0 / 0.35);
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: Georgia, "Times New Roman", serif;
+}
+
+[data-theme="carta"] {
+  color-scheme: light;
+  --bg: #f5efe2;
+  --surface: #fffdf7;
+  --surface-2: #f1e9d8;
+  --line: #e0d5bd;
+  --fg: #3a2e25;
+  --muted: #8a7d6d;
+  --accent: #c4552d;
+  --accent-edge: #97401f;
+  --accent-fg: #fff7ee;
+  --pop: #79885d;
+  --pop-edge: #5d6a45;
+  --pop-fg: #f6f8ee;
+  --link: #a05c2c;
+  --danger: #b3342a;
+  --radius: 12px;
+  --btn-edge: 0px;
+  --shadow: 0 1px 4px rgb(90 70 40 / 0.12);
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: Georgia, "Times New Roman", serif;
+}
+
+/* Expose tokens to Tailwind utilities (bg-surface, text-fg, border-line, …) */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-pop: var(--pop);
+  --color-pop-fg: var(--pop-fg);
+  --color-link: var(--link);
+  --color-danger: var(--danger);
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+
+html {
+  background: var(--bg);
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--fg);
+  background: var(--bg);
+  min-height: 100dvh;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+h1, h2, h3, button {
+  font-family: var(--font-display);
+}
+
+/* Notte gets a faint star field */
+[data-theme="notte"] body {
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgb(232 226 212 / 0.35) 50%, transparent 51%),
+    radial-gradient(1px 1px at 70% 12%, rgb(232 226 212 / 0.3) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 85% 60%, rgb(212 168 67 / 0.4) 50%, transparent 51%),
+    radial-gradient(1px 1px at 40% 80%, rgb(232 226 212 / 0.25) 50%, transparent 51%),
+    radial-gradient(1px 1px at 10% 65%, rgb(141 123 199 / 0.4) 50%, transparent 51%);
+  background-attachment: fixed;
+}
+
+/* ---------------------------------------------------------------------------
+   Components
+--------------------------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: var(--shadow);
+}
+
+.btn-spark,
+.btn-ghost,
+.chip,
+.chip-active,
+.chip-pop {
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  transition: transform 0.08s ease, filter 0.15s ease, background 0.15s ease;
+}
+
+.btn-spark {
+  background: var(--accent);
+  color: var(--accent-fg);
+  box-shadow: 0 var(--btn-edge) 0 var(--accent-edge);
+}
+
+.btn-spark:hover { filter: brightness(1.06); }
+
+.btn-spark:active {
+  transform: translateY(var(--btn-edge));
+  box-shadow: 0 0 0 var(--accent-edge);
+}
+
+.btn-ghost {
+  background: var(--surface-2);
+  color: var(--fg);
+  border: 1px solid var(--line);
+}
+
+.btn-ghost:hover { filter: brightness(0.97); }
+[data-theme="notte"] .btn-ghost:hover { filter: brightness(1.15); }
+.btn-ghost:active { transform: scale(0.97); }
+
+.btn-spark:disabled,
+.btn-ghost:disabled {
+  opacity: 0.4;
+  transform: none;
+}
+
+.chip {
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
+.chip-active {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border: 1px solid var(--accent-edge);
+  box-shadow: 0 calc(var(--btn-edge) / 2) 0 var(--accent-edge);
+}
+
+.chip-pop {
+  background: var(--pop);
+  color: var(--pop-fg);
+  border: 1px solid var(--pop-edge);
+}
+
+.input {
+  width: 100%;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  padding: 0.5rem 0.75rem;
+  color: var(--fg);
+}
+
+.input::placeholder { color: color-mix(in srgb, var(--muted) 75%, transparent); }
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   The book — typeset manuscript view (Libro tab + public share page).
+   Always book-like serif regardless of app theme.
+--------------------------------------------------------------------------- */
+
+.book-view {
+  font-family: "Fraunces", Georgia, serif;
+  line-height: 1.7;
+}
+
+.book-cover {
+  text-align: center;
+  padding: 1.5rem 0 2rem;
+}
+
+.book-cover h1 {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1rem 0 0.5rem;
+}
+
+.book-cover-rule {
+  width: 64px;
+  height: 2px;
+  margin: 0 auto;
+  background: var(--accent);
+}
+
+.book-author {
+  font-style: italic;
+  color: var(--muted);
+}
+
+.book-blurb {
+  max-width: 36ch;
+  margin: 1.25rem auto 0;
+  font-style: italic;
+}
+
+.book-meta {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.book-empty {
+  text-align: center;
+  font-style: italic;
+  color: var(--muted);
+  padding: 2rem 0;
+}
+
+.book-chapter {
+  margin-top: 2.5rem;
+}
+
+.book-chapter h2 {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.book-chapter-number {
+  display: inline-grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  margin-right: 0.6rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: 1rem;
+}
+
+.book-draft {
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.book-prose {
+  white-space: pre-wrap;
+  text-align: justify;
+  hyphens: auto;
+}
+
+.book-prose::first-letter {
+  font-size: 2.6em;
+  line-height: 1;
+  float: left;
+  padding-right: 0.12em;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.book-appendix ul {
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.book-colophon {
+  margin-top: 3rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Print → "Salva come PDF": only the book, on white paper.
+--------------------------------------------------------------------------- */
+
+@media print {
+  body {
+    background: #fff !important;
+    color: #1c1a17 !important;
+  }
+
+  body *:not(.book-view):not(.book-view *) {
+    visibility: hidden;
+  }
+
+  .book-view {
+    visibility: visible;
+    position: absolute;
+    inset: 0;
+    padding: 0;
+  }
+
+  .book-view, .book-view * {
+    visibility: visible;
+    color: #1c1a17 !important;
+  }
+
+  .book-cover-rule, .book-chapter-number {
+    background: #1c1a17 !important;
+    color: #fff !important;
+  }
+
+  .book-cover {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    page-break-after: always;
+  }
+
+  .book-chapter {
+    page-break-before: always;
+    margin-top: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

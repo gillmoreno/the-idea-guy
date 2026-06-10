@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rooms — Go-to-Market</title>
+<style>
+  :root{
+    --bg:#0b0e16;
+    --panel:#121726;
+    --panel-2:#0f1422;
+    --ink:#e8ecf6;
+    --muted:#9aa6c0;
+    --line:#222a3d;
+    --primary:#6366f1;
+    --primary-soft:rgba(99,102,241,.14);
+    --green:#22c55e;
+    --amber:#f59e0b;
+    --red:#ef4444;
+    --cyan:#22d3ee;
+    --maxw:920px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--primary);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+  header.hero{
+    background:
+      radial-gradient(1200px 400px at 20% -10%, rgba(99,102,241,.35), transparent 60%),
+      radial-gradient(900px 380px at 90% 0%, rgba(34,211,238,.18), transparent 55%),
+      linear-gradient(180deg,#0d1322,#0b0e16);
+    border-bottom:1px solid var(--line);
+    padding:64px 0 40px;
+  }
+  .eyebrow{color:var(--cyan);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px;margin:0 0 12px}
+  h1{font-size:40px;line-height:1.1;margin:0 0 14px;letter-spacing:-.02em}
+  .tagline{font-size:20px;color:var(--muted);max-width:680px;margin:0}
+  .meta{margin-top:20px;color:var(--muted);font-size:13px}
+  .pill{display:inline-block;background:var(--primary-soft);color:#c3c6ff;border:1px solid #2c2f5a;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;margin-right:6px}
+  nav.toc{
+    position:sticky;top:0;z-index:5;background:rgba(11,14,22,.86);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:10px 0;
+  }
+  nav.toc .wrap{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+  nav.toc a{color:var(--muted);font-weight:600}
+  nav.toc a:hover{color:var(--ink);text-decoration:none}
+  section{padding:40px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+  h2 .num{color:var(--primary);font-weight:800;margin-right:10px}
+  h3{font-size:18px;margin:26px 0 8px}
+  p{margin:12px 0}
+  .lead{color:var(--muted);font-size:17px;margin-top:0}
+  ul,ol{margin:12px 0;padding-left:22px}
+  li{margin:6px 0}
+  code{background:#0e1424;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:13px;color:#bfe0ff}
+  .grid{display:grid;gap:14px}
+  @media(min-width:640px){.grid.cols-2{grid-template-columns:1fr 1fr}.grid.cols-3{grid-template-columns:1fr 1fr 1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .card h4{margin:0 0 6px;font-size:15px}
+  .card p{margin:6px 0;color:var(--muted);font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#0e1424;color:#c7d2f0;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  tr:last-child td{border-bottom:none}
+  .callout{border-radius:14px;padding:16px 18px;margin:18px 0;border:1px solid}
+  .callout .k{font-weight:700;display:block;margin-bottom:4px}
+  .callout.good{background:rgba(34,197,94,.08);border-color:#1f5135}
+  .callout.warn{background:rgba(245,158,11,.08);border-color:#5b4516}
+  .callout.bad{background:rgba(239,68,68,.08);border-color:#5a2222}
+  .callout.key{background:var(--primary-soft);border-color:#2c2f5a}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .ascii{background:#0a0f1c;border:1px solid var(--line);border-radius:12px;padding:16px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.5;color:#a9c7ff}
+  footer{padding:36px 0 60px;color:var(--muted);font-size:13px}
+  hr{border:none;border-top:1px solid var(--line);margin:26px 0}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Go-to-Market Strategy</p>
+    <h1>Rooms</h1>
+    <p class="tagline">Who we reach, through which channels, in what order — gated on what. The part the business plan doesn't cover.</p>
+    <div class="meta">
+      <span class="pill">Demo-led</span>
+      <span class="pill">Three audience rings</span>
+      <span class="pill">Launch gates</span>
+      <br><br>
+      Draft · June 2026 · internal strategy document · pairs with <a href="business-plan-and-next-steps.html">Business Plan &amp; Next Steps</a> and <a href="pricing-and-operating-costs.html">Pricing &amp; Operating Costs</a>
+    </div>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#positioning">Positioning</a>
+    <a href="#demo">The demo is the marketing</a>
+    <a href="#audiences">Audiences</a>
+    <a href="#gates">Launch gates</a>
+    <a href="#messaging">Messaging discipline</a>
+    <a href="#open">Open questions</a>
+  </div>
+</nav>
+
+<main>
+
+<section id="positioning">
+  <div class="wrap">
+    <h2><span class="num">01</span>The one-line positioning</h2>
+    <p class="lead"><strong>Describe an app to your friends and it exists — on your devices, not our servers.</strong></p>
+    <p>Supporting lines, by audience:</p>
+    <div class="grid cols-3">
+      <div class="card"><h4>Privacy / dev audience</h4><p>"The server only moves encrypted blobs. We couldn't read your data if we wanted to."</p></div>
+      <div class="card"><h4>Mainstream audience</h4><p>"Group apps without the app. One sentence, one QR code, no signup."</p></div>
+      <div class="card"><h4>Build-in-public audience</h4><p>"A multiplayer app platform that costs almost nothing to run, because your devices are the database."</p></div>
+    </div>
+    <div class="callout warn">
+      <span class="k">What we are not positioned as</span>
+      A better group chat, a Notion competitor, or a no-code builder. Those framings invite feature-checklist comparisons we lose. The frame we own is <strong>conjuring + sovereignty + calm</strong> — incumbents structurally can't copy "we can't read you and we won't notify you."
+    </div>
+  </div>
+</section>
+
+<section id="demo">
+  <div class="wrap">
+    <h2><span class="num">02</span>The demo is the marketing</h2>
+    <p class="lead">The core asset is a ~20-second screen recording. Everything else — threads, landing pages, docs — exists to make people watch it and believe it.</p>
+    <div class="ascii">type:   "a place where my 4 roommates vote on what to cook this week"
+3s:     the app appears, working
+tap:    Share → QR fills the screen
+phone:  friend scans with the camera → they're in, no signup
+both:   editing live</div>
+    <div class="callout key">
+      <span class="k">The hard consequence</span>
+      <strong>No public launch until in-app generation ships.</strong> The current copy-paste-to-ChatGPT flow is a fine power-user path, but it kills the demo dead. Friends-and-family rollout of the existing templates can and should happen before that — it battle-tests the relay and produces real usage anecdotes for the build-in-public threads.
+    </div>
+  </div>
+</section>
+
+<section id="audiences">
+  <div class="wrap">
+    <h2><span class="num">03</span>Audiences — three rings, in order</h2>
+
+    <h3>Ring 1 · Local-first / privacy / indie-dev community</h3>
+    <ul>
+      <li><strong>Where:</strong> the X local-first scene, Hacker News (Show HN), lobste.rs, r/selfhosted, local-first Discords and meetups.</li>
+      <li><strong>Why first:</strong> they amplify, they stress-test the architecture, BYOK / self-host-the-relay is built for them, and their endorsement is the trust signal Ring 3 needs later.</li>
+      <li><strong>How:</strong> <em>publish the architecture and threat model openly.</em> For this audience the honest threat model — what the relay operator <em>can</em> see (hashed room ids, IPs, timing, blob sizes) and <em>can't</em> (any content) — is more persuasive than any copy. Self-hosting the relay is one Go binary; say so loudly.</li>
+    </ul>
+
+    <h3>Ring 2 · Build-in-public / indie hackers (X)</h3>
+    <ul>
+      <li><strong>Why:</strong> Gil's natural channel; the story of a solo operator running a multiplayer platform for a few dollars a month is itself content.</li>
+      <li><strong>Thread material already in hand:</strong> the dumb-relay design; the cost math (relay-as-cache, devices as backup); "your data outlives our servers and dies when you all let it go"; the $0.0006 generation; ambient AI where <em>your friends' devices are the cloud</em>.</li>
+      <li><strong>Cadence:</strong> build-in-public threads during the run-up → demo video at launch → Show HN once one-tap generation works → Product Hunt after the rough edges are gone.</li>
+    </ul>
+
+    <h3>Ring 3 · End users, via use-cases — never via "the platform"</h3>
+    <ul>
+      <li>Nobody searches for "rooms"; they search for <em>split trip expenses</em>, <em>chore chart for roommates</em>, <em>book club tracker</em>. Each template gets its own landing page / keyword on the website, all feeding the same PWA. The website How-to-guides backlog item slots here.</li>
+      <li><strong>Trip Split is the sharpest wedge:</strong> every trip group contains non-users, the link-share moment is built into the use-case, and the value is immediate and numeric.</li>
+      <li>The growth loop (make room → share link → friend joins with no signup → friend makes their own room) does the rest; our job is only the first room.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="gates">
+  <div class="wrap">
+    <h2><span class="num">04</span>Launch gates — technical work that must precede the public moment</h2>
+    <p class="lead">Ordered. The first two are hard gates; the rest are strongly preferred. All four are now scored rows in the <a href="html/backlog.html">RICE backlog</a>.</p>
+    <ol>
+      <li><strong>Stateless generation proxy + in-app "speak it into existence"</strong> — the demo depends on it (business plan §09, next-steps #2–3).</li>
+      <li><strong>Relay lazy-load + idle eviction, plus abuse caps</strong> — per-IP rate limits, max blob size, max rooms per source. A viral spike with all-rooms-in-RAM and no caps either falls over or gets abused as free encrypted storage. This must land <em>before</em> the demo can go viral, not after.</li>
+      <li><strong>Signed-tombstone room delete</strong> — "the right to destroy" is a visible feature and a Ring 1 talking point.</li>
+      <li><strong>Threat model, published (HTML)</strong> — formalize the business plan's "honest limitations" into adversary profiles: relay operator, network observer, ex-member with the old code, device thief — what each can and can't do, with accepted limitations stated plainly (no re-key on member removal; metadata visible; generation prompts leave the device unless BYOK).</li>
+      <li><strong>Onboarding &amp; PWA install polish</strong> — already backlog #2; the QR scan must land somewhere that doesn't feel rough.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="messaging">
+  <div class="wrap">
+    <h2><span class="num">05</span>Messaging discipline (load-bearing copy rules)</h2>
+    <div class="grid cols-3">
+      <div class="card"><h4>Never blur the privacy line</h4><p>"Room content is E2E encrypted and never readable by us" and "your one-sentence app description goes to our AI proxy" are both true; conflating them in either direction loses the trust moat. Generation touches <em>app descriptions</em>, never <em>room content</em>.</p></div>
+      <div class="card"><h4>Say the limitations out loud, unprompted</h4><p>Metadata visibility, room-code-is-the-key, no public-channel re-key. Ring 1 will find them anyway; finding them in <em>our</em> docs builds trust, finding them on their own builds a takedown thread.</p></div>
+      <div class="card"><h4>Market moments, not the platform</h4><p>Lead with one use-case per asset. "Rooms can do anything" is a weaker message than "watch me make a potluck app in one sentence."</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="open">
+  <div class="wrap">
+    <h2><span class="num">06</span>Open questions (to decide, not yet decided)</h2>
+    <ul>
+      <li><strong>Name/scope of the public story:</strong> launch as "Rooms by The Idea Guy", or lead with a single template's brand (e.g. Trip Split) and reveal the platform second?</li>
+      <li><strong>Pricing timing:</strong> launch Free + BYOK only and add Rooms Plus once the ambient helper exists, or announce all three lanes day one? → analyzed in <a href="pricing-and-operating-costs.html">Pricing &amp; Operating Costs</a>.</li>
+      <li><strong>Geo/latency:</strong> a single relay region is fine pre-PMF; decide the threshold that triggers sharding work.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Rooms — internal strategy draft. Pairs with <a href="business-plan-and-next-steps.html">Business Plan &amp; Next Steps</a> · <a href="pricing-and-operating-costs.html">Pricing &amp; Operating Costs</a> · technical docs at <code>docs_and_changelog/html/index.html</code>.
+  </div>
+</footer>
+
+</body>
+</html>

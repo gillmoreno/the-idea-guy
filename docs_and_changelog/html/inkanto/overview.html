@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inkanto — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+<div class="layout">
+<nav>
+  <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+  <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+  <h2>Start</h2>
+  <a href="../index.html">Overview</a>
+  <a href="../backlog.html">Backlog &amp; priorities</a>
+  <a href="../how-docs-work.html">How these docs work</a>
+  <h2>Rooms platform</h2>
+  <a href="../rooms/architecture.html">Architecture</a>
+  <a href="../rooms/sync-and-local-first.html">Sync &amp; local-first</a>
+  <a href="../rooms/security.html">Security &amp; invites</a>
+  <a href="../rooms/personas-and-contacts.html">Personas &amp; contacts</a>
+  <a href="../rooms/schema-engine.html">Schema engine</a>
+      <a href="../rooms/ai-generation.html">AI generation</a>
+  <a href="../rooms/themes-and-profile.html">Themes &amp; profile</a>
+  <h2>Templates</h2>
+  <a href="../templates/choreboard.html">ChoreBoard</a>
+  <a href="../templates/tripsplit.html">Trip Split</a>
+  <a href="../templates/bookclub.html">Book Club</a>
+  <a href="../templates/fitcrew.html">Fit Crew</a>
+  <a href="../templates/backlog-room.html">Backlog room</a>
+  <h2>Other apps</h2>
+  <a href="../secondbrain/overview.html">Second Brain</a>
+  <a href="../website/overview.html">Website</a>
+  <a href="overview.html" class="active">Inkanto</a>
+</nav>
+<main>
+<article>
+
+<h1>Inkanto</h1>
+<p class="lead">A story-writing <em>coach</em> — not a story writer — built for an 11-year-old novelist: an Italian-first (it/es/en) mobile PWA where the AI asks one good question and offers three options, but she writes every word herself.</p>
+
+<h2>What it is</h2>
+<p>Inkanto ("il tuo laboratorio di storie") is a personal writing lab built for Gil's daughter. She keeps her stories in one place — an idea, an outline of beats (the <em>scaletta</em>), chapters, and a story bible (the <em>mondo</em>: characters, places, objects) — and a Claude-powered coach sits alongside, available in six distinct coaching modes. The core product promise, enforced in the prompts themselves, is that <strong>the coach never writes her story</strong>. It asks questions, offers numbered options to pick from or remix, celebrates the specific things that make her ideas hers, and keeps everything age-appropriate.</p>
+
+<div class="card">
+<p><strong>Status: not deployed publicly, family-only by design.</strong> Registration requires a <code>FAMILY_CODE</code> environment secret, so only the family can create accounts. <code>just dev</code> inside <code>inkanto/</code> runs the web app on <code>:3400</code>, the Go API on <code>:4800</code>, and the AI sidecar on <code>:4700</code>; <code>just deploy</code> ships one container on <code>:3400</code>.</p>
+</div>
+
+<h2>Why it was built this way</h2>
+<p>Unlike Rooms and Second Brain (local-first Yjs apps), Inkanto follows the classic <strong>Roger monolith pattern</strong>: a Go chi API with SQLite, a React/Vite SPA served by nginx, all run by supervisord in a single container. A kid's writing app wants one durable source of truth a parent can back up (one SQLite file in <code>./data/</code>), simple JWT accounts, and zero sync complexity — local-first CRDTs would be over-engineering here.</p>
+<p>The interesting choice is how the AI is wired. Instead of an Anthropic API key with pay-per-token billing, Inkanto adds a small stateless Node sidecar that uses the <strong>Claude Agent SDK</strong> authenticated with a Claude <em>subscription</em> OAuth token (<code>CLAUDE_CODE_OAUTH_TOKEN</code>, minted once via <code>claude setup-token</code>). Coach calls draw from the subscription's monthly Agent SDK credit — a family app rides the existing plan with no separate API bill. The sidecar runs the SDK with <code>allowedTools: []</code> and <code>maxTurns: 1</code>: pure conversation, no file or shell access, one reply per call.</p>
+<ul>
+  <li><strong>Go owns all data.</strong> Stories, beats, chapters, entities, and coach history live in SQLite behind the Go API. The sidecar holds no state at all.</li>
+  <li><strong>The sidecar exists only because the Agent SDK is a Node library.</strong> Go composes the request; Node just turns it into a streamed Claude reply.</li>
+  <li><strong>One origin for the browser.</strong> The frontend only ever talks to the Go API; even the skill catalog is proxied through Go from the sidecar.</li>
+  <li><strong>glibc base image on purpose.</strong> The final container is <code>node:20-slim</code> rather than alpine because the Agent SDK ships a native <code>claude</code> binary that isn't guaranteed to run on musl.</li>
+</ul>
+
+<h2>The skills system</h2>
+<p>Coaching behavior is not hardcoded — it lives in <code>inkanto/skills/*.md</code>, Claude-Code-style markdown files with YAML frontmatter (name, emoji, localized titles, description). The sidecar loads them at startup and builds each system prompt as <em>base guardrails + selected skill + locale note</em>. Editing a coaching mode means editing a markdown file and restarting the sidecar.</p>
+<p><code>_base.md</code> is the always-on guardrail layer, prepended to every session and hidden from the skill picker: reply in her language (Italian by default), never write her story (at most one short marked example sentence), prefer "one question plus 3 numbered options", keep replies short, stay age-appropriate for an 11-year-old, never ask for or discuss personal real-life information, and shrink the task when she's stuck.</p>
+<div class="card">
+<table>
+  <tr><th>Skill</th><th>Name means</th><th>What it does</th></tr>
+  <tr><td><code>scintilla</code> ✨</td><td>Spark</td><td>Turns a vague idea (or none) into a one-sentence story idea she's excited about: who wants what, and what stands in the way.</td></tr>
+  <tr><td><code>architetto</code></td><td>Architect</td><td>Helps her build the <em>scaletta</em> — the outline of story beats.</td></tr>
+  <tr><td><code>intervista</code></td><td>Interview</td><td>Interviews her to grow the story bible: characters, places, objects.</td></tr>
+  <tr><td><code>e-poi</code></td><td>"And then?"</td><td>Mid-chapter unblocker for when she's stuck on what happens next.</td></tr>
+  <tr><td><code>dottore</code></td><td>Doctor</td><td>Chapter feedback in "two stars and a wish" form — what works, plus one thing to try.</td></tr>
+  <tr><td><code>voce</code></td><td>Voice</td><td>Discovers the story's narrative voice (narrator, tone, inspirations) and distills it into a per-story voice card that all other skills then respect.</td></tr>
+</table>
+</div>
+
+<h2>What users see</h2>
+<ul>
+  <li><strong>Family-gated accounts.</strong> Registering needs the family code; sessions are plain JWT bearer tokens.</li>
+  <li><strong>Stories with structure.</strong> Each story has an idea, a scaletta of beats, chapters with statuses, and a mondo of typed entities (characters / places / objects with summaries and notes).</li>
+  <li><strong>A coach drawer per story.</strong> She picks a skill, and each skill keeps its own conversation history (the last 50 turns are shown). Replies stream token-by-token over SSE, so the coach feels alive on a phone.</li>
+  <li><strong>Context-aware coaching.</strong> Asking the coach from inside a chapter or an entity sends that chapter's text (last ~6,000 characters) or that entity's notes along as the focus.</li>
+</ul>
+
+<h2>Data flow of a coach call</h2>
+<p>One request travels browser → Go → sidecar → Claude and streams back the whole way:</p>
+<ol>
+  <li>The frontend POSTs <code>/api/stories/{id}/coach</code> with a skill, message, and optional chapter/entity focus.</li>
+  <li>Go verifies ownership, then flattens everything the coach should know into one text block: title, idea, scaletta, mondo, chapter list, plus the focused chapter or entity.</li>
+  <li>Go attaches the last 12 turns of that skill's history and the writer's locale, and POSTs to the sidecar's <code>/coach</code>.</li>
+  <li>The sidecar folds context + history + message into a single-turn Agent SDK <code>query()</code> with the composed system prompt, and streams text chunks back as SSE.</li>
+  <li>Go relays the SSE lines to the browser unchanged while accumulating the full reply, then persists both the user turn and the assistant turn. The user turn is only saved after the sidecar accepts the request, so a dead sidecar never pollutes the history.</li>
+</ol>
+
+<h2>Tradeoffs</h2>
+<ul>
+  <li><strong>Two runtimes instead of one.</strong> The Node sidecar adds a second process to deploy and supervise, but it's the price of subscription auth via the Agent SDK — and supervisord already runs nginx + Go anyway.</li>
+  <li><strong>Manual token rotation.</strong> The OAuth token lasts about a year and does not auto-rotate; when it expires someone re-runs <code>claude setup-token</code> and updates <code>.env</code>.</li>
+  <li><strong>Credit, not quota.</strong> The Agent SDK draws from the subscription's monthly Agent SDK credit (separate from interactive Claude Code limits since June 2026). If it runs out, the coach returns an error — but the writing app keeps working fully; the AI is additive, never load-bearing.</li>
+  <li><strong>Guardrails are prompts, not code.</strong> The "never writes her story" rule lives in <code>_base.md</code> rather than an output filter. That keeps it editable and inspectable by a parent, at the cost of being model-behavior rather than a hard technical guarantee.</li>
+</ul>
+
+<h2>Key code paths</h2>
+<div class="card">
+<table>
+  <tr><th>Path</th><th>What it does</th></tr>
+  <tr><td><code>inkanto/go-backend/internal/api/handlers_coach.go</code></td><td>Builds story context, proxies SSE from the sidecar, persists each exchange</td></tr>
+  <tr><td><code>inkanto/ai-sidecar/src/server.mjs</code></td><td>Stateless Agent SDK <code>query()</code> — one turn, no tools, SSE out</td></tr>
+  <tr><td><code>inkanto/skills/</code></td><td>Guardrail (<code>_base.md</code>) and the six coaching-mode prompts</td></tr>
+  <tr><td><code>inkanto/frontend/src/components/CoachDrawer.tsx</code></td><td>The coach UI: skill picker, history, streaming replies</td></tr>
+</table>
+</div>
+
+<h2>Ports</h2>
+<div class="card">
+<table>
+  <tr><th>Process</th><th>Dev</th><th>Prod (single container on :3400)</th></tr>
+  <tr><td>Web (Vite / nginx)</td><td>3400</td><td>nginx :80 → host :3400</td></tr>
+  <tr><td>Go API</td><td>4800</td><td>:8080 internal, behind nginx <code>/api</code></td></tr>
+  <tr><td>AI sidecar</td><td>4700</td><td>:8090 internal, reached only by Go</td></tr>
+</table>
+</div>
+
+<p class="footer">Sources: <code>inkanto/</code> · Last synced 2026-06-10</p>
+
+</article>
+</main>
+</div>
+</body>
+</html>

@@ -21,8 +21,11 @@ func TestFrameType(t *testing.T) {
 }
 
 func TestCompactReplacesLog(t *testing.T) {
-	h := newHub("")
-	rm := h.getRoom("test-room")
+	h := newHub(config{})
+	rm, err := h.acquireRoom("test-room", "")
+	if err != nil {
+		t.Fatalf("acquireRoom: %v", err)
+	}
 	frame := []byte{msgCheckpoint, 0xde, 0xad}
 
 	h.compactAndBroadcast("test-room", rm, nil, frame)
@@ -38,10 +41,17 @@ func TestCompactReplacesLog(t *testing.T) {
 }
 
 func TestAppendGrowsLog(t *testing.T) {
-	h := newHub("")
-	rm := h.getRoom("grow-room")
-	h.appendAndBroadcast("grow-room", rm, nil, []byte{msgUpdate, 1})
-	h.appendAndBroadcast("grow-room", rm, nil, []byte{msgUpdate, 2})
+	h := newHub(config{})
+	rm, err := h.acquireRoom("grow-room", "")
+	if err != nil {
+		t.Fatalf("acquireRoom: %v", err)
+	}
+	if err := h.appendAndBroadcast("grow-room", rm, nil, []byte{msgUpdate, 1}); err != nil {
+		t.Fatalf("append 1: %v", err)
+	}
+	if err := h.appendAndBroadcast("grow-room", rm, nil, []byte{msgUpdate, 2}); err != nil {
+		t.Fatalf("append 2: %v", err)
+	}
 
 	rm.mu.Lock()
 	defer rm.mu.Unlock()

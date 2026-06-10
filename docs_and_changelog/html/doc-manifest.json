@@ -177,6 +177,30 @@
         "frontend/src/",
         "backend/"
       ]
+    },
+    {
+      "id": "inkanto",
+      "title": "Inkanto story coach",
+      "doc": "docs_and_changelog/html/inkanto/overview.html",
+      "sources": [
+        "inkanto/README.md",
+        "inkanto/go-backend/",
+        "inkanto/ai-sidecar/",
+        "inkanto/skills/",
+        "inkanto/frontend/src/"
+      ]
+    },
+    {
+      "id": "room-ai-generation",
+      "title": "AI room generation",
+      "doc": "docs_and_changelog/html/rooms/ai-generation.html",
+      "sources": [
+        "genproxy/",
+        "apps/rooms/web/src/schema/generate.ts",
+        "apps/rooms/web/src/schema/spells.ts",
+        "apps/rooms/web/src/schema/engine/SchemaPromptPanel.tsx",
+        "docs_and_changelog/ROOM_AI.md"
+      ]
     }
   ]
 }

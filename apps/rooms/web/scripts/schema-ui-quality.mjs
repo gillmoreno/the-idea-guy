@@ -152,6 +152,16 @@ async function main() {
       process.exit(1);
     }
 
+    // The persona onboarding gate fronts every route in a fresh profile —
+    // create a throwaway persona, then return to the preview page.
+    await page.waitForTimeout(1_500);
+    if (await page.getByText("Create persona").count()) {
+      await page.getByPlaceholder("Gil").fill("QA Bot");
+      await page.getByRole("button", { name: "Create persona" }).click();
+      await page.waitForTimeout(1_000);
+      await page.goto(url, { waitUntil: "networkidle", timeout: 30_000 });
+    }
+
     await page.waitForSelector("[data-schema-fixture]", { timeout: 10_000 });
 
     const themes = ["classic", "paper", "glow"];

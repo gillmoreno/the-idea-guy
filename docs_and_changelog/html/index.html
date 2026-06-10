@@ -21,6 +21,7 @@
       <a href="rooms/security.html">Security &amp; invites</a>
       <a href="rooms/personas-and-contacts.html">Personas &amp; contacts</a>
       <a href="rooms/schema-engine.html">Schema engine</a>
+      <a href="rooms/ai-generation.html">AI generation</a>
       <a href="rooms/themes-and-profile.html">Themes &amp; profile</a>
       <h2>Templates</h2>
       <a href="templates/choreboard.html">ChoreBoard</a>
@@ -31,44 +32,80 @@
       <h2>Other apps</h2>
       <a href="secondbrain/overview.html">Second Brain</a>
       <a href="website/overview.html">Website</a>
+      <a href="inkanto/overview.html">Inkanto</a>
     </nav>
     <main>
       <article>
-        <h1>Technical documentation</h1>
-        <p class="lead">
-          Plain-language docs for everything in this repo — what each piece is, why it was built
-          that way, and where the code lives. Kept in sync with the repo via a manifest, git hooks,
-          and the <code>html-docs</code> Claude Code skill.
-        </p>
 
-        <h2>The three products</h2>
-        <div class="card">
-          <strong>Rooms <span class="tag">apps/rooms</span></strong>
-          One installable PWA, many room templates (ChoreBoard, Trip Split, Book Club, Fit Crew,
-          Backlog). Local-first: Yjs CRDTs on each device, E2E-encrypted sync through a dumb relay
-          that never reads your data. Not deployed yet.
-        </div>
-        <div class="card">
-          <strong>Second Brain <span class="tag">secondbrain/</span></strong>
-          Obsidian-style notes vault in the browser — internal links, backlinks graph, full-text
-          search, HTML pages/blocks, AI chat (OpenAI or local Ollama). Same local-first kit.
-          Not deployed yet.
-        </div>
-        <div class="card">
-          <strong>Website <span class="tag">frontend/ + backend/</span></strong>
-          Personal brand site: shipped builds, public idea log, tools &amp; workflow. Next.js static
-          export + Go API behind nginx. Not deployed yet.
+        <!-- Hero -->
+        <div style="background:linear-gradient(135deg,#f0f4ff 0%,#faf5ff 100%);border:1px solid #ddd6fe;border-radius:18px;padding:36px 32px 32px;margin-bottom:44px;">
+          <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#7c3aed;margin:0 0 10px;">In development — nothing deployed yet</p>
+          <h1 style="margin:0 0 10px;font-size:32px;">The Idea Guy</h1>
+          <p style="margin:0;color:#4b5563;font-size:16px;max-width:480px;line-height:1.65;">Three local-first products: a room-template platform, a notes vault, and a personal brand site. All powered by the same CRDT sync kit — no server reads your data.</p>
         </div>
 
+        <!-- Projects -->
+        <h2 style="margin-top:0;">Projects</h2>
+        <div class="project-grid">
+          <a href="rooms/architecture.html" class="project-card">
+            <span class="icon">🏠</span>
+            <h3>Rooms</h3>
+            <p>One PWA shell, many templates — ChoreBoard, Trip Split, Book Club, Fit Crew, Backlog. Yjs CRDT + E2E encrypted relay.</p>
+            <span class="badge-wip">In development · port 3300</span>
+          </a>
+          <a href="secondbrain/overview.html" class="project-card">
+            <span class="icon">🧠</span>
+            <h3>Second Brain</h3>
+            <p>Obsidian-style vault — Tiptap editor, [[links]], backlinks graph, MiniSearch, AI chat via OpenAI or Ollama.</p>
+            <span class="badge-wip">In development · port 3200</span>
+          </a>
+          <a href="website/overview.html" class="project-card">
+            <span class="icon">🌐</span>
+            <h3>Website</h3>
+            <p>Personal brand site — shipped builds, public idea log, tools &amp; workflow, snippets. Next.js + Go + nginx.</p>
+            <span class="badge-wip">In development · port 3000</span>
+          </a>
+        </div>
+
+        <!-- Quick links -->
         <h2>Where to start</h2>
-        <ul>
-          <li><a href="backlog.html"><strong>Backlog &amp; priorities</strong></a> — what to build next, RICE-scored across all three products.</li>
-          <li><a href="rooms/architecture.html">Rooms architecture</a> — the meta-app idea: shell + templates + room-kit + relay.</li>
-          <li><a href="rooms/security.html">Security &amp; invites</a> — hash-based invite links, passphrases, device PIN.</li>
-          <li><a href="how-docs-work.html">How these docs work</a> — manifest, git hooks, and the skills that keep this site honest.</li>
+        <div class="quick-links">
+          <a href="backlog.html" class="quick-link">📋 Backlog &amp; priorities</a>
+          <a href="rooms/architecture.html" class="quick-link">🏗 Rooms architecture</a>
+          <a href="rooms/security.html" class="quick-link">🔐 Security &amp; invites</a>
+          <a href="rooms/sync-and-local-first.html" class="quick-link">⚡ Sync &amp; local-first</a>
+          <a href="how-docs-work.html" class="quick-link">📖 How docs work</a>
+        </div>
+
+        <!-- Rooms pages -->
+        <h2>Rooms platform</h2>
+        <ul class="doc-list">
+          <li><a href="rooms/architecture.html"><strong>Architecture</strong> <span>— meta-app idea, shell + templates + room-kit + relay layers, template registry</span></a></li>
+          <li><a href="rooms/sync-and-local-first.html"><strong>Sync &amp; local-first</strong> <span>— Yjs CRDT, Y-IndexedDB, E2E encryption, background pull, offline behavior</span></a></li>
+          <li><a href="rooms/security.html"><strong>Security &amp; invites</strong> <span>— hash-based invite links, Argon2id passphrase, AES-256-GCM, device PIN</span></a></li>
+          <li><a href="rooms/personas-and-contacts.html"><strong>Personas &amp; contacts</strong> <span>— per-device X25519 identity, QR contact exchange, avatar &amp; accent</span></a></li>
+          <li><a href="rooms/schema-engine.html"><strong>Schema engine</strong> <span>— declarative room templates, field/feature bricks, versioning &amp; migrations</span></a></li>
+          <li><a href="rooms/themes-and-profile.html"><strong>Themes &amp; profile</strong> <span>— four CSS-only themes, persona accent → --primary, template icons, settings</span></a></li>
         </ul>
 
-        <p class="footer">Source manifest: <code>docs_and_changelog/html/doc-manifest.json</code> · Last synced 2026-06-10</p>
+        <!-- Templates -->
+        <h2>Templates</h2>
+        <ul class="doc-list">
+          <li><a href="templates/choreboard.html"><strong>ChoreBoard</strong> <span>— family chores + allowance, parent/kid crypto roles, frequency limits, ledger</span></a></li>
+          <li><a href="templates/tripsplit.html"><strong>Trip Split</strong> <span>— group expense splitting, integer-cents math, greedy settlement algorithm</span></a></li>
+          <li><a href="templates/bookclub.html"><strong>Book Club</strong> <span>— current book + meeting date, queue promotion, notes, auto-archive on start</span></a></li>
+          <li><a href="templates/fitcrew.html"><strong>Fit Crew</strong> <span>— workout league, logging, leaderboard, streaks, prize stakes</span></a></li>
+          <li><a href="templates/backlog-room.html"><strong>Backlog room</strong> <span>— community idea pool, propose / vote / owner-status, sorted by votes</span></a></li>
+        </ul>
+
+        <!-- Other apps -->
+        <h2>Other apps</h2>
+        <ul class="doc-list">
+          <li><a href="secondbrain/overview.html"><strong>Second Brain</strong> <span>— notes vault, Tiptap, internal links, backlinks graph, AI chat, relay :4501</span></a></li>
+          <li><a href="website/overview.html"><strong>Website</strong> <span>— brand site, content API, builds section, idea log, tools &amp; workflow</span></a></li>
+        </ul>
+
+        <p class="footer">Manifest: <code>docs_and_changelog/html/doc-manifest.json</code> · Synced with git hooks · Last updated 2026-06-10</p>
       </article>
     </main>
   </div>

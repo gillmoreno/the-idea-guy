@@ -1,12 +1,13 @@
 # The Idea Guy — monorepo
 
-Three products, none deployed yet:
+Four products, none deployed yet:
 
 | Product | Path | Dev | Port |
 |---------|------|-----|------|
-| Rooms (meta-PWA, room templates) | `apps/rooms/web` | `npm run dev` | 3300 (relay `relay/` :4500) |
+| Rooms (meta-PWA, room templates) | `apps/rooms/web` | `npm run dev` | 3300 (relay `relay/` :4500, genproxy `genproxy/` :4600) |
 | Second Brain (notes vault + AI) | `secondbrain/` | `make dev` | web 3200, relay 4501 |
 | Website (brand site) | `frontend/` + `backend/` | `npm run dev` | 3000 (Go API + nginx in Docker) |
+| Inkanto (story coach for kids) | `inkanto/` | `just dev` | web 3400, Go API 4800, AI sidecar 4700 |
 
 Shared local-first kit: `packages/room-kit` (Yjs CRDT sync, Argon2id/AES-256-GCM crypto, device vault + PIN lock, invite links in URL hash). `choreboard/` at the root is the **legacy standalone** app — current ChoreBoard lives in `apps/rooms/web/src/templates/choreboard/`.
 
@@ -24,6 +25,7 @@ Human-readable technical docs are an HTML site: open `docs_and_changelog/html/in
 - **After changing code, run the `html-docs` skill** (`.claude/skills/html-docs/`) to sync stale pages; it can fan out to the `doc-page-writer` agent.
 - Feature prioritization lives at `docs_and_changelog/html/backlog.html` (RICE-scored) — maintained by the `rice-backlog` skill.
 - Deep specs are markdown in `docs_and_changelog/*.md`; HTML pages link to them rather than duplicating.
+- **Strategy docs are HTML, never markdown:** business plan, go-to-market, pricing, threat model live as standalone HTML in `docs_and_changelog/` styled like `business-plan-and-next-steps.html`, cross-linked in their footers.
 
 ## Schema QA
 

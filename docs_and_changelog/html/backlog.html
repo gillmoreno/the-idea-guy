@@ -21,6 +21,7 @@
       <a href="rooms/security.html">Security &amp; invites</a>
       <a href="rooms/personas-and-contacts.html">Personas &amp; contacts</a>
       <a href="rooms/schema-engine.html">Schema engine</a>
+      <a href="rooms/ai-generation.html">AI generation</a>
       <a href="rooms/themes-and-profile.html">Themes &amp; profile</a>
       <h2>Templates</h2>
       <a href="templates/choreboard.html">ChoreBoard</a>
@@ -31,6 +32,7 @@
       <h2>Other apps</h2>
       <a href="secondbrain/overview.html">Second Brain</a>
       <a href="website/overview.html">Website</a>
+      <a href="inkanto/overview.html">Inkanto</a>
     </nav>
     <main>
       <article>
@@ -87,6 +89,30 @@
           </tr>
           <tr>
             <td>4</td>
+            <td><strong>Relay lazy-load + idle eviction + abuse caps</strong> — load rooms on connect, evict idle ones (self-healing via checkpoints), add per-IP rate limits and blob/room caps; the #1 cost lever and a launch gate before anything can go viral</td>
+            <td>Rooms</td>
+            <td class="num">9</td><td class="num">2</td><td class="num">0.9</td><td class="num">1.5</td>
+            <td class="num"><span class="score">10.8</span></td>
+            <td><span class="tier tier-now">Now</span></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>In-app "speak it into existence"</strong> — stateless AI generation proxy (platform key, no DB) + type-a-sentence → schema appears live → create → share; replaces copy-paste-to-ChatGPT as the front door and gates the public launch</td>
+            <td>Rooms</td>
+            <td class="num">8</td><td class="num">3</td><td class="num">0.8</td><td class="num">2</td>
+            <td class="num"><span class="score">9.6</span></td>
+            <td><span class="tier tier-now">Now</span></td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><strong>Threat model doc (published)</strong> — formal adversary profiles (relay operator, network observer, ex-member, device thief) + honest limitations, as a public HTML page; the main trust asset for the local-first/privacy launch audience</td>
+            <td>Rooms</td>
+            <td class="num">5</td><td class="num">1</td><td class="num">0.9</td><td class="num">0.5</td>
+            <td class="num"><span class="score">9.0</span></td>
+            <td><span class="tier tier-now">Now</span></td>
+          </tr>
+          <tr>
+            <td>7</td>
             <td><strong>Roommate Ledger template</strong> — household bills, the most-voted seeded idea; reuses Trip Split math</td>
             <td>Rooms</td>
             <td class="num">6</td><td class="num">2</td><td class="num">0.8</td><td class="num">2</td>
@@ -94,7 +120,7 @@
             <td><span class="tier tier-next">Next</span></td>
           </tr>
           <tr>
-            <td>5</td>
+            <td>8</td>
             <td><strong>Public showcase Backlog room</strong> — read-only room code on the website; public roadmap people can vote on</td>
             <td>Website + Rooms</td>
             <td class="num">6</td><td class="num">1</td><td class="num">0.7</td><td class="num">1</td>
@@ -102,7 +128,7 @@
             <td><span class="tier tier-next">Next</span></td>
           </tr>
           <tr>
-            <td>6</td>
+            <td>9</td>
             <td><strong>How-to guides section</strong> — teaching content on the website (roadmap item #4 in IDEA_LOG_AND_TOOLS)</td>
             <td>Website</td>
             <td class="num">5</td><td class="num">1</td><td class="num">0.8</td><td class="num">1</td>
@@ -110,7 +136,7 @@
             <td><span class="tier tier-next">Next</span></td>
           </tr>
           <tr>
-            <td>7</td>
+            <td>10</td>
             <td><strong>Ship Second Brain</strong> — deploy as a personal instance + public demo vault (relay :4501 hosted)</td>
             <td>Second Brain</td>
             <td class="num">5</td><td class="num">2</td><td class="num">0.7</td><td class="num">2</td>
@@ -118,7 +144,7 @@
             <td><span class="tier tier-next">Next</span></td>
           </tr>
           <tr>
-            <td>8</td>
+            <td>11</td>
             <td><strong>Push notifications</strong> — replace pull-only "Updated" badges with real push for room changes (service worker + push relay endpoint)</td>
             <td>Rooms</td>
             <td class="num">7</td><td class="num">2</td><td class="num">0.5</td><td class="num">3</td>
@@ -126,7 +152,7 @@
             <td><span class="tier tier-later">Later</span></td>
           </tr>
           <tr>
-            <td>9</td>
+            <td>12</td>
             <td><strong>Potluck template</strong> — who brings what, dietary tags, headcount (seeded idea)</td>
             <td>Rooms</td>
             <td class="num">4</td><td class="num">1</td><td class="num">0.8</td><td class="num">1.5</td>
@@ -134,7 +160,7 @@
             <td><span class="tier tier-later">Later</span></td>
           </tr>
           <tr>
-            <td>10</td>
+            <td>13</td>
             <td><strong>Watch Club template</strong> — Book Club for TV: series, episodes, queue (seeded idea)</td>
             <td>Rooms</td>
             <td class="num">5</td><td class="num">1</td><td class="num">0.8</td><td class="num">2</td>
@@ -142,7 +168,7 @@
             <td><span class="tier tier-later">Later</span></td>
           </tr>
           <tr>
-            <td>11</td>
+            <td>14</td>
             <td><strong>Idea Validator demo</strong> — interactive widget on the website (roadmap item #5 in IDEA_LOG_AND_TOOLS)</td>
             <td>Website</td>
             <td class="num">4</td><td class="num">1</td><td class="num">0.6</td><td class="num">2</td>
@@ -153,7 +179,7 @@
 
         <h2>Reading the tiers</h2>
         <ul>
-          <li><span class="tier tier-now">Now</span> — get all three deploys-adjacent items done; the website first because it is the cheapest win and gives Rooms a landing page.</li>
+          <li><span class="tier tier-now">Now</span> — deploys plus the three Rooms launch gates (relay eviction + abuse caps, in-app generation, threat model); the website first because it is the cheapest win and gives Rooms a landing page. The public Rooms launch waits for the gates — the demo only works once generation is one tap, and a viral spike before relay eviction either falls over or breaks the budget.</li>
           <li><span class="tier tier-next">Next</span> — compounding items once something is live: the showcase room turns the website into a feedback loop for Rooms.</li>
           <li><span class="tier tier-later">Later</span> — real, but either expensive (push), low-confidence, or waiting on demand signal (template votes in the live Backlog room).</li>
         </ul>

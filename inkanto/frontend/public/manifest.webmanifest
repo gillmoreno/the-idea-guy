@@ -1,0 +1,17 @@
+{
+  "name": "Inkanto",
+  "short_name": "Inkanto",
+  "description": "Il tuo laboratorio di storie",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2b1d4f",
+  "theme_color": "#2b1d4f",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

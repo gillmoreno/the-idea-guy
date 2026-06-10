@@ -1,0 +1,7 @@
+.env
+data/
+node_modules/
+dist/
+go-backend/data/
+*.sqlite3
+*.sqlite3-*

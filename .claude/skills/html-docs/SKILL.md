@@ -58,6 +58,10 @@ For writing or rewriting whole pages, prefer delegating to the **doc-page-writer
 - Use `.card` divs for highlight boxes; tables for enumerable facts.
 - End with: `<p class="footer">Sources: <code>…</code> · Last synced YYYY-MM-DD</p>`
 
+## Strategy documents (also HTML, never markdown)
+
+Business/strategy docs — business plan, go-to-market, pricing & operating costs, threat model — are **standalone HTML files in `docs_and_changelog/`** (not in the `html/` site, not in the manifest). Style them like `business-plan-and-next-steps.html` (copy its `<style>` block: dark hero, sticky TOC, cards, callouts) and cross-link sibling strategy docs in the footer. Gil's standing preference: no new `docs_and_changelog/*.md` strategy files.
+
 ## Do not
 
 - Do not duplicate full API/spec content — link to `docs_and_changelog/*.md` instead.

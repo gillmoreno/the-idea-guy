@@ -21,6 +21,7 @@
       <a href="security.html">Security &amp; invites</a>
       <a href="personas-and-contacts.html">Personas &amp; contacts</a>
       <a href="schema-engine.html">Schema engine</a>
+      <a href="ai-generation.html">AI generation</a>
       <a href="themes-and-profile.html">Themes &amp; profile</a>
       <h2>Templates</h2>
       <a href="../templates/choreboard.html">ChoreBoard</a>
@@ -31,6 +32,7 @@
       <h2>Other apps</h2>
       <a href="../secondbrain/overview.html">Second Brain</a>
       <a href="../website/overview.html">Website</a>
+      <a href="../inkanto/overview.html">Inkanto</a>
     </nav>
     <main>
       <article>
@@ -63,10 +65,21 @@
             </tbody>
           </table>
         </div>
-        <p>The relay does zero parsing of ciphertext — a one-byte tag check, a 32&nbsp;MiB size ceiling, append/broadcast, done. That minimalism is a performance principle as much as a privacy one.</p>
+        <p>The relay does zero parsing of ciphertext — a one-byte tag check, a size ceiling (8&nbsp;MiB per frame by default, configurable), append/broadcast, done. That minimalism is a performance principle as much as a privacy one.</p>
 
         <h2>Log compaction</h2>
         <p>An append-only log would grow forever, and every reconnect used to push a full snapshot. The fix is <strong>client-driven checkpoint compaction</strong>: after a client replays the backlog and merges it with its local IndexedDB state, it sends one checkpoint frame containing the whole merged document, and the relay collapses the room's log to that single entry. Incremental updates append again until the next checkpoint. Tradeoffs accepted by design: compaction only happens when a device connects (no background GC on the server), and the relay retains no edit history beyond the latest checkpoint — which is a privacy feature. Clients also have a local <code>compactStorage</code> path to prune CRDT history after large payloads like inline images.</p>
+
+        <h2>The relay is a cache: lazy-load, idle eviction, expiry</h2>
+        <p>Members' devices hold the canonical copy of every room; the relay is a rendezvous cache so peers who are never online at the same time can still sync. The implementation follows that idea literally:</p>
+        <ul>
+          <li><strong>Lazy-load:</strong> the relay starts with zero rooms in RAM. A room's persisted log is read from disk on the first connect after startup (or after eviction) — RAM scales with <em>active</em> rooms, not all-rooms-ever.</li>
+          <li><strong>Idle eviction:</strong> a sweeper drops rooms with no connected peers from RAM after <code>RELAY_EVICT_AFTER</code> (default 30&nbsp;min; requires persistence, since eviction without disk would discard the cache). Eviction is safe because the log is already on disk — and even if it weren't, any member's device <strong>re-seeds the relay with a checkpoint on reconnect</strong> (self-healing).</li>
+          <li><strong>Disk expiry (opt-in):</strong> with <code>RELAY_EXPIRE_AFTER</code> set, room files untouched for that long are deleted entirely — "your data outlives our servers and dies when you all let it go." A returning member re-seeds from their device as usual.</li>
+        </ul>
+        <div class="card">
+          <p><strong>Abuse caps (no accounts needed):</strong> per-address limits on concurrent sockets (<code>RELAY_MAX_CONNS_PER_IP</code>, default 128) and on <em>brand-new</em> room creations (<code>RELAY_ROOM_CREATES_PER_IP_HOUR</code>, default 120, token bucket) — joining or syncing an existing room is never budgeted, so the viral path stays unlimited. Each room's backlog is capped (<code>RELAY_MAX_ROOM_LOG_BYTES</code>, default 64&nbsp;MiB); a writer that exceeds it gets a policy-violation close telling it to send a checkpoint. Together these stop the relay being farmed as a free encrypted dropbox. Address detection trusts <code>CF-Connecting-IP</code>/<code>X-Forwarded-For</code>, so the relay must sit behind a proxy (cloudflared/nginx) in production.</p>
+        </div>
 
         <h2>Background sync &amp; "Updated" badges — no push</h2>
         <p>Rooms deliberately has no push notifications and no lock-screen alerts. Instead, when the <strong>home screen</strong> is open and the app is foregrounded, the shell quietly pulls each vault room: <code>pullRoomPublicChannel</code> opens a short-lived WebSocket, replays the relay backlog into local IndexedDB, sends a checkpoint (helping compaction for free), and disconnects. Up to three rooms sync in parallel; triggers are home mount and the app returning to foreground.</p>
@@ -87,7 +100,7 @@
               <tr><td>Cross-device sync</td><td>CRDT updates merge conflict-free via the relay</td></tr>
               <tr><td>User owns the data</td><td>Data never leaves devices in readable form</td></tr>
               <tr><td>Operator can't read it</td><td>E2E encryption with a key derived from the invite code</td></tr>
-              <tr><td>Cheap to operate</td><td>Relay only passes/stores opaque blobs; logs self-compact</td></tr>
+              <tr><td>Cheap to operate</td><td>Relay only passes/stores opaque blobs; logs self-compact; RAM holds active rooms only (lazy-load + idle eviction)</td></tr>
               <tr><td>Self-hostable</td><td>Relay is one small Go binary / Docker image</td></tr>
             </tbody>
           </table>
@@ -102,7 +115,8 @@
           <li><code>packages/room-kit/src/crypto.ts</code> — key + relay-room derivation, encrypt/decrypt</li>
           <li><code>packages/room-kit/src/yjs.ts</code> — the single shared Yjs instance</li>
           <li><code>apps/rooms/web/src/shell/backgroundRoomSyncManager.ts</code> and <code>useBackgroundRoomSync.ts</code> — home-screen sync orchestration</li>
-          <li><code>relay/main.go</code> — the relay hub, replay log, and compaction</li>
+          <li><code>relay/main.go</code> — the relay hub, replay log, compaction, lazy-load + idle sweeper</li>
+          <li><code>relay/limits.go</code> — per-address connection and room-creation caps</li>
         </ul>
 
         <p class="footer">Sources: <code>docs_and_changelog/LOCAL_FIRST_KIT.md, docs_and_changelog/BACKGROUND_ROOM_SYNC.md, docs_and_changelog/RELAY_LOG_COMPACTION.md, docs_and_changelog/BACKLOG.md, packages/room-kit/src/sync.ts, packages/room-kit/src/pullRoomSync.ts, relay/main.go</code> · Last synced 2026-06-10</p>

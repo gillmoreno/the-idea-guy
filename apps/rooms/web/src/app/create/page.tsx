@@ -244,6 +244,11 @@ export default function CreatePage() {
                 setCustomJson(json);
                 setParseIssues([]);
               }}
+              onGenerated={(json) => {
+                setCustomJson(json);
+                const result = parseAndValidateJson(json);
+                setParseIssues(result.issues.map((i) => `${i.path}: ${i.message}`));
+              }}
             />
             <div className="card stack">
               <div className="section-title">Paste room schema (JSON)</div>

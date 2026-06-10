@@ -83,6 +83,14 @@ Health check: `GET /healthz` → `ok`
 |----------|---------|-------------|
 | `RELAY_ADDR` | `:4500` | Listen address |
 | `RELAY_DATA_DIR` | (empty) | Persist encrypted blob log on disk |
+| `RELAY_EVICT_AFTER` | `30m` | Evict idle, peer-less rooms from RAM (requires `RELAY_DATA_DIR`; `0` = never). Safe: members' devices re-seed evicted rooms with a checkpoint on reconnect |
+| `RELAY_EXPIRE_AFTER` | `0` (never) | Delete room files idle longer than this from disk entirely |
+| `RELAY_MAX_MSG_BYTES` | `8388608` (8 MiB) | Ceiling per encrypted frame |
+| `RELAY_MAX_ROOM_LOG_BYTES` | `67108864` (64 MiB) | Per-room backlog cap; an over-cap writer gets a policy close asking for a checkpoint |
+| `RELAY_MAX_CONNS_PER_IP` | `128` | Concurrent WebSockets per client address (`0` = unlimited) |
+| `RELAY_ROOM_CREATES_PER_IP_HOUR` | `120` | Brand-new rooms per address per hour, token bucket (`0` = unlimited). Joining existing rooms is never limited |
+
+The relay starts with zero rooms resident and lazy-loads each room's log from disk on first connect, so RAM scales with *active* rooms. Per-IP limits trust `CF-Connecting-IP` / `X-Forwarded-For` — keep the relay behind cloudflared/nginx in production.
 
 ## Paid managed sync (later)
 

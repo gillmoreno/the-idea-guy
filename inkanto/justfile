@@ -1,0 +1,28 @@
+# Inkanto — story workshop for a young writer
+
+# run go api + ai sidecar + vite together (ctrl-c stops all three)
+dev:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    trap 'kill 0' EXIT
+    (cd go-backend && go run ./cmd/server) &
+    (cd ai-sidecar && npm start) &
+    (cd frontend && npm run dev) &
+    wait
+
+# install all dependencies
+setup:
+    cd go-backend && go mod tidy
+    cd ai-sidecar && npm install
+    cd frontend && npm install
+
+test:
+    cd go-backend && go test ./...
+
+# build + run the single production container on :3400
+deploy:
+    docker compose down
+    docker compose up -d --build
+
+logs:
+    docker compose logs -f
