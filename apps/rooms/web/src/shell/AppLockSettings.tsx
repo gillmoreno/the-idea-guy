@@ -5,10 +5,12 @@ import { loadVault } from "@the-idea-guy/room-kit";
 import { useVaultLock } from "@/shell/VaultLockProvider";
 
 export function AppLockSettings() {
-  const { lockEnabled, enableLock, disableLock } = useVaultLock();
+  const { lockEnabled, enableLock, disableLock, bioAvailable, bioEnabled, enableBio, disableBio } =
+    useVaultLock();
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [currentPin, setCurrentPin] = useState("");
+  const [bioPin, setBioPin] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -37,6 +39,23 @@ export function AppLockSettings() {
     setBusy(false);
   };
 
+  const onEnableBio = async () => {
+    setBusy(true);
+    setMessage(null);
+    const err = await enableBio(bioPin);
+    if (err) setMessage(err);
+    else {
+      setBioPin("");
+      setMessage("Biometric unlock enabled — next unlock can use Face ID / fingerprint.");
+    }
+    setBusy(false);
+  };
+
+  const onDisableBio = () => {
+    disableBio();
+    setMessage("Biometric unlock turned off. Your PIN still works.");
+  };
+
   return (
     <div className="card stack-sm">
       <strong>App lock (this device)</strong>
@@ -47,6 +66,37 @@ export function AppLockSettings() {
 
       {lockEnabled ? (
         <>
+          {bioEnabled ? (
+            <>
+              <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+                ✅ Biometric unlock is on — Face ID, Touch ID, or fingerprint opens the vault.
+                Your PIN always works as a backup.
+              </p>
+              <button className="btn btn-block" disabled={busy} onClick={onDisableBio}>
+                Turn off biometric unlock
+              </button>
+            </>
+          ) : bioAvailable ? (
+            <>
+              <div className="field">
+                <label>Confirm PIN to add Face ID / fingerprint</label>
+                <input
+                  className="input"
+                  type="password"
+                  inputMode="numeric"
+                  value={bioPin}
+                  onChange={(e) => setBioPin(e.target.value)}
+                />
+              </div>
+              <button
+                className="btn btn-primary btn-block"
+                disabled={busy || !bioPin.trim()}
+                onClick={() => void onEnableBio()}
+              >
+                Enable biometric unlock
+              </button>
+            </>
+          ) : null}
           <div className="field">
             <label>Current PIN to disable</label>
             <input

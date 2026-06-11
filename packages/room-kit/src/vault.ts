@@ -17,15 +17,12 @@ const VAULT_KEY = "rooms.vault.v1";
 
 /** In-memory vault while app is unlocked (required when PIN lock is on). */
 let sessionVault: DeviceVault | null = null;
-let sessionPin: string | null = null;
+/** Vault AES key for re-encryption on save — set on unlock, regardless of PIN or biometric path. */
+let sessionVaultKey: CryptoKey | null = null;
 
-export function setSessionVault(vault: DeviceVault | null, pin?: string | null): void {
+export function setSessionVault(vault: DeviceVault | null, key?: CryptoKey | null): void {
   sessionVault = vault;
-  sessionPin = pin ?? null;
-}
-
-export function getSessionPin(): string | null {
-  return sessionPin;
+  sessionVaultKey = key ?? null;
 }
 
 export function isVaultSessionLocked(): boolean {
@@ -74,8 +71,8 @@ export function loadVault(): DeviceVault {
 export function saveVault(vault: DeviceVault): void {
   if (typeof window === "undefined") return;
   sessionVault = vault;
-  if (isVaultLockEnabled() && sessionPin) {
-    void persistLockedVault(sessionPin, vault);
+  if (isVaultLockEnabled() && sessionVaultKey) {
+    void persistLockedVault(sessionVaultKey, vault);
     return;
   }
   writePlainVaultJson(JSON.stringify(vault));

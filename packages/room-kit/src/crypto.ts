@@ -120,16 +120,36 @@ export function publicKeyMaterial(roomCode: string): string {
   return `lfk-public:${normalize(roomCode)}`;
 }
 
-/** Derive a key from a PIN + salt (vault lock). */
-export async function derivePinKey(pin: string, saltHex: string): Promise<CryptoKey> {
-  const raw = await argon2Derive(
-    enc.encode(normalize(pin)),
-    `lfk-vault-pin:v1:${saltHex}`,
-  );
+/** Raw Argon2id bytes behind the vault PIN key — wrapped at rest for biometric unlock. */
+export async function derivePinKeyBytes(pin: string, saltHex: string): Promise<Uint8Array> {
+  return argon2Derive(enc.encode(normalize(pin)), `lfk-vault-pin:v1:${saltHex}`);
+}
+
+/** Import 32 raw bytes as a non-extractable AES-GCM vault key. */
+export async function importVaultKey(raw: Uint8Array): Promise<CryptoKey> {
   return crypto.subtle.importKey("raw", raw as BufferSource, { name: "AES-GCM" }, false, [
     "encrypt",
     "decrypt",
   ]);
+}
+
+/** Derive a key from a PIN + salt (vault lock). */
+export async function derivePinKey(pin: string, saltHex: string): Promise<CryptoKey> {
+  return importVaultKey(await derivePinKeyBytes(pin, saltHex));
+}
+
+/** AES-GCM key from a high-entropy secret (e.g. WebAuthn PRF output) via HKDF-SHA256. */
+export async function hkdfAesKey(secret: Uint8Array, infoLabel: string): Promise<CryptoKey> {
+  const base = await crypto.subtle.importKey("raw", secret as BufferSource, "HKDF", false, [
+    "deriveKey",
+  ]);
+  return crypto.subtle.deriveKey(
+    { name: "HKDF", hash: "SHA-256", salt: new Uint8Array(0), info: enc.encode(infoLabel) },
+    base,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"],
+  );
 }
 
 export async function encrypt(key: CryptoKey, plaintext: Uint8Array): Promise<Uint8Array> {

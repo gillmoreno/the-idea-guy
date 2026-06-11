@@ -64,7 +64,6 @@ export {
   getContact,
   getRelayUrl,
   getRoomInvite,
-  getSessionPin,
   getVaultRoom,
   isBackgroundRoomSyncEnabled,
   isVaultSessionLocked,
@@ -94,7 +93,17 @@ export {
   readPlainVaultJson,
   readVaultLockMeta,
   unlockVaultWithPin,
+  type VaultLockMeta,
+  type VaultUnlockResult,
 } from "./vaultLock";
+export {
+  disableBiometricUnlock,
+  enableBiometricUnlock,
+  isBiometricUnlockAvailable,
+  isBiometricUnlockEnabled,
+  unlockVaultWithBiometric,
+  type EnableBiometricResult,
+} from "./vaultBio";
 export {
   canExchangeMessages,
   canSendFriendRequest,

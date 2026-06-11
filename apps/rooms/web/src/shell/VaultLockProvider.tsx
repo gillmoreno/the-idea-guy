@@ -10,21 +10,33 @@ import React, {
 } from "react";
 import {
   DeviceVault,
+  disableBiometricUnlock,
   disableVaultLock,
+  enableBiometricUnlock,
   enableVaultLock,
+  isBiometricUnlockAvailable,
+  isBiometricUnlockEnabled,
   isVaultLockEnabled,
   loadVault,
   readPlainVaultJson,
   setSessionVault,
+  unlockVaultWithBiometric,
   unlockVaultWithPin,
 } from "@the-idea-guy/room-kit";
 
 interface VaultLockCtx {
   locked: boolean;
   lockEnabled: boolean;
+  /** Platform authenticator (FaceID / TouchID / Windows Hello) exists on this device. */
+  bioAvailable: boolean;
+  /** Biometric unlock is enrolled for the vault. */
+  bioEnabled: boolean;
   unlock: (pin: string) => Promise<boolean>;
+  unlockWithBio: () => Promise<boolean>;
   enableLock: (pin: string, confirmPin: string) => Promise<string | null>;
   disableLock: (pin: string) => Promise<boolean>;
+  enableBio: (pin: string) => Promise<string | null>;
+  disableBio: () => void;
 }
 
 const Ctx = createContext<VaultLockCtx | null>(null);
@@ -32,10 +44,15 @@ const Ctx = createContext<VaultLockCtx | null>(null);
 export function VaultLockProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   const [locked, setLocked] = useState(false);
-  const lockEnabled = mounted && isVaultLockEnabled();
+  const [lockEnabled, setLockEnabled] = useState(false);
+  const [bioAvailable, setBioAvailable] = useState(false);
+  const [bioEnabled, setBioEnabled] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    setLockEnabled(isVaultLockEnabled());
+    setBioEnabled(isBiometricUnlockEnabled());
+    void isBiometricUnlockAvailable().then(setBioAvailable);
     if (isVaultLockEnabled()) {
       setLocked(true);
       setSessionVault(null, null);
@@ -53,9 +70,17 @@ export function VaultLockProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const unlock = useCallback(async (pin: string) => {
-    const vault = await unlockVaultWithPin(pin);
-    if (!vault) return false;
-    setSessionVault(vault, pin.trim());
+    const unlocked = await unlockVaultWithPin(pin);
+    if (!unlocked) return false;
+    setSessionVault(unlocked.vault, unlocked.key);
+    setLocked(false);
+    return true;
+  }, []);
+
+  const unlockWithBio = useCallback(async () => {
+    const unlocked = await unlockVaultWithBiometric();
+    if (!unlocked) return false;
+    setSessionVault(unlocked.vault, unlocked.key);
     setLocked(false);
     return true;
   }, []);
@@ -64,9 +89,11 @@ export function VaultLockProvider({ children }: { children: React.ReactNode }) {
     if (pin.trim().length < 4) return "PIN must be at least 4 characters.";
     if (pin !== confirmPin) return "PINs do not match.";
     const vault = loadVault();
-    const ok = await enableVaultLock(pin, vault);
-    if (!ok) return "Could not enable app lock.";
-    setSessionVault(vault, pin.trim());
+    const key = await enableVaultLock(pin, vault);
+    if (!key) return "Could not enable app lock.";
+    setSessionVault(vault, key);
+    setLockEnabled(true);
+    setBioEnabled(false); // fresh lock never carries old biometric enrollment
     setLocked(false);
     return null;
   }, []);
@@ -75,13 +102,55 @@ export function VaultLockProvider({ children }: { children: React.ReactNode }) {
     const vault = await disableVaultLock(pin);
     if (!vault) return false;
     setSessionVault(vault, null);
+    setLockEnabled(false);
+    setBioEnabled(false);
     setLocked(false);
     return true;
   }, []);
 
+  const enableBio = useCallback(async (pin: string) => {
+    const result = await enableBiometricUnlock(pin);
+    if (result === "ok") {
+      setBioEnabled(true);
+      return null;
+    }
+    if (result === "wrong-pin") return "Wrong PIN.";
+    if (result === "unsupported")
+      return "This device doesn't support biometric unlock for Rooms.";
+    if (result === "cancelled") return "Biometric setup was cancelled.";
+    return "Could not enable biometric unlock.";
+  }, []);
+
+  const disableBio = useCallback(() => {
+    disableBiometricUnlock();
+    setBioEnabled(false);
+  }, []);
+
   const value = useMemo(
-    () => ({ locked, lockEnabled, unlock, enableLock, disableLock }),
-    [locked, lockEnabled, unlock, enableLock, disableLock],
+    () => ({
+      locked,
+      lockEnabled,
+      bioAvailable,
+      bioEnabled,
+      unlock,
+      unlockWithBio,
+      enableLock,
+      disableLock,
+      enableBio,
+      disableBio,
+    }),
+    [
+      locked,
+      lockEnabled,
+      bioAvailable,
+      bioEnabled,
+      unlock,
+      unlockWithBio,
+      enableLock,
+      disableLock,
+      enableBio,
+      disableBio,
+    ],
   );
 
   if (!mounted) {
@@ -91,7 +160,11 @@ export function VaultLockProvider({ children }: { children: React.ReactNode }) {
   if (locked) {
     return (
       <Ctx.Provider value={value}>
-        <VaultUnlockScreen onUnlock={unlock} />
+        <VaultUnlockScreen
+          bioEnabled={bioEnabled}
+          onUnlock={unlock}
+          onUnlockWithBio={unlockWithBio}
+        />
       </Ctx.Provider>
     );
   }
@@ -99,7 +172,15 @@ export function VaultLockProvider({ children }: { children: React.ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-function VaultUnlockScreen({ onUnlock }: { onUnlock: (pin: string) => Promise<boolean> }) {
+function VaultUnlockScreen({
+  bioEnabled,
+  onUnlock,
+  onUnlockWithBio,
+}: {
+  bioEnabled: boolean;
+  onUnlock: (pin: string) => Promise<boolean>;
+  onUnlockWithBio: () => Promise<boolean>;
+}) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -113,14 +194,34 @@ function VaultUnlockScreen({ onUnlock }: { onUnlock: (pin: string) => Promise<bo
     setBusy(false);
   };
 
+  const submitBio = async () => {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    const ok = await onUnlockWithBio();
+    if (!ok) setError("Biometric unlock didn't go through. Use your PIN instead.");
+    setBusy(false);
+  };
+
   return (
     <div className="app">
       <div className="centered stack" style={{ maxWidth: 360, margin: "0 auto", padding: 24 }}>
         <div style={{ fontSize: 40 }}>🔒</div>
         <h1 style={{ margin: 0, fontSize: 22 }}>Unlock Rooms</h1>
         <p className="muted" style={{ textAlign: "center", margin: 0 }}>
-          Enter your device PIN to access your rooms on this device.
+          {bioEnabled
+            ? "Use Face ID, Touch ID, or your fingerprint — or enter your device PIN."
+            : "Enter your device PIN to access your rooms on this device."}
         </p>
+        {bioEnabled ? (
+          <button
+            className="btn btn-primary btn-block"
+            disabled={busy}
+            onClick={() => void submitBio()}
+          >
+            {busy ? "Unlocking…" : "Unlock with Face ID / fingerprint"}
+          </button>
+        ) : null}
         <div className="field" style={{ width: "100%" }}>
           <label>PIN</label>
           <input
@@ -133,7 +234,7 @@ function VaultUnlockScreen({ onUnlock }: { onUnlock: (pin: string) => Promise<bo
             onKeyDown={(e) => {
               if (e.key === "Enter") void submit();
             }}
-            autoFocus
+            autoFocus={!bioEnabled}
           />
         </div>
         {error ? (
@@ -141,8 +242,12 @@ function VaultUnlockScreen({ onUnlock }: { onUnlock: (pin: string) => Promise<bo
             {error}
           </p>
         ) : null}
-        <button className="btn btn-primary btn-block" disabled={busy || !pin.trim()} onClick={() => void submit()}>
-          {busy ? "Unlocking…" : "Unlock"}
+        <button
+          className={`btn btn-block${bioEnabled ? "" : " btn-primary"}`}
+          disabled={busy || !pin.trim()}
+          onClick={() => void submit()}
+        >
+          {busy ? "Unlocking…" : "Unlock with PIN"}
         </button>
       </div>
     </div>
