@@ -171,6 +171,50 @@
           }
         ]
       }
+    },
+    {
+      "id": "watch-club",
+      "name": "Watch Club",
+      "description": "Decide what to watch together — propose, vote, track what you've seen.",
+      "emoji": "🍿",
+      "accent": "#f43f5e",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "watch-club",
+        "name": "Watch Club",
+        "description": "A shared watchlist — propose movies and series, vote on what's next, and mark what you've watched.",
+        "emoji": "🍿",
+        "accent": "#f43f5e",
+        "collections": [
+          {
+            "id": "titles",
+            "label": "Watchlist",
+            "singular": "title",
+            "fields": [
+              { "key": "title", "label": "Title", "type": "text", "required": true },
+              { "key": "kind", "label": "Type / genre", "type": "tags" },
+              { "key": "where", "label": "Where to watch", "type": "text" },
+              { "key": "notes", "label": "Why this one?", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          { "type": "votes", "collection": "titles", "onePerMember": true },
+          {
+            "type": "status",
+            "collection": "titles",
+            "values": [
+              { "id": "queue", "label": "In the queue" },
+              { "id": "watching", "label": "Watching" },
+              { "id": "watched", "label": "Watched" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }

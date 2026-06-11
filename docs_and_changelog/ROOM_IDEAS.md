@@ -23,11 +23,11 @@ _(empty)_
 - [x] **Idea Pool** 💡 — propose & vote, generic backlog · declarative · pre-loop
 - [x] **Grocery Run** 🛒 — shared shopping list: add items, claim "I'll grab it", mark bought · declarative · 2026-06-11. New shared brick: **status attribution** — schema engine records who last set a record's status (`statusById`/`statusAt`), shows a member chip on the card, and non-setters now see a read-only status pill (benefits Potluck & Idea Pool too).
 - [x] **Appointment Huddle** 📅 — propose time slots, vote on availability, organizer confirms one · declarative · 2026-06-11. Pure catalog entry (votes + owner status), no engine changes.
+- [x] **Watch Club** 🍿 — propose movies/series, vote what's next, track queue → watching → watched · declarative · 2026-06-11. Pure catalog entry (votes + member status).
 
 ## Candidates (pick the highest value ÷ effort)
 
 - [ ] **Roommate Ledger** 🏠 — recurring household bills & shared purchases; Trip Split for daily life. Likely builtin (settlement math, can reuse `tripsplit/lib/balances.ts`).
-- [ ] **Watch Club** 🍿 — Book Club for series/movies: what to watch next, vote, track episode progress. Likely declarative (collections + votes + status).
 - [ ] **Who's In?** 🙋 — recurring event availability: Sunday football, weekly poker — who's coming this week, headcount, waitlist. Declarative-ish; builtin if per-occurrence logic needed.
 - [ ] **Carpool Rota** 🚗 — school-run / commute driving rotation: whose turn, swaps, fairness counter. Builtin (rotation logic).
 - [ ] **Secret Santa** 🎁 — draw names privately, wishlists, budget. Builtin (private assignment needs crypto/per-member secrets).
