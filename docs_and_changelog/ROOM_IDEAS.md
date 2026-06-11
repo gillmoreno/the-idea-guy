@@ -26,6 +26,7 @@ _(empty)_
 - [x] **Watch Club** 🍿 — propose movies/series, vote what's next, track queue → watching → watched · declarative · 2026-06-11. Pure catalog entry (votes + member status).
 - [x] **Lend & Borrow** 🔁 — who borrowed what: item, who has it, due back, returned · declarative · 2026-06-12. Pure catalog entry (member status out → returned).
 - [x] **Packing List** 🧳 — shared trip packing: claim what you'll bring, no duplicates · declarative · 2026-06-12. Pure catalog entry (claim status + attribution chip).
+- [x] **Moving Day** 📦 — box inventory (photo of contents) + claimable moving tasks · declarative · 2026-06-12. First catalog template with two collections and an image field.
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -34,7 +35,6 @@ _(empty)_
 - [ ] **Carpool Rota** 🚗 — school-run / commute driving rotation: whose turn, swaps, fairness counter. Builtin (rotation logic).
 - [ ] **Secret Santa** 🎁 — draw names privately, wishlists, budget. Builtin (private assignment needs crypto/per-member secrets).
 - [ ] **Plant & Pet Sitter** 🪴 — watering/feeding schedule while someone is away: tasks, photos as proof, last-done timestamps. Declarative + image field.
-- [ ] **Moving Day** 📦 — box inventory (what's in box #12), claim carrying tasks, address/utility checklist. Declarative (two collections).
 - [ ] **Game Night** 🎲 — running scoreboard across game nights, win streaks, who hosts next. Builtin (scores/streak math, like Fit Crew).
 - [ ] **Meal Week** 🍽️ — plan the week's dinners together: propose meals, assign cook per day, auto-derive shopping notes. Builtin or declarative.
 - [ ] **Care Circle** ❤️ — siblings coordinating care for a parent: visits, meds picked up, doctor notes, "who's on this week". Builtin (sensitive — lean on E2E story).

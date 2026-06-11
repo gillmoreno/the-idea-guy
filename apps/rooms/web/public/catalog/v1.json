@@ -300,6 +300,70 @@
           }
         ]
       }
+    },
+    {
+      "id": "moving-day",
+      "name": "Moving Day",
+      "description": "Box inventory and moving tasks — know what's in box #12 and who carries it.",
+      "emoji": "📦",
+      "accent": "#a16207",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "moving-day",
+        "name": "Moving Day",
+        "description": "Every box and every task in one place — photograph contents, track what's moved, claim jobs.",
+        "emoji": "📦",
+        "accent": "#a16207",
+        "collections": [
+          {
+            "id": "boxes",
+            "label": "Boxes",
+            "singular": "box",
+            "fields": [
+              { "key": "title", "label": "Box label", "type": "text", "required": true },
+              { "key": "room", "label": "Room", "type": "tags" },
+              { "key": "contents", "label": "What's inside", "type": "textarea" },
+              { "key": "photo", "label": "Photo of contents", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          },
+          {
+            "id": "tasks",
+            "label": "Moving tasks",
+            "singular": "task",
+            "fields": [
+              { "key": "title", "label": "Task", "type": "text", "required": true },
+              { "key": "notes", "label": "Notes", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "boxes",
+            "values": [
+              { "id": "packed", "label": "Packed" },
+              { "id": "moved", "label": "In the new place" },
+              { "id": "unpacked", "label": "Unpacked ✓" }
+            ],
+            "setBy": "member"
+          },
+          {
+            "type": "status",
+            "collection": "tasks",
+            "values": [
+              { "id": "todo", "label": "To do" },
+              { "id": "claimed", "label": "I'm on it" },
+              { "id": "done", "label": "Done ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
