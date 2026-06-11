@@ -70,6 +70,18 @@
         </ul>
         <p>Adding a built-in template takes three steps: add a registry entry, create <code>src/templates/{id}/</code> with UI and Yjs data under <code>template.{id}.*</code>, and mount it from the room page when the metadata matches.</p>
 
+        <h2>Room lifecycle: leaving and deleting</h2>
+        <p>Because a room is just an invite code plus local storage — no server-side account, no central database row — "leaving" and "deleting" need their own local-first definitions:</p>
+        <ul>
+          <li><strong>Leave (any member).</strong> Leaving clears the session state and navigates straight home, so the action is unambiguous — you're out of the room and looking at your room list, not staring at a stale screen.</li>
+          <li><strong>Delete (admin only).</strong> Surfaced as a "Danger zone" in the shared invite/settings block, so every template gets it for free. It's a two-step confirm (Slack-style channel delete) and is disabled while disconnected from the relay — other members can only learn the room is gone through sync.</li>
+        </ul>
+        <div class="card">
+          <p><strong>How deletion works without a server that understands rooms:</strong> the admin's client writes a <code>deletedAt</code> tombstone into the room's CRDT <code>meta</code> map, then pushes a storage checkpoint to the relay — the relay's stored backlog for the room collapses to the tombstoned document. The relay stays dumb throughout: it never learns what changed, only that a smaller opaque blob replaced the history. The admin's device then purges its local copy and navigates home.</p>
+        </div>
+        <p>Every other member's client gates on that tombstone: when <code>deletedAt</code> arrives via sync, the template UI is replaced with a "Room deleted by its organizer" screen offering a one-tap "Remove from this device". Honouring local-first, their copy of the data stays on the device until they choose to remove it, and offline members simply learn of the deletion the next time they sync.</p>
+        <p>Honest limitation: the admin channel's encrypted blob may remain orphaned on the relay after deletion; idle rooms are evicted from RAM and can expire from disk per relay config, so it ages out rather than being actively reaped.</p>
+
         <h2>Why one app instead of many</h2>
         <ul>
           <li><strong>Zero marginal infrastructure per product.</strong> No new subdomain, container, relay namespace, or deploy script per template. One static export serves them all; the relay isolates tenants by hashing the room id.</li>
@@ -104,6 +116,11 @@
         <h2>Key code paths</h2>
         <ul>
           <li><code>apps/rooms/web/src/shell/</code> — shell chrome, vault, room session, sync orchestration</li>
+          <li><code>apps/rooms/web/src/shell/RoomSessionProvider.tsx</code> — room session incl. <code>leaveRoom</code> / <code>deleteRoom</code></li>
+          <li><code>apps/rooms/web/src/shell/roomMeta.ts</code> — room metadata read/write incl. the deletion tombstone</li>
+          <li><code>apps/rooms/web/src/shell/RoomDangerZone.tsx</code> — admin-only delete control (two-step confirm)</li>
+          <li><code>apps/rooms/web/src/shell/RoomDeleted.tsx</code> — member-facing "room deleted" screen</li>
+          <li><code>apps/rooms/web/src/templates/TemplateApp.tsx</code> — mounts templates; gates on the deletion tombstone</li>
           <li><code>apps/rooms/web/src/templates/registry.ts</code> — template registry (the one place new templates register)</li>
           <li><code>apps/rooms/web/src/templates/</code> — template plugins (choreboard, tripsplit, bookclub, backlog, fitcrew)</li>
           <li><code>apps/rooms/web/src/app/</code> — client-side routes (home, create, join, room, profile)</li>
@@ -115,7 +132,7 @@
           <li><code>apps/rooms/Makefile</code> — dev/preview commands</li>
         </ul>
 
-        <p class="footer">Sources: <code>docs_and_changelog/ROOM_KIT.md, docs_and_changelog/ROOM_KIT_ARCHITECTURE.md, docs_and_changelog/ARCHITECTURE.md, apps/rooms/web/package.json, apps/rooms/web/src/templates/registry.ts, packages/room-kit/src/types.ts, packages/room-kit/src/links.ts, apps/rooms/web/src/components/QRScanner.tsx, deploy/rooms/</code> · Last synced 2026-06-11</p>
+        <p class="footer">Sources: <code>docs_and_changelog/ROOM_KIT.md, docs_and_changelog/ROOM_KIT_ARCHITECTURE.md, docs_and_changelog/ARCHITECTURE.md, apps/rooms/web/package.json, apps/rooms/web/src/templates/registry.ts, packages/room-kit/src/types.ts, packages/room-kit/src/links.ts, apps/rooms/web/src/components/QRScanner.tsx, apps/rooms/web/src/shell/RoomSessionProvider.tsx, apps/rooms/web/src/shell/roomMeta.ts, apps/rooms/web/src/shell/RoomDangerZone.tsx, apps/rooms/web/src/shell/RoomDeleted.tsx, apps/rooms/web/src/templates/TemplateApp.tsx, deploy/rooms/</code> · Last synced 2026-06-11</p>
       </article>
     </main>
   </div>
