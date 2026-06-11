@@ -1,0 +1,36 @@
+{
+  "items": [
+    {
+      "id": "RM-004",
+      "created": "2026-06-10T22:38:29+0200",
+      "title": "Relay lazy-load + idle eviction + abuse caps",
+      "description": "Load rooms on connect, evict idle ones (self-healing via checkpoints), per-IP rate limits and blob/room caps — the #1 cost lever and a launch gate.",
+      "source": "RICE backlog #4 (docs_and_changelog/html/backlog.html)",
+      "impact": 5,
+      "impact_rationale": "Launch gate: without abuse caps and bounded RAM the relay cannot survive anything going viral.",
+      "effort": 2,
+      "effort_rationale": "Relay-internal changes building on existing checkpoint machinery; ~1.5 weeks.",
+      "priority": 8,
+      "status": "todo",
+      "notes": [],
+      "completed": "2026-06-10T22:38:29+0200",
+      "outcome": "Shipped in commit 42f0a2b: lazy-load on connect, idle eviction with self-healing checkpoints, per-IP and per-room abuse caps."
+    },
+    {
+      "id": "RM-005",
+      "created": "2026-06-10T22:38:29+0200",
+      "title": "In-app 'speak it into existence' AI generation",
+      "description": "Stateless AI generation proxy (platform key, no DB): type a sentence, schema appears live, create, share — replaces copy-paste-to-ChatGPT as the front door.",
+      "source": "RICE backlog #5 (docs_and_changelog/html/backlog.html)",
+      "impact": 5,
+      "impact_rationale": "Launch gate: the front-door experience that makes Rooms self-explanatory to new users.",
+      "effort": 3,
+      "effort_rationale": "New genproxy service plus in-app UI and fallback paths; ~2 weeks.",
+      "priority": 7,
+      "status": "todo",
+      "notes": [],
+      "completed": "2026-06-10T22:38:29+0200",
+      "outcome": "Shipped in commit 42f0a2b: stateless genproxy (Anthropic SDK / OpenAI-compatible / subscription sidecar) plus in-app Describe-it UI with spell counter and copy-paste fallback."
+    }
+  ]
+}
