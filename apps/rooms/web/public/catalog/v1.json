@@ -85,6 +85,49 @@
           }
         ]
       }
+    },
+    {
+      "id": "grocery-run",
+      "name": "Grocery Run",
+      "description": "Shared shopping list — add items, claim \"I'll grab it\", tick off when bought.",
+      "emoji": "🛒",
+      "accent": "#0ea5e9",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "grocery-run",
+        "name": "Grocery Run",
+        "description": "One list for the household — see what's needed, claim items, mark them bought.",
+        "emoji": "🛒",
+        "accent": "#0ea5e9",
+        "collections": [
+          {
+            "id": "items",
+            "label": "Items",
+            "singular": "item",
+            "fields": [
+              { "key": "title", "label": "Item", "type": "text", "required": true },
+              { "key": "qty", "label": "Quantity / size", "type": "text" },
+              { "key": "notes", "label": "Notes", "type": "textarea" },
+              { "key": "store", "label": "Store / aisle", "type": "tags" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "items",
+            "values": [
+              { "id": "needed", "label": "Needed" },
+              { "id": "grabbing", "label": "I'll grab it" },
+              { "id": "bought", "label": "Bought" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }

@@ -77,6 +77,9 @@ export interface SchemaRecord {
   createdById: string;
   fields: Record<string, string | string[]>;
   status?: string;
+  /** Member who last set `status` (older records/engines: undefined). */
+  statusById?: string;
+  statusAt?: number;
 }
 
 export interface ValidationIssue {

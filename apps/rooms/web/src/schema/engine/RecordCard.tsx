@@ -3,7 +3,7 @@
 import { bodyFields, emojiField, titleField } from "@/schema/display";
 import { DEFAULT_RECORD_EMOJI } from "@/lib/emoji";
 import { imageValueSrc, parseImageValue } from "@/lib/imageValue";
-import type { CollectionDef, FieldDef, SchemaRecord } from "@/schema/types";
+import type { CollectionDef, FieldDef, SchemaMember, SchemaRecord } from "@/schema/types";
 
 function fieldValue(record: SchemaRecord, key: string): string {
   const v = record.fields[key];
@@ -67,6 +67,7 @@ export function RecordCard({
   canSetStatus,
   statusValues,
   status,
+  statusBy,
   onStatusChange,
 }: {
   record: SchemaRecord;
@@ -78,6 +79,7 @@ export function RecordCard({
   canSetStatus: boolean;
   statusValues: { id: string; label: string }[];
   status?: string;
+  statusBy?: SchemaMember | null;
   onStatusChange: (status: string) => void;
 }) {
   const titleKey = titleField(collection)?.key ?? "title";
@@ -130,6 +132,23 @@ export function RecordCard({
             ))}
           </select>
         </label>
+      )}
+
+      {!canSetStatus && status && statusValues.length > 0 && (
+        <p className="schema-record__status-pill cadence-pill">
+          {statusValues.find((s) => s.id === status)?.label ?? status}
+        </p>
+      )}
+
+      {statusBy && status && status !== statusValues[0]?.id && (
+        <p className="schema-record__status-by">
+          <span
+            className="schema-record__status-by-dot"
+            style={{ background: statusBy.color }}
+            aria-hidden
+          />
+          {statusBy.name}
+        </p>
       )}
     </article>
   );

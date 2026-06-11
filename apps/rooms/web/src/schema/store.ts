@@ -155,14 +155,14 @@ export class SchemaStore {
     return record;
   }
 
-  setRecordStatus(collectionId: string, recordId: string, status: string) {
+  setRecordStatus(collectionId: string, recordId: string, status: string, memberId?: string) {
     const record = this.readRecordsMap(collectionId)?.get(recordId);
     if (!record) return;
     this.publicDoc.transact(() => {
       const pub = ensureTemplateBranch(this.publicDoc, SCHEMA_BRANCH_ID);
       const data = ensureNestedMap(pub, "data");
       const bucket = ensureNestedMap<SchemaRecord>(data, collectionId);
-      bucket.set(recordId, { ...record, status });
+      bucket.set(recordId, { ...record, status, statusById: memberId, statusAt: Date.now() });
     });
   }
 

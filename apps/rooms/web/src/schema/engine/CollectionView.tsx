@@ -158,7 +158,8 @@ export function CollectionView({
           canSetStatus={canSetStatus}
           statusValues={statusValues}
           status={rec.status}
-          onStatusChange={(s) => store.setRecordStatus(collectionId, rec.id, s)}
+          statusBy={rec.statusById ? store.getMember(rec.statusById) : null}
+          onStatusChange={(s) => store.setRecordStatus(collectionId, rec.id, s, memberId)}
         />
       ))}
     </div>

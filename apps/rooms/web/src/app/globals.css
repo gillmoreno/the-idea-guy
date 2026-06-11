@@ -1352,6 +1352,24 @@ textarea.input {
 .schema-record__status {
   width: 100%;
 }
+.schema-record__status-pill {
+  margin: 2px 0 0;
+  align-self: flex-start;
+}
+.schema-record__status-by {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.schema-record__status-by-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
 /* ---------- emoji picker (shared) ---------- */
 .emoji-picker {
   position: relative;
