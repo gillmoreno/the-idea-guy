@@ -1,17 +1,20 @@
-# Deploying Inkanto → inkanto.theideaguy.com
+# Deploying Inkanto → inkanto.the-idea-guy.com
 
 Goal: run the single Inkanto container on the deploy machine and expose it as
-**https://inkanto.theideaguy.com** under The Idea Guy umbrella.
+**https://inkanto.the-idea-guy.com** under The Idea Guy umbrella.
 
-Everything below happens **on the deploy machine** (this repo committed & pulled there).
+Everything below happens **on the deploy machine** — same machine that runs the
+ChoreBoard relay (`relay.the-idea-guy.com`), exposed via a cloudflared tunnel.
 
 ## 0. Prerequisites
 
 - Docker + docker compose
-- DNS: `A` (or `CNAME`) record `inkanto.theideaguy.com` → deploy server IP
-- A host-level reverse proxy for TLS (Caddy recommended, or nginx + certbot).
-  **HTTPS is required, not optional**: the PWA service worker, `Add to Home Screen`,
-  clipboard copy, and the native share sheet all need a secure origin.
+- cloudflared logged in (see `docs_and_changelog/CLOUDFLARED_MULTI_ZONE.md` —
+  DNS on `the-idea-guy.com` goes through the API script or the Zero Trust
+  dashboard, since the CLI cert is scoped to aigil.dev)
+- **HTTPS is required, not optional**: the PWA service worker, `Add to Home Screen`,
+  clipboard copy, and the native share sheet all need a secure origin. The
+  Cloudflare tunnel provides TLS at the edge, so no local Caddy/certbot is needed.
 
 ## 1. Configure
 
@@ -39,23 +42,33 @@ curl localhost:3400/health   # {"status":"ok"}
 The container bundles nginx + Go API + AI sidecar (supervisord auto-restarts each).
 SQLite data lives in `inkanto/data/` on the host (compose volume).
 
-## 3. Reverse proxy + TLS
+## 3. Expose via cloudflared tunnel
 
-Caddy (simplest — automatic certificates):
+Same pattern as the ChoreBoard relay (`scripts/deploy-relay.sh`):
 
+```sh
+cloudflared tunnel create inkanto
+# Tunnel config (~/.cloudflared/config-inkanto.yml):
+#   tunnel: <TUNNEL_ID>
+#   credentials-file: ~/.cloudflared/<TUNNEL_ID>.json
+#   ingress:
+#     - hostname: inkanto.the-idea-guy.com
+#       service: http://localhost:3400
+#     - service: http_status:404
+cloudflared tunnel --config ~/.cloudflared/config-inkanto.yml run   # or install as launchd service
 ```
-inkanto.theideaguy.com {
-    reverse_proxy localhost:3400
-}
-```
 
-nginx alternative: proxy_pass to `http://127.0.0.1:3400`, then `certbot --nginx`.
-Either way, make sure SSE isn't buffered for the coach stream
-(Caddy: fine by default; nginx: `proxy_buffering off` on the location).
+DNS: create a proxied CNAME `inkanto` → `<TUNNEL_ID>.cfargotunnel.com` on the
+**the-idea-guy.com** zone via the Cloudflare API (same token as `deploy/.env`)
+or the Zero Trust dashboard — **not** `cloudflared tunnel route dns`, whose cert
+is scoped to aigil.dev (see `docs_and_changelog/CLOUDFLARED_MULTI_ZONE.md`).
+
+SSE note: Cloudflare passes the coach's SSE stream through fine by default;
+the in-container nginx already has buffering configured.
 
 ## 4. Smoke test
 
-1. Open https://inkanto.theideaguy.com → register with the `FAMILY_CODE`.
+1. Open https://inkanto.the-idea-guy.com → register with the `FAMILY_CODE`.
 2. Create a story, open the coach, send one message → reply must stream.
 3. Libro tab → Condividi → open the share link in an incognito window.
 4. On her phone: open the site → Add to Home Screen → app icon works offline-shell.
@@ -75,4 +88,4 @@ Either way, make sure SSE isn't buffered for the coach stream
 
 - EPUB export endpoint in the Go backend (epub = zip of XHTML; serve from Libro tab)
 - Author-level default voice shared across stories
-- Link Inkanto from the theideaguy.com builds/portfolio page once live
+- Link Inkanto from the the-idea-guy.com builds/portfolio page once live
