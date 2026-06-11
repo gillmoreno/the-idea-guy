@@ -28,6 +28,9 @@ const FitCrewApp = lazy(() =>
 const RoomLedgerApp = lazy(() =>
   import("./roomledger/RoomLedgerApp").then((m) => ({ default: m.RoomLedgerApp })),
 );
+const WhosInApp = lazy(() =>
+  import("./whosin/WhosInApp").then((m) => ({ default: m.WhosInApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -63,6 +66,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return FitCrewApp;
       case "roomledger":
         return RoomLedgerApp;
+      case "whosin":
+        return WhosInApp;
       default:
         return null;
     }

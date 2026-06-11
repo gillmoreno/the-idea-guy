@@ -8,7 +8,8 @@ export type BuiltinTemplateId =
   | "bookclub"
   | "backlog"
   | "fitcrew"
-  | "roomledger";
+  | "roomledger"
+  | "whosin";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -74,6 +75,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "Household bills & shared purchases — who paid, who owes, settle up.",
     emoji: "🏠💸",
     accent: "#0d9488",
+  },
+  {
+    kind: "builtin",
+    id: "whosin",
+    name: "Who's In?",
+    description: "Recurring event headcount — RSVP per date, capacity, waitlist.",
+    emoji: "🙋📅",
+    accent: "#0284c7",
   },
   {
     kind: "builtin",
