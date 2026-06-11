@@ -257,6 +257,49 @@
           }
         ]
       }
+    },
+    {
+      "id": "packing-list",
+      "name": "Packing List",
+      "description": "Group trip packing — claim what you'll bring, no duplicate tents.",
+      "emoji": "🧳",
+      "accent": "#f97316",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "packing-list",
+        "name": "Packing List",
+        "description": "One packing list for the whole trip — see what's needed and claim what you'll bring.",
+        "emoji": "🧳",
+        "accent": "#f97316",
+        "collections": [
+          {
+            "id": "items",
+            "label": "To pack",
+            "singular": "item",
+            "fields": [
+              { "key": "title", "label": "Item", "type": "text", "required": true },
+              { "key": "qty", "label": "How many", "type": "text" },
+              { "key": "category", "label": "Category", "type": "tags" },
+              { "key": "notes", "label": "Notes", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "items",
+            "values": [
+              { "id": "needed", "label": "Needed" },
+              { "id": "bringing", "label": "I'll bring it" },
+              { "id": "packed", "label": "Packed ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
