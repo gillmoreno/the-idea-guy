@@ -128,6 +128,49 @@
           }
         ]
       }
+    },
+    {
+      "id": "appointment-huddle",
+      "name": "Appointment Huddle",
+      "description": "Find one slot everyone can make — propose times, vote, confirm.",
+      "emoji": "📅",
+      "accent": "#8b5cf6",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "appointment-huddle",
+        "name": "Appointment Huddle",
+        "description": "Propose time slots, vote on what works, and let the organizer confirm one.",
+        "emoji": "📅",
+        "accent": "#8b5cf6",
+        "collections": [
+          {
+            "id": "slots",
+            "label": "Time slots",
+            "singular": "slot",
+            "fields": [
+              { "key": "title", "label": "When", "type": "text", "required": true },
+              { "key": "where", "label": "Where", "type": "text" },
+              { "key": "notes", "label": "Notes", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          { "type": "votes", "collection": "slots", "onePerMember": true },
+          {
+            "type": "status",
+            "collection": "slots",
+            "values": [
+              { "id": "proposed", "label": "Proposed" },
+              { "id": "confirmed", "label": "Confirmed ✓" },
+              { "id": "dropped", "label": "Doesn't work" }
+            ],
+            "setBy": "owner"
+          }
+        ]
+      }
     }
   ]
 }
