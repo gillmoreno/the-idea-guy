@@ -215,6 +215,48 @@
           }
         ]
       }
+    },
+    {
+      "id": "lend-borrow",
+      "name": "Lend & Borrow",
+      "description": "Who borrowed what — items, who has them, due back, returned.",
+      "emoji": "🔁",
+      "accent": "#14b8a6",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "lend-borrow",
+        "name": "Lend & Borrow",
+        "description": "A shared ledger of lent things — never lose track of a book, tool, or twenty again.",
+        "emoji": "🔁",
+        "accent": "#14b8a6",
+        "collections": [
+          {
+            "id": "loans",
+            "label": "Lent items",
+            "singular": "item",
+            "fields": [
+              { "key": "title", "label": "Item", "type": "text", "required": true },
+              { "key": "who", "label": "Who has it", "type": "text", "required": true },
+              { "key": "due", "label": "Due back", "type": "text" },
+              { "key": "notes", "label": "Notes", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "loans",
+            "values": [
+              { "id": "out", "label": "Out" },
+              { "id": "returned", "label": "Returned ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }

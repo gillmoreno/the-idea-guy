@@ -24,6 +24,7 @@ _(empty)_
 - [x] **Grocery Run** 🛒 — shared shopping list: add items, claim "I'll grab it", mark bought · declarative · 2026-06-11. New shared brick: **status attribution** — schema engine records who last set a record's status (`statusById`/`statusAt`), shows a member chip on the card, and non-setters now see a read-only status pill (benefits Potluck & Idea Pool too).
 - [x] **Appointment Huddle** 📅 — propose time slots, vote on availability, organizer confirms one · declarative · 2026-06-11. Pure catalog entry (votes + owner status), no engine changes.
 - [x] **Watch Club** 🍿 — propose movies/series, vote what's next, track queue → watching → watched · declarative · 2026-06-11. Pure catalog entry (votes + member status).
+- [x] **Lend & Borrow** 🔁 — who borrowed what: item, who has it, due back, returned · declarative · 2026-06-12. Pure catalog entry (member status out → returned).
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -34,7 +35,6 @@ _(empty)_
 - [ ] **Plant & Pet Sitter** 🪴 — watering/feeding schedule while someone is away: tasks, photos as proof, last-done timestamps. Declarative + image field.
 - [ ] **Moving Day** 📦 — box inventory (what's in box #12), claim carrying tasks, address/utility checklist. Declarative (two collections).
 - [ ] **Game Night** 🎲 — running scoreboard across game nights, win streaks, who hosts next. Builtin (scores/streak math, like Fit Crew).
-- [ ] **Lend & Borrow** 🔁 — who borrowed what among friends/neighbors (books, tools, cash): item, due back, returned. Declarative (status: out → returned).
 - [ ] **Meal Week** 🍽️ — plan the week's dinners together: propose meals, assign cook per day, auto-derive shopping notes. Builtin or declarative.
 - [ ] **Packing List** 🧳 — shared trip packing: who brings the tent/speaker/first-aid, don't duplicate. Declarative (claim status) — pairs with Trip Split.
 - [ ] **Care Circle** ❤️ — siblings coordinating care for a parent: visits, meds picked up, doctor notes, "who's on this week". Builtin (sensitive — lean on E2E story).
