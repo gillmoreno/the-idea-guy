@@ -25,6 +25,9 @@ const BacklogApp = lazy(() =>
 const FitCrewApp = lazy(() =>
   import("./fitcrew/FitCrewApp").then((m) => ({ default: m.FitCrewApp })),
 );
+const RoomLedgerApp = lazy(() =>
+  import("./roomledger/RoomLedgerApp").then((m) => ({ default: m.RoomLedgerApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -58,6 +61,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return BacklogApp;
       case "fitcrew":
         return FitCrewApp;
+      case "roomledger":
+        return RoomLedgerApp;
       default:
         return null;
     }

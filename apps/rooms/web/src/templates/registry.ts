@@ -2,7 +2,13 @@ import type { TemplateKind } from "@the-idea-guy/room-kit";
 import { DECLARATIVE_TEMPLATE_ID } from "@the-idea-guy/room-kit";
 import type { RoomSchema } from "@/schema/types";
 
-export type BuiltinTemplateId = "choreboard" | "tripsplit" | "bookclub" | "backlog" | "fitcrew";
+export type BuiltinTemplateId =
+  | "choreboard"
+  | "tripsplit"
+  | "bookclub"
+  | "backlog"
+  | "fitcrew"
+  | "roomledger";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -60,6 +66,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     emoji: "💡🗳️",
     accent: "#f59e0b",
     ownerOnly: true,
+  },
+  {
+    kind: "builtin",
+    id: "roomledger",
+    name: "Roommate Ledger",
+    description: "Household bills & shared purchases — who paid, who owes, settle up.",
+    emoji: "🏠💸",
+    accent: "#0d9488",
   },
   {
     kind: "builtin",
