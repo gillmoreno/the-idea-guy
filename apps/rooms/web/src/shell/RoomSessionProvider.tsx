@@ -25,9 +25,10 @@ import {
   publicKeyMaterial,
   touchVaultRoom,
 } from "@the-idea-guy/room-kit";
+import { useRouter } from "next/navigation";
 import { useDevice } from "./DeviceProvider";
 import { clearMemberSecrets } from "@/templates/choreboard/lib/memberSecrets";
-import { readRoomMeta, writeRoomMeta, type ResolvedRoomMeta } from "./roomMeta";
+import { markRoomDeleted, readRoomMeta, writeRoomMeta, type ResolvedRoomMeta } from "./roomMeta";
 import { inferTemplateFromDoc } from "./resolveRoomType";
 import type { RoomSchema } from "@/schema/types";
 import { peekPendingSchema } from "@/schema/pending";
@@ -79,6 +80,8 @@ interface RoomSessionCtx {
   joinRoom: (roomCode: string, opts: JoinOpts) => void;
   unlockAdmin: (adminSecret: string) => void;
   leaveRoom: () => void;
+  /** Admin only: tombstone the room for everyone, checkpoint the relay, purge this device. */
+  deleteRoom: () => Promise<void>;
   setCurrentMember: (id: string | null) => void;
   /** Prune CRDT history after large inline images. */
   compactRoom: () => Promise<void>;
@@ -93,7 +96,8 @@ export function RoomSessionProvider({
   roomCode: string | null;
   children: React.ReactNode;
 }) {
-  const { relayUrl, saveRoom, forgetRoom, refreshVault } = useDevice();
+  const router = useRouter();
+  const { relayUrl, saveRoom, forgetRoom, refreshVault, removeRoomFromDevice } = useDevice();
   const [mounted, setMounted] = useState(false);
   const [roomCode, setRoomCode] = useState<string | null>(initialRoomCode);
   const [templateKind, setTemplateKind] = useState<TemplateKind | null>(() => {
@@ -356,8 +360,7 @@ export function RoomSessionProvider({
     [roomCode, saveRoom],
   );
 
-  const leaveRoom = useCallback(() => {
-    if (roomCode) forgetRoom(roomCode);
+  const resetSessionState = useCallback(() => {
     clearMemberSecrets();
     localStorage.removeItem(LS_MEMBER);
     setAdminSecret(null);
@@ -369,7 +372,26 @@ export function RoomSessionProvider({
     setCurrentMemberId(null);
     setRoomCode(null);
     teardown();
-  }, [forgetRoom, roomCode]);
+  }, []);
+
+  const leaveRoom = useCallback(() => {
+    if (roomCode) forgetRoom(roomCode);
+    resetSessionState();
+    router.push("/");
+  }, [forgetRoom, roomCode, resetSessionState, router]);
+
+  const deleteRoom = useCallback(async () => {
+    const pub = publicRef.current;
+    if (!pub || !roomCode) return;
+    const code = roomCode;
+    // Tombstone first (broadcasts to connected members), then checkpoint so the
+    // relay's stored backlog collapses to the tombstoned doc.
+    pub.doc.transact(() => markRoomDeleted(pub.doc));
+    await pub.compactStorage();
+    resetSessionState();
+    await removeRoomFromDevice(code);
+    router.push("/");
+  }, [roomCode, resetSessionState, removeRoomFromDevice, router]);
 
   const setCurrentMember = useCallback(
     (id: string | null) => {
@@ -415,6 +437,7 @@ export function RoomSessionProvider({
       joinRoom,
       unlockAdmin,
       leaveRoom,
+      deleteRoom,
       setCurrentMember,
       compactRoom,
     }),
@@ -436,6 +459,7 @@ export function RoomSessionProvider({
       joinRoom,
       unlockAdmin,
       leaveRoom,
+      deleteRoom,
       setCurrentMember,
       compactRoom,
     ],

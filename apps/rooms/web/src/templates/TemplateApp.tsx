@@ -3,6 +3,7 @@
 import { Suspense, lazy } from "react";
 import { loadVault } from "@the-idea-guy/room-kit";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
+import { RoomDeleted } from "@/shell/RoomDeleted";
 import { RoomLoading } from "@/shell/RoomLoading";
 import { RoomTypePending } from "@/shell/RoomTypePending";
 import { inferTemplateFromDoc, resolveRoomType } from "@/shell/resolveRoomType";
@@ -85,6 +86,7 @@ export function TemplateApp() {
 
   if (!mounted) return <RoomLoading emoji="🏠" message="Starting Rooms…" />;
   if (!sync.localLoaded) return <RoomLoading emoji="🏠" message="Loading your data…" />;
+  if (roomMeta?.deletedAt) return <RoomDeleted />;
 
   const vaultRoom = roomCode ? loadVault().rooms[roomCode] ?? null : null;
   const inferred = docs ? inferTemplateFromDoc(docs.publicDoc) : null;

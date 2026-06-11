@@ -6,6 +6,7 @@ import { RoomMemberInviteField } from "@/components/RoomMemberInviteField";
 import { sendPostSetupRoomInvites } from "@/lib/sendPostSetupRoomInvites";
 import type { InviteeSlot } from "@/lib/roomMemberInvites";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
+import { RoomDangerZone } from "@/shell/RoomDangerZone";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 
 /**
@@ -29,13 +30,16 @@ export function RoomInviteSettings({
   const { hasAdminAccess } = useRoomSession();
   if (!hasAdminAccess) return null;
   return (
-    <RoomInviteSettingsPanel
-      onReserveMembers={onReserveMembers}
-      hint={hint}
-      title={title}
-      memberColors={memberColors}
-      minContacts={minContacts}
-    />
+    <>
+      <RoomInviteSettingsPanel
+        onReserveMembers={onReserveMembers}
+        hint={hint}
+        title={title}
+        memberColors={memberColors}
+        minContacts={minContacts}
+      />
+      <RoomDangerZone />
+    </>
   );
 }
 

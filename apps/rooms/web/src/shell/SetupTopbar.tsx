@@ -1,17 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useRoomSession } from "./RoomSessionProvider";
 
 export function SetupTopbar({ title }: { title: string }) {
-  const router = useRouter();
   const { leaveRoom } = useRoomSession();
-
-  const leave = () => {
-    leaveRoom();
-    router.push("/");
-  };
 
   return (
     <div className="topbar">
@@ -19,7 +12,7 @@ export function SetupTopbar({ title }: { title: string }) {
         ← Home
       </Link>
       <h1>{title}</h1>
-      <button type="button" className="btn btn-ghost btn-sm" onClick={leave}>
+      <button type="button" className="btn btn-ghost btn-sm" onClick={leaveRoom}>
         Leave
       </button>
     </div>

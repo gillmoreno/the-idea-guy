@@ -11,6 +11,8 @@ export interface ResolvedRoomMeta {
   schema: RoomSchema | null;
   createdAt: number | null;
   initialized: boolean;
+  /** Set when an admin deleted the room — tombstone replicates to every member. */
+  deletedAt: number | null;
 }
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -25,6 +27,7 @@ export function readRoomMeta(doc: Y.Doc): ResolvedRoomMeta {
   const templateKindRaw = meta.get("templateKind");
   const createdAt = meta.get("createdAt");
   const schemaRaw = meta.get("schema");
+  const deletedAt = meta.get("deletedAt");
 
   const kind: TemplateKind =
     templateKindRaw === "declarative" || templateKindRaw === "builtin"
@@ -51,7 +54,13 @@ export function readRoomMeta(doc: Y.Doc): ResolvedRoomMeta {
     schema,
     createdAt: typeof createdAt === "number" ? createdAt : null,
     initialized,
+    deletedAt: typeof deletedAt === "number" ? deletedAt : null,
   };
+}
+
+/** Tombstone the room for every member. Call inside `doc.transact()` only. */
+export function markRoomDeleted(doc: Y.Doc) {
+  doc.getMap("meta").set("deletedAt", Date.now());
 }
 
 export interface WriteRoomMetaInput {
