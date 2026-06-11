@@ -61,8 +61,10 @@
         "docs_and_changelog/ROOM_DEVICE_DATA.md",
         "packages/room-kit/src/crypto.ts",
         "packages/room-kit/src/vaultLock.ts",
+        "packages/room-kit/src/vaultBio.ts",
         "packages/room-kit/src/links.ts",
-        "apps/rooms/web/src/shell/AppLockSettings.tsx"
+        "apps/rooms/web/src/shell/AppLockSettings.tsx",
+        "apps/rooms/web/src/shell/VaultLockProvider.tsx"
       ]
     },
     {

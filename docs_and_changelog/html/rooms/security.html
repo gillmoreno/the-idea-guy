@@ -80,15 +80,16 @@
   <h2>End-to-end encryption: AES-256-GCM</h2>
   <p>All room data that travels through the relay is encrypted on-device with AES-256-GCM (via the browser's Web Crypto API) before it leaves. Each message gets a fresh random 12-byte IV, and GCM's built-in authentication means tampered ciphertext simply fails to decrypt — there's no way to silently corrupt a room's data in transit.</p>
 
-  <h2>Device app lock (PIN)</h2>
-  <p>Even with everything encrypted in transit, room codes, admin secrets, and passphrases have to live <em>somewhere</em> on the device — the local vault in <code>localStorage</code>. Anyone who opens your browser could read it. The optional <strong>app lock</strong> closes this gap:</p>
+  <h2>Device app lock: PIN and optional biometric unlock</h2>
+  <p>Even with everything encrypted in transit, room codes, admin secrets, and passphrases have to live <em>somewhere</em> on the device — the local vault in <code>localStorage</code>. Anyone who opens your browser could read it. The optional <strong>app lock</strong> closes this gap with a PIN and optional biometric enrollment:</p>
   <ul>
-    <li>You set a PIN (4+ digits) under Profile → App lock.</li>
-    <li>The entire vault is encrypted with a key derived via Argon2id(PIN, random salt) and the plaintext copy is deleted.</li>
-    <li>On open, the app asks for the PIN, verifies it against an encrypted verifier string, and decrypts the vault into memory for the session.</li>
-    <li>Any vault change while locked is re-encrypted before being saved.</li>
+    <li><strong>PIN (required):</strong> You set a PIN (4+ digits) under Profile → App lock. The entire vault is encrypted with a key derived via Argon2id(PIN, random salt, 64 MiB / 2 iterations) and the plaintext copy is deleted.</li>
+    <li><strong>Biometric unlock (optional):</strong> On devices with a user-verifying platform authenticator (Face ID, Touch ID, Windows Hello, or Android fingerprint), you can enroll biometric unlock by confirming your PIN once. This creates a WebAuthn credential with the PRF extension, which derives an unlock key from a unique per-device 32-byte salt. The PIN key bytes are then wrapped in AES-256-GCM and stored alongside the credential id and salt. On unlock, biometric verification releases the PRF secret (the device validates your face or fingerprint), which unwraps the PIN key to decrypt the vault — no server involvement.</li>
+    <li><strong>Session behavior:</strong> On open, the app offers biometric unlock as the primary action (if enrolled); PIN unlock is always available as a fallback. Both unlock to the same vault key (they decrypt the identical cipher, not separate copies). The decrypted vault lives in memory during the session as a <code>CryptoKey</code>, not raw bytes, and the PIN is never retained in memory after unlock.</li>
+    <li><strong>Changing or disabling:</strong> If you change your PIN or disable the lock, the biometric enrollment is automatically invalidated (the salt rotates and the wrapped key becomes unrecoverable). Re-enrollment is required to use biometric again. Disabling biometric alone just drops the credential and salt; the PIN remains.</li>
   </ul>
-  <p>Again, no server and no recovery: forget the PIN and the local copy is gone — but room data isn't lost, because you can rejoin rooms with their invite codes and re-sync from the relay or other devices.</p>
+  <p>Biometric unlock adds convenience and shoulder-surf resistance: your face or fingerprint is far harder to coerce or observe than a 4-digit PIN, and it never leaves the device. However, biometric is per-device — if you get a new phone, you enroll again. And the PIN is still the ultimate unlock path: anyone who knows the PIN can still unlock. Biometrics are a UX and observation-resistance layer on top of a PIN-secured vault, not a stronger cryptographic key.</p>
+  <p>As always, no server and no recovery: forget the PIN and the local copy is gone — but room data isn't lost, because you can rejoin rooms with their invite codes and re-sync from the relay or other devices.</p>
 
   <h2>What the relay can and cannot see</h2>
   <table>
@@ -102,11 +103,11 @@
   <h2>Threat model in plain words</h2>
   <div class="card">
     <strong>Protected against:</strong>
-    a nosy or compromised relay/CDN operator (sees only ciphertext and opaque ids); leaked server or CDN logs (no secrets in query strings); someone casually opening your browser (app lock encrypts the vault at rest); brute-force on passphrases and PINs (Argon2id is slow and memory-hard); tampering with synced data in transit (GCM authentication).
+    a nosy or compromised relay/CDN operator (sees only ciphertext and opaque ids); leaked server or CDN logs (no secrets in query strings); someone casually opening your browser (app lock encrypts the vault at rest); brute-force on passphrases and PINs (Argon2id is slow and memory-hard); tampering with synced data in transit (GCM authentication); observation or coercion of your PIN (biometric unlock stays invisible and resists shoulder-surfing).
   </div>
   <div class="card">
     <strong>Not protected against:</strong>
-    someone you shared the link with re-sharing it — a leaked room code without a passphrase is full member access; a removed member who keeps the old code (no forward secrecy or key rotation yet, so the public channel stays readable to them); malware or full compromise of an unlocked device; losing all your secrets (no recovery service exists, by design). Server-side 2FA was intentionally skipped because it would require accounts.
+    someone you shared the link with re-sharing it — a leaked room code without a passphrase is full member access; a removed member who keeps the old code (no forward secrecy or key rotation yet, so the public channel stays readable to them); malware or full compromise of an unlocked device; losing all your secrets (no recovery service exists, by design); biometric re-enrollment on a stolen device if the attacker has your PIN (biometric is per-device, so a thief gets a fresh enrollment with the PIN they stole). Server-side 2FA was intentionally skipped because it would require accounts.
   </div>
 
   <h2>Invites between contacts</h2>
@@ -115,15 +116,18 @@
   <h2>Key code paths</h2>
   <ul>
     <li><code>packages/room-kit/src/crypto.ts</code> — key derivation (SHA-256 / Argon2id), AES-256-GCM encrypt/decrypt, public vs admin key material, PIN key</li>
+    <li><code>packages/room-kit/src/vault.ts</code> — vault unlock result structure and session key storage</li>
+    <li><code>packages/room-kit/src/vaultLock.ts</code> — PIN lock enable/unlock/change, encrypted vault storage, per-device secret rotation</li>
+    <li><code>packages/room-kit/src/vaultBio.ts</code> — biometric enrollment via WebAuthn platform authenticator with PRF extension, HKDF-SHA256 key derivation, AES-256-GCM wrapping of PIN key</li>
     <li><code>packages/room-kit/src/links.ts</code> — hash-based invite links, legacy parsing, address-bar scrubbing</li>
-    <li><code>packages/room-kit/src/vaultLock.ts</code> — PIN lock enable/unlock/change, encrypted vault storage</li>
     <li><code>packages/room-kit/src/pairInbox.ts</code> — pairwise encrypted inbox carrying <code>room_invite</code> messages</li>
-    <li><code>apps/rooms/web/src/shell/VaultLockProvider.tsx</code> — app-lock session handling</li>
+    <li><code>apps/rooms/web/src/shell/VaultLockProvider.tsx</code> — app-lock session handling, unlock screen with biometric as primary action</li>
+    <li><code>apps/rooms/web/src/shell/AppLockSettings.tsx</code> — PIN and biometric enrollment UI</li>
     <li><code>apps/rooms/web/src/shell/RoomInviteSettings.tsx</code> — post-setup admin invites</li>
     <li><code>apps/rooms/web/src/lib/purgeRoomFromDevice.ts</code> — local-only room removal</li>
   </ul>
 
-  <p class="footer">Sources: <code>docs_and_changelog/ROOM_SECURITY.md, docs_and_changelog/ROOM_INVITES.md, docs_and_changelog/ROOM_DEVICE_DATA.md, packages/room-kit/src/crypto.ts, packages/room-kit/src/vaultLock.ts, packages/room-kit/src/links.ts, packages/room-kit/src/pairInbox.ts</code> · Last synced 2026-06-10</p>
+  <p class="footer">Sources: <code>docs_and_changelog/ROOM_SECURITY.md, docs_and_changelog/ROOM_INVITES.md, docs_and_changelog/ROOM_DEVICE_DATA.md, packages/room-kit/src/crypto.ts, packages/room-kit/src/vault.ts, packages/room-kit/src/vaultLock.ts, packages/room-kit/src/vaultBio.ts, packages/room-kit/src/links.ts, packages/room-kit/src/pairInbox.ts</code> · Last synced 2026-06-11</p>
 </article>
 </main>
 </div>
