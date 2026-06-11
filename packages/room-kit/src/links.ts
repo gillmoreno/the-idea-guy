@@ -26,22 +26,44 @@ export function roomUrl(roomCode: string): string {
   return hashLink("/room", { c: roomCode.trim() });
 }
 
+export interface JoinUrlOptions {
+  /** One-bit hint that the room needs a passphrase (never the passphrase itself) —
+   *  lets the join page demand it up front instead of silently joining an empty
+   *  parallel channel derived from the wrong passphrase. */
+  passphraseProtected?: boolean;
+}
+
 /** Member invite — room code in hash only. */
-export function memberJoinUrl(roomCode: string): string {
-  return hashLink("/join", { c: roomCode.trim() });
+export function memberJoinUrl(roomCode: string, opts?: JoinUrlOptions): string {
+  return hashLink("/join", {
+    c: roomCode.trim(),
+    pp: opts?.passphraseProtected ? "1" : undefined,
+  });
 }
 
 /** Admin invite — room code + admin secret + optional template, all in hash. */
-export function adminJoinUrl(roomCode: string, adminSecret: string, templateId?: string): string {
+export function adminJoinUrl(
+  roomCode: string,
+  adminSecret: string,
+  templateId?: string,
+  opts?: JoinUrlOptions,
+): string {
   return hashLink("/join", {
     c: roomCode.trim(),
     admin: adminSecret.trim(),
     template: templateId,
+    pp: opts?.passphraseProtected ? "1" : undefined,
   });
 }
 
 export type DeepLink =
-  | { type: "join"; roomCode: string; adminSecret?: string; templateId?: string }
+  | {
+      type: "join";
+      roomCode: string;
+      adminSecret?: string;
+      templateId?: string;
+      passphraseProtected?: boolean;
+    }
   | { type: "member"; link: string };
 
 function readLocationParams(search: string, hash: string): URLSearchParams {
@@ -65,6 +87,7 @@ export function parseJoinLocation(search: string, hash: string): DeepLink | null
     roomCode: decodeURIComponent(roomCode),
     adminSecret: params.get("admin") ?? undefined,
     templateId: params.get("template") ?? undefined,
+    passphraseProtected: params.get("pp") === "1" || undefined,
   };
 }
 

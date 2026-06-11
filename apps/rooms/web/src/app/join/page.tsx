@@ -37,11 +37,16 @@ function JoinInner() {
   const [adminSecret, setAdminSecret] = useState("");
   const [passphrase, setPassphrase] = useState("");
   const [scanning, setScanning] = useState(false);
+  const [needsPassphrase, setNeedsPassphrase] = useState(false);
 
   const handleScan = (parsed: Extract<DeepLink, { type: "join" }>) => {
     setScanning(false);
     setCode(parsed.roomCode);
     if (parsed.adminSecret) setAdminSecret(parsed.adminSecret);
+    if (parsed.passphraseProtected && !passphrase.trim()) {
+      setNeedsPassphrase(true);
+      return;
+    }
     finishJoin(parsed.roomCode, parsed.adminSecret, parsed.templateId, passphrase || undefined, true);
   };
 
@@ -51,6 +56,12 @@ function JoinInner() {
     stripInviteParamsFromUrl();
     setCode(parsed.roomCode);
     if (parsed.adminSecret) setAdminSecret(parsed.adminSecret);
+    if (parsed.passphraseProtected) {
+      // Joining without the passphrase would land in an empty parallel channel —
+      // stop and ask for it instead of auto-joining.
+      setNeedsPassphrase(true);
+      return;
+    }
     if (parsed.roomCode) {
       finishJoin(parsed.roomCode, parsed.adminSecret, parsed.templateId, undefined, true);
     }
@@ -131,11 +142,17 @@ function JoinInner() {
           />
         </div>
         <div className="field">
-          <label>Room passphrase (optional)</label>
+          <label>{needsPassphrase ? "Room passphrase (required)" : "Room passphrase (optional)"}</label>
+          {needsPassphrase && (
+            <p className="muted" style={{ fontSize: 13, marginTop: 0 }}>
+              This room is passphrase-protected. Enter the passphrase the organizer shared
+              with you separately — without it you would join an empty copy of the room.
+            </p>
+          )}
           <input
             className="input"
             type="password"
-            placeholder="Only if the room owner shared one separately"
+            placeholder={needsPassphrase ? "Enter the room passphrase" : "Only if the room owner shared one separately"}
             value={passphrase}
             onChange={(e) => setPassphrase(e.target.value)}
             autoCapitalize="off"
@@ -145,7 +162,7 @@ function JoinInner() {
         </div>
         <button
           className="btn btn-primary btn-block"
-          disabled={!code.trim()}
+          disabled={!code.trim() || (needsPassphrase && !passphrase.trim())}
           onClick={() => finishJoin(code, adminSecret || undefined, undefined, passphrase || undefined, true)}
         >
           Join room

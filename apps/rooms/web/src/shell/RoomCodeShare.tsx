@@ -24,7 +24,10 @@ export function RoomCodeShare({
     <>
       <div className="code-box">{roomCode}</div>
       <div style={{ textAlign: "center" }}>
-        <QRBlock value={memberJoinUrl(roomCode)} label={qrLabel} />
+        <QRBlock
+          value={memberJoinUrl(roomCode, { passphraseProtected: protectedRoom })}
+          label={qrLabel}
+        />
       </div>
       {protectedRoom ? (
         <p className="muted" style={{ fontSize: 12 }}>

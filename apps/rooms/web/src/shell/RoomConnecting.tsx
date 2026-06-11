@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { TemplateIcon } from "@/components/TemplateIcon";
 import { useRoomSession } from "./RoomSessionProvider";
+
+const SLOW_HINT_AFTER_MS = 20_000;
 
 export function RoomConnecting({
   emoji = "🔗",
@@ -14,6 +17,12 @@ export function RoomConnecting({
   organizerLabel?: string;
 }) {
   const { sync, relayUrl, leaveRoom } = useRoomSession();
+  const [waitedLong, setWaitedLong] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setWaitedLong(true), SLOW_HINT_AFTER_MS);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <div className="centered" style={{ textAlign: "center" }}>
@@ -28,6 +37,13 @@ export function RoomConnecting({
         Relay: {sync.connected ? "connected" : "not connected"} ·{" "}
         <span style={{ wordBreak: "break-all" }}>{relayUrl}</span>
       </p>
+      {waitedLong && sync.connected && (
+        <p style={{ fontSize: 13, marginTop: 12, maxWidth: 360, marginInline: "auto" }}>
+          Still empty after a while? If this room has a <strong>passphrase</strong>, a wrong
+          or missing passphrase looks exactly like an empty room. Leave the room and join
+          again with the passphrase the organizer shared.
+        </p>
+      )}
       <button className="btn btn-ghost" style={{ marginTop: 16 }} onClick={leaveRoom}>
         Leave room
       </button>
