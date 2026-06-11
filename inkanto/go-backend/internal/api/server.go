@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -28,12 +29,48 @@ func NewApp(cfg config.Config, logger *log.Logger) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := bootstrapUsers(st, cfg.BootstrapUsers, logger); err != nil {
+		st.Close()
+		return nil, err
+	}
 	return &App{
 		cfg:    cfg,
 		logger: logger,
 		store:  st,
 		tokens: auth.NewTokenManager(cfg.SecretKey, cfg.TokenExpireDays),
 	}, nil
+}
+
+// bootstrapUsers creates each "user:pass" from the comma-separated spec that
+// doesn't exist yet. With no signup endpoint, this is how accounts are
+// provisioned: add to INKANTO_USERS, restart. Existing users are left alone.
+func bootstrapUsers(st *store.Store, spec string, logger *log.Logger) error {
+	for _, pair := range strings.Split(spec, ",") {
+		pair = strings.TrimSpace(pair)
+		if pair == "" {
+			continue
+		}
+		username, password, ok := strings.Cut(pair, ":")
+		username = strings.TrimSpace(strings.ToLower(username))
+		if !ok || username == "" || len(password) < 4 {
+			return fmt.Errorf("INKANTO_USERS entry %q must be username:password (password of at least 4 characters)", pair)
+		}
+		if _, err := st.GetUserByUsername(username); err == nil {
+			continue
+		} else if !errors.Is(err, store.ErrNotFound) {
+			return err
+		}
+		hash, err := auth.HashPassword(password)
+		if err != nil {
+			return err
+		}
+		display := strings.ToUpper(username[:1]) + username[1:]
+		if _, err := st.CreateUser(username, hash, display, "it"); err != nil {
+			return err
+		}
+		logger.Printf("bootstrap: created user %q", username)
+	}
+	return nil
 }
 
 func (a *App) Close() error { return a.store.Close() }
@@ -48,7 +85,7 @@ func (a *App) Router() http.Handler {
 	})
 
 	r.Route("/api", func(api chi.Router) {
-		api.Post("/auth/register", a.handleRegister)
+		// no /auth/register: accounts are provisioned by hand (family-only app)
 		api.Post("/auth/login", a.handleLogin)
 		api.Get("/share/{token}", a.handleGetSharedBook)
 

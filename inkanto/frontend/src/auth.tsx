@@ -7,7 +7,6 @@ interface AuthState {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (data: { username: string; password: string; display_name: string; family_code: string }) => Promise<void>;
   logout: () => void;
 }
 
@@ -41,16 +40,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onAuth(await api("/auth/login", { method: "POST", body: JSON.stringify({ username, password }) }));
   };
 
-  const register = async (data: { username: string; password: string; display_name: string; family_code: string }) => {
-    onAuth(await api("/auth/register", { method: "POST", body: JSON.stringify(data) }));
-  };
-
   const logout = () => {
     setToken(null);
     setUser(null);
   };
 
-  return <AuthContext.Provider value={{ user, loading, login, register, logout }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthState {

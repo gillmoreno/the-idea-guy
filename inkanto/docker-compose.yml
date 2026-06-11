@@ -8,7 +8,7 @@ services:
       - "3400:80"
     environment:
       SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
-      FAMILY_CODE: ${FAMILY_CODE:?set FAMILY_CODE in .env}
+      INKANTO_USERS: ${INKANTO_USERS:-}
       CLAUDE_CODE_OAUTH_TOKEN: ${CLAUDE_CODE_OAUTH_TOKEN:?set CLAUDE_CODE_OAUTH_TOKEN in .env}
       INKANTO_MODEL: ${INKANTO_MODEL:-claude-opus-4-8}
     volumes:

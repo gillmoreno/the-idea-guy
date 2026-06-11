@@ -21,7 +21,7 @@ func newTestApp(t *testing.T) *App {
 		SecretKey:       "test-secret",
 		DatabasePath:    filepath.Join(t.TempDir(), "test.sqlite3"),
 		SidecarURL:      "http://127.0.0.1:1", // unreachable on purpose
-		FamilyCode:      "famiglia",
+		BootstrapUsers:  "luna:stelle, nonno:torta",
 		TokenExpireDays: 1,
 	}
 	app, err := NewApp(cfg, log.New(os.Stderr, "test ", 0))
@@ -54,34 +54,33 @@ func TestAuthAndStoryFlow(t *testing.T) {
 	app := newTestApp(t)
 	router := app.Router()
 
-	// wrong family code rejected
+	// registration endpoint is gone — accounts come from INKANTO_USERS only
 	rec, _ := doJSON(t, router, "POST", "/api/auth/register", "", map[string]any{
-		"username": "luna", "password": "stelle", "family_code": "sbagliato",
+		"username": "intruso", "password": "ciaociao",
 	})
-	if rec.Code != http.StatusForbidden {
-		t.Fatalf("expected 403 for wrong family code, got %d", rec.Code)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("expected 404 for removed register endpoint, got %d", rec.Code)
 	}
 
-	// register
-	rec, out := doJSON(t, router, "POST", "/api/auth/register", "", map[string]any{
-		"username": "luna", "password": "stelle", "family_code": "famiglia", "display_name": "Luna",
+	// wrong password rejected
+	rec, _ = doJSON(t, router, "POST", "/api/auth/login", "", map[string]any{
+		"username": "luna", "password": "sbagliata",
 	})
-	if rec.Code != http.StatusCreated {
-		t.Fatalf("register: expected 201, got %d (%s)", rec.Code, rec.Body)
-	}
-	token, _ := out["token"].(string)
-	if token == "" {
-		t.Fatal("register: missing token")
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 for wrong password, got %d", rec.Code)
 	}
 
-	// login
-	rec, out = doJSON(t, router, "POST", "/api/auth/login", "", map[string]any{
+	// login as a bootstrapped user
+	rec, out := doJSON(t, router, "POST", "/api/auth/login", "", map[string]any{
 		"username": "luna", "password": "stelle",
 	})
 	if rec.Code != http.StatusOK {
-		t.Fatalf("login: expected 200, got %d", rec.Code)
+		t.Fatalf("login: expected 200, got %d (%s)", rec.Code, rec.Body)
 	}
-	token = out["token"].(string)
+	token, _ := out["token"].(string)
+	if token == "" {
+		t.Fatal("login: missing token")
+	}
 
 	// unauthorized without token
 	rec, _ = doJSON(t, router, "GET", "/api/stories", "", nil)
@@ -147,8 +146,8 @@ func TestAuthAndStoryFlow(t *testing.T) {
 	}
 
 	// second user cannot see luna's story
-	_, out2 := doJSON(t, router, "POST", "/api/auth/register", "", map[string]any{
-		"username": "nonno", "password": "torta", "family_code": "famiglia",
+	_, out2 := doJSON(t, router, "POST", "/api/auth/login", "", map[string]any{
+		"username": "nonno", "password": "torta",
 	})
 	otherToken := out2["token"].(string)
 	rec, _ = doJSON(t, router, "GET", base, otherToken, nil)

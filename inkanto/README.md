@@ -29,7 +29,7 @@ Part of [the-idea-guy](../) monorepo. Architecture follows the Roger monolith pa
 ```sh
 just setup                 # go mod tidy + npm install (sidecar, frontend)
 claude setup-token         # one-time: mint a 1-year subscription OAuth token
-cp .env.example .env       # paste the token, set SECRET_KEY + FAMILY_CODE
+cp .env.example .env       # paste the token, set SECRET_KEY + INKANTO_USERS
 ```
 
 ## Dev
@@ -39,7 +39,8 @@ just dev    # Go API :4800 + sidecar :4700 + Vite :3400 (proxies /api)
 just test   # Go integration tests
 ```
 
-Registration requires the `FAMILY_CODE`, so only the family can create accounts.
+There is no signup page: accounts come from `INKANTO_USERS` (`user:pass,user:pass`),
+created at startup if missing. Only the family ever gets an account.
 
 ## Deploy
 

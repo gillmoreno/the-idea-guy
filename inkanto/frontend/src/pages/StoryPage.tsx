@@ -62,15 +62,17 @@ export default function StoryPage() {
         ))}
       </nav>
 
-      {tab === "idea" && <IdeaTab story={story} onSaved={reload} onCoach={openCoach} />}
-      {tab === "outline" && <OutlineTab story={story} onSaved={reload} />}
-      {tab === "chapters" && <ChaptersTab story={story} onChanged={reload} onCoach={openCoach} />}
-      {tab === "world" && <WorldTab story={story} onChanged={reload} onCoach={openCoach} />}
-      {tab === "book" && <BookTab story={story} onChanged={reload} />}
+      <div key={tab} className="rise-in">
+        {tab === "idea" && <IdeaTab story={story} onSaved={reload} onCoach={openCoach} />}
+        {tab === "outline" && <OutlineTab story={story} onSaved={reload} />}
+        {tab === "chapters" && <ChaptersTab story={story} onChanged={reload} onCoach={openCoach} />}
+        {tab === "world" && <WorldTab story={story} onChanged={reload} onCoach={openCoach} />}
+        {tab === "book" && <BookTab story={story} onChanged={reload} />}
+      </div>
 
       <button
         onClick={() => openCoach({})}
-        className="fixed bottom-5 right-5 h-16 w-16 rounded-full bg-pop text-3xl shadow-xl active:scale-95 transition"
+        className="fab-coach fixed bottom-5 right-5 h-16 w-16 rounded-full bg-pop text-3xl shadow-xl active:scale-95 transition"
         style={{ boxShadow: "0 4px 0 var(--pop-edge), 0 10px 24px rgb(0 0 0 / 0.25)" }}
         aria-label={t("coach")}
       >

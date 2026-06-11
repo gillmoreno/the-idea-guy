@@ -10,7 +10,7 @@ type Config struct {
 	SecretKey       string
 	DatabasePath    string
 	SidecarURL      string
-	FamilyCode      string // required at registration so only the family can sign up
+	BootstrapUsers  string // "user:pass,user:pass" — created at startup if missing (no signup endpoint)
 	TokenExpireDays int
 }
 
@@ -20,7 +20,7 @@ func Load() Config {
 		SecretKey:       envStr("SECRET_KEY", "dev-secret-change-me"),
 		DatabasePath:    envStr("DATABASE_PATH", "./data/inkanto.sqlite3"),
 		SidecarURL:      envStr("SIDECAR_URL", "http://localhost:4700"),
-		FamilyCode:      envStr("FAMILY_CODE", "inkanto"),
+		BootstrapUsers:  envStr("INKANTO_USERS", ""),
 		TokenExpireDays: envInt("TOKEN_EXPIRE_DAYS", 30),
 	}
 }

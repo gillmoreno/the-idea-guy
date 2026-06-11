@@ -9,55 +9,6 @@ import (
 	"inkanto/go-backend/internal/store"
 )
 
-type registerRequest struct {
-	Username    string `json:"username"`
-	Password    string `json:"password"`
-	DisplayName string `json:"display_name"`
-	Locale      string `json:"locale"`
-	FamilyCode  string `json:"family_code"`
-}
-
-func (a *App) handleRegister(w http.ResponseWriter, r *http.Request) {
-	var req registerRequest
-	if err := decode(r, &req); err != nil {
-		writeError(w, http.StatusBadRequest, "invalid body")
-		return
-	}
-	req.Username = strings.TrimSpace(strings.ToLower(req.Username))
-	if req.Username == "" || len(req.Password) < 4 {
-		writeError(w, http.StatusBadRequest, "username and a password of at least 4 characters are required")
-		return
-	}
-	if req.FamilyCode != a.cfg.FamilyCode {
-		writeError(w, http.StatusForbidden, "wrong family code")
-		return
-	}
-	if req.Locale == "" {
-		req.Locale = "it"
-	}
-	if req.DisplayName == "" {
-		req.DisplayName = req.Username
-	}
-
-	hash, err := auth.HashPassword(req.Password)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "internal error")
-		return
-	}
-	id, err := a.store.CreateUser(req.Username, hash, req.DisplayName, req.Locale)
-	if err != nil {
-		writeError(w, http.StatusConflict, "username already taken")
-		return
-	}
-	token, err := a.tokens.NewToken(id)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "internal error")
-		return
-	}
-	user, _ := a.store.GetUserByID(id)
-	writeJSON(w, http.StatusCreated, map[string]any{"token": token, "user": user})
-}
-
 type loginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`

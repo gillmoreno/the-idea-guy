@@ -3,13 +3,13 @@ export type Locale = "it" | "es" | "en";
 const dict: Record<string, Record<Locale, string>> = {
   app_tag: { it: "il tuo laboratorio di storie", es: "tu taller de historias", en: "your story workshop" },
   login: { it: "Entra", es: "Entrar", en: "Log in" },
-  register: { it: "Crea il tuo posto", es: "Crea tu lugar", en: "Create your spot" },
   username: { it: "Nome utente", es: "Nombre de usuario", en: "Username" },
   password: { it: "Parola segreta", es: "Palabra secreta", en: "Password" },
-  display_name: { it: "Come ti chiami?", es: "¿Cómo te llamas?", en: "What's your name?" },
-  family_code: { it: "Codice di famiglia", es: "Código de familia", en: "Family code" },
-  no_account: { it: "Prima volta qui?", es: "¿Primera vez aquí?", en: "First time here?" },
-  have_account: { it: "Hai già il tuo posto?", es: "¿Ya tienes tu lugar?", en: "Already have a spot?" },
+  login_wrong: {
+    it: "Mmm, la parola segreta non è giusta. Riprova!",
+    es: "Mmm, la palabra secreta no es correcta. ¡Inténtalo otra vez!",
+    en: "Hmm, that secret word isn't right. Try again!",
+  },
   my_stories: { it: "Le mie storie", es: "Mis historias", en: "My stories" },
   new_story: { it: "Nuova storia", es: "Nueva historia", en: "New story" },
   new_story_title: { it: "Come si chiama la tua storia?", es: "¿Cómo se llama tu historia?", en: "What is your story called?" },

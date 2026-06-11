@@ -44,7 +44,7 @@
 <p>Inkanto ("il tuo laboratorio di storie") is a personal writing lab built for Gil's daughter. She keeps her stories in one place — an idea, an outline of beats (the <em>scaletta</em>), chapters, and a story bible (the <em>mondo</em>: characters, places, objects) — and a Claude-powered coach sits alongside, available in six distinct coaching modes. The core product promise, enforced in the prompts themselves, is that <strong>the coach never writes her story</strong>. It asks questions, offers numbered options to pick from or remix, celebrates the specific things that make her ideas hers, and keeps everything age-appropriate.</p>
 
 <div class="card">
-<p><strong>Status: not deployed publicly, family-only by design.</strong> Registration requires a <code>FAMILY_CODE</code> environment secret, so only the family can create accounts. <code>just dev</code> inside <code>inkanto/</code> runs the web app on <code>:3400</code>, the Go API on <code>:4800</code>, and the AI sidecar on <code>:4700</code>; <code>just deploy</code> ships one container on <code>:3400</code>.</p>
+<p><strong>Status: live at <a href="https://inkanto.the-idea-guy.com">inkanto.the-idea-guy.com</a>, family-only by design.</strong> There is no signup at all — the register endpoint and the old <code>FAMILY_CODE</code> gate were removed. Accounts come from the <code>INKANTO_USERS</code> env var (<code>user:pass,user:pass</code>): at startup the Go API creates any listed user that doesn't exist yet and never touches existing ones. Production is one Docker container (nginx + Go API + AI sidecar under supervisord) on host <code>:3400</code>, reached through the existing <code>choreboard-relay</code> Cloudflare tunnel (proxied CNAME <code>inkanto</code> → tunnel) — Cloudflare terminates TLS, so the PWA gets its secure origin with no host-level proxy. <code>just dev</code> inside <code>inkanto/</code> still runs web <code>:3400</code> / Go API <code>:4800</code> / sidecar <code>:4700</code>; deploy and aftercare details live in <a href="../../../inkanto/DEPLOY.md"><code>inkanto/DEPLOY.md</code></a>.</p>
 </div>
 
 <h2>Why it was built this way</h2>
@@ -74,7 +74,7 @@
 
 <h2>What users see</h2>
 <ul>
-  <li><strong>Family-gated accounts.</strong> Registering needs the family code; sessions are plain JWT bearer tokens.</li>
+  <li><strong>Login only — no signup.</strong> The login page is a redesigned animated "enchanted book cover" (floating sparks, a quill, a shake on a wrong password). Accounts are provisioned by a parent via <code>INKANTO_USERS</code>; sessions are plain JWT bearer tokens.</li>
   <li><strong>Stories with structure.</strong> Each story has an idea, a scaletta of beats, chapters with statuses, and a mondo of typed entities (characters / places / objects with summaries and notes).</li>
   <li><strong>A coach drawer per story.</strong> She picks a skill, and each skill keeps its own conversation history (the last 50 turns are shown). Replies stream token-by-token over SSE, so the coach feels alive on a phone.</li>
   <li><strong>Context-aware coaching.</strong> Asking the coach from inside a chapter or an entity sends that chapter's text (last ~6,000 characters) or that entity's notes along as the focus.</li>
@@ -96,12 +96,14 @@
   <li><strong>Manual token rotation.</strong> The OAuth token lasts about a year and does not auto-rotate; when it expires someone re-runs <code>claude setup-token</code> and updates <code>.env</code>.</li>
   <li><strong>Credit, not quota.</strong> The Agent SDK draws from the subscription's monthly Agent SDK credit (separate from interactive Claude Code limits since June 2026). If it runs out, the coach returns an error — but the writing app keeps working fully; the AI is additive, never load-bearing.</li>
   <li><strong>Guardrails are prompts, not code.</strong> The "never writes her story" rule lives in <code>_base.md</code> rather than an output filter. That keeps it editable and inspectable by a parent, at the cost of being model-behavior rather than a hard technical guarantee.</li>
+  <li><strong>Accounts need a restart.</strong> With no signup endpoint, adding a user means editing <code>INKANTO_USERS</code> in <code>.env</code> and restarting the container. For a family-sized userbase that's a feature: no registration surface exposed on a public URL, and the user list is one greppable line. (<code>bootstrapUsers</code> enforces ≥4-char passwords, lowercases usernames, and defaults display name to the capitalized username with locale <code>it</code>.)</li>
 </ul>
 
 <h2>Key code paths</h2>
 <div class="card">
 <table>
   <tr><th>Path</th><th>What it does</th></tr>
+  <tr><td><code>inkanto/go-backend/internal/api/server.go</code></td><td>Routes, JWT middleware, and <code>bootstrapUsers</code> account provisioning from <code>INKANTO_USERS</code></td></tr>
   <tr><td><code>inkanto/go-backend/internal/api/handlers_coach.go</code></td><td>Builds story context, proxies SSE from the sidecar, persists each exchange</td></tr>
   <tr><td><code>inkanto/ai-sidecar/src/server.mjs</code></td><td>Stateless Agent SDK <code>query()</code> — one turn, no tools, SSE out</td></tr>
   <tr><td><code>inkanto/skills/</code></td><td>Guardrail (<code>_base.md</code>) and the six coaching-mode prompts</td></tr>
@@ -117,9 +119,10 @@
   <tr><td>Go API</td><td>4800</td><td>:8080 internal, behind nginx <code>/api</code></td></tr>
   <tr><td>AI sidecar</td><td>4700</td><td>:8090 internal, reached only by Go</td></tr>
 </table>
+<p>The in-container nginx also serves <code>.webmanifest</code> with the <code>application/manifest+json</code> MIME type — without it, Add to Home Screen silently fails on her phone.</p>
 </div>
 
-<p class="footer">Sources: <code>inkanto/</code> · Last synced 2026-06-10</p>
+<p class="footer">Sources: <code>inkanto/</code> · Last synced 2026-06-11</p>
 
 </article>
 </main>

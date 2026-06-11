@@ -69,9 +69,9 @@ export default function CoachDrawer({ story, focus, onClose }: Props) {
   const locale = getLocale();
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" onClick={onClose}>
+    <div className="coach-overlay fixed inset-0 z-50 bg-black/40 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="absolute inset-x-0 bottom-0 top-14 rounded-t-3xl bg-bg border-t border-line flex flex-col"
+        className="coach-sheet absolute inset-x-0 bottom-0 top-14 rounded-t-3xl bg-bg border-t border-line flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-2 p-3 border-b border-line">
@@ -97,13 +97,23 @@ export default function CoachDrawer({ story, focus, onClose }: Props) {
           {messages.map((m, i) => (
             <div
               key={i}
-              className={`coach-bubble max-w-[85%] rounded-2xl px-4 py-2 whitespace-pre-wrap leading-relaxed ${
+              className={`coach-bubble pop-in max-w-[85%] rounded-2xl px-4 py-2 whitespace-pre-wrap leading-relaxed ${
                 m.role === "user"
                   ? "ml-auto bg-accent text-accent-fg rounded-br-md"
                   : "bg-surface-2 text-fg border border-line rounded-bl-md"
               }`}
             >
-              {m.content || (busy && i === messages.length - 1 ? t("coach_thinking") : "")}
+              {m.content ||
+                (busy && i === messages.length - 1 ? (
+                  <span className="inline-flex items-center gap-2 text-muted">
+                    {t("coach_thinking")}
+                    <span className="thinking-dots" aria-hidden>
+                      <span /><span /><span />
+                    </span>
+                  </span>
+                ) : (
+                  ""
+                ))}
             </div>
           ))}
           {error && <p className="text-danger text-sm text-center">{error}</p>}
