@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rooms — Threat Model & Security Guarantees</title>
+<style>
+  :root{
+    --bg:#0b0e16;
+    --panel:#121726;
+    --panel-2:#0f1422;
+    --ink:#e8ecf6;
+    --muted:#9aa6c0;
+    --line:#222a3d;
+    --primary:#6366f1;
+    --primary-soft:rgba(99,102,241,.14);
+    --green:#22c55e;
+    --green-soft:rgba(34,197,94,.10);
+    --amber:#f59e0b;
+    --amber-soft:rgba(245,158,11,.08);
+    --red:#ef4444;
+    --red-soft:rgba(239,68,68,.08);
+    --cyan:#22d3ee;
+    --maxw:920px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--primary);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  /* Hero */
+  header.hero{
+    background:
+      radial-gradient(1200px 400px at 20% -10%, rgba(99,102,241,.30), transparent 60%),
+      radial-gradient(900px 380px at 90% 0%, rgba(34,211,238,.14), transparent 55%),
+      linear-gradient(180deg,#0d1322,#0b0e16);
+    border-bottom:1px solid var(--line);
+    padding:64px 0 44px;
+  }
+  .eyebrow{color:var(--cyan);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px;margin:0 0 12px}
+  h1{font-size:40px;line-height:1.1;margin:0 0 14px;letter-spacing:-.02em}
+  .tagline{font-size:19px;color:var(--muted);max-width:700px;margin:0}
+  .meta{margin-top:20px;color:var(--muted);font-size:13px}
+  .pill{display:inline-block;background:var(--primary-soft);color:#c3c6ff;border:1px solid #2c2f5a;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;margin-right:6px}
+
+  /* TOC */
+  nav.toc{
+    position:sticky;top:0;z-index:5;background:rgba(11,14,22,.88);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:10px 0;
+  }
+  nav.toc .wrap{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}
+  nav.toc a{color:var(--muted);font-weight:600}
+  nav.toc a:hover{color:var(--ink);text-decoration:none}
+
+  /* Sections */
+  section{padding:44px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
+  h2 .num{color:var(--primary);font-weight:800;margin-right:10px}
+  h3{font-size:17px;margin:28px 0 8px;color:var(--ink)}
+  p{margin:12px 0;color:var(--muted)}
+  p strong{color:var(--ink)}
+  .lead{color:var(--muted);font-size:17px;margin-top:0}
+  ul,ol{margin:12px 0;padding-left:22px;color:var(--muted)}
+  li{margin:6px 0}
+  li strong{color:var(--ink)}
+  code{background:#0e1424;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:13px;color:#bfe0ff;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
+  /* Cards + callouts */
+  .grid{display:grid;gap:14px;margin:18px 0}
+  @media(min-width:640px){.grid.cols-2{grid-template-columns:1fr 1fr}.grid.cols-3{grid-template-columns:1fr 1fr 1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h4{margin:0 0 8px;font-size:15px;color:var(--ink)}
+  .card p{margin:4px 0;color:var(--muted);font-size:14px}
+  .callout{border-radius:14px;padding:16px 20px;margin:16px 0;border:1px solid}
+  .callout .k{font-weight:700;display:block;margin-bottom:5px;font-size:14px}
+  .callout.good{background:var(--green-soft);border-color:#1f5135}
+  .callout.warn{background:var(--amber-soft);border-color:#5b4516}
+  .callout.bad {background:var(--red-soft);border-color:#5a2222}
+  .callout.key {background:var(--primary-soft);border-color:#2c2f5a}
+  .callout p{margin:4px 0;font-size:14px}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;color:var(--muted)}
+  th{background:#0e1424;color:#c7d2f0;font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+  td:first-child{color:var(--ink);font-weight:500}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover td{background:rgba(255,255,255,.02)}
+
+  /* Verdict badges */
+  .yes  {color:#4ade80;font-weight:700}
+  .no   {color:#f87171;font-weight:700}
+  .dep  {color:var(--amber);font-weight:700}
+  .partial{color:#60a5fa;font-weight:700}
+
+  /* Crypto spec block */
+  .spec{background:#080d18;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;line-height:1.8;color:#a9c7ff}
+  .spec .label{color:var(--muted);margin-right:8px;font-family:inherit}
+
+  /* Footer */
+  footer{padding:36px 0;color:var(--muted);font-size:13px}
+  footer a{color:var(--muted)}
+  .footer-links{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:8px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Security &amp; Privacy</p>
+    <h1>Rooms — Threat Model</h1>
+    <p class="tagline">
+      An honest account of what Rooms protects, who the adversaries are,
+      what each one can see, and where the real limits are.
+      No marketing, no hand-waving.
+    </p>
+    <p class="meta">
+      <span class="pill">v1 — June 2026</span>
+      <span class="pill">Local-first</span>
+      <span class="pill">E2E encrypted</span>
+    </p>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#what-we-protect">What we protect</a>
+    <a href="#crypto">Cryptography</a>
+    <a href="#adversaries">Adversary table</a>
+    <a href="#relay">Relay operator</a>
+    <a href="#network">Network observer</a>
+    <a href="#device">Device access</a>
+    <a href="#members">Room members</a>
+    <a href="#genproxy">AI proxy</a>
+    <a href="#limits">Honest limits</a>
+    <a href="#summary">Summary</a>
+  </div>
+</nav>
+
+<!-- ─────────────── WHAT WE PROTECT ─────────────── -->
+<section id="what-we-protect">
+  <div class="wrap">
+    <h2><span class="num">01</span>What Rooms protects</h2>
+    <p class="lead">The data model is simple: rooms contain CRDT documents. Everything else follows from keeping those documents private to their members.</p>
+
+    <div class="grid cols-3">
+      <div class="card">
+        <h4>Room content</h4>
+        <p>Chores, expenses, book notes, workouts — everything inside a room. Encrypted with AES-256-GCM before it ever leaves your device. The relay sees only ciphertext.</p>
+      </div>
+      <div class="card">
+        <h4>Room membership</h4>
+        <p>The relay room ID is a cryptographic hash of your room code. There are no accounts — the server has no membership roster and cannot map IDs back to people.</p>
+      </div>
+      <div class="card">
+        <h4>Invite credentials</h4>
+        <p>Room codes, admin secrets, and passphrases travel in the URL hash fragment — the part after <code>#</code>. Browsers never send the fragment to servers, CDNs, or proxies.</p>
+      </div>
+      <div class="card">
+        <h4>Device vault</h4>
+        <p>All keys and room bookmarks are stored in <code>localStorage</code> on your device. With a PIN enabled, the vault is AES-256-GCM encrypted at rest and is unreadable without the PIN.</p>
+      </div>
+      <div class="card">
+        <h4>Persona identity</h4>
+        <p>Your X25519 keypair lives only in your device vault. Your public key is the contact code you share; your private key never leaves your device and is never sent to the relay.</p>
+      </div>
+      <div class="card">
+        <h4>Contact relationships</h4>
+        <p>Contact data (who knows whom, who blocked whom) is stored locally in the vault. Pairwise messages use ECDH-derived keys; the relay handles them as opaque blobs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── CRYPTOGRAPHY ─────────────── -->
+<section id="crypto">
+  <div class="wrap">
+    <h2><span class="num">02</span>Cryptography</h2>
+    <p class="lead">All primitives are from the Web Crypto API (browser-native, audited) plus hash-wasm for Argon2id in the browser context.</p>
+
+    <h3>Room channel keys</h3>
+    <div class="spec">
+      <div><span class="label">Without passphrase (legacy, default):</span>key = SHA-256("lfk-key:" + keyMaterial)</div>
+      <div><span class="label">With passphrase:</span>key = Argon2id(roomCode + "\0" + passphrase, salt=SHA-256(label))</div>
+      <div><span class="label">Argon2id params:</span>memory=64 MiB · iterations=2 · parallelism=1 · output=256 bits</div>
+      <div><span class="label">Encryption:</span>AES-256-GCM · 96-bit random IV per ciphertext · 128-bit auth tag</div>
+    </div>
+
+    <h3>Public vs admin channels</h3>
+    <p>Every room has two encrypted channels. The <strong>public channel</strong> key is derived from the room code alone — anyone you share the code with can read and write it. The <strong>admin channel</strong> key is derived from <code>roomCode + adminSecret</code>, a separate 128-bit random secret that only the room creator holds. Admin-only data (settings, moderator controls) is physically unreadable on member-only devices — not just hidden behind a UI check.</p>
+
+    <div class="spec">
+      <div><span class="label">Public key material:</span>"lfk-public:{roomCode}"</div>
+      <div><span class="label">Admin key material:</span>"lfk-admin:{roomCode}:{adminSecret}"</div>
+    </div>
+
+    <h3>Relay room IDs</h3>
+    <p>The relay never receives a room code. The ID it stores is a derived value:</p>
+    <div class="spec">
+      <div><span class="label">Without passphrase:</span>SHA-256("lfk-room:{appId}:{scope}:{roomCode}") → first 16 bytes as hex</div>
+      <div><span class="label">With passphrase:</span>Argon2id(roomCode + "\0" + passphrase, ...) → the relay room ID itself requires the passphrase to compute; data cannot be fetched without it</div>
+    </div>
+
+    <h3>Device PIN (vault lock)</h3>
+    <div class="spec">
+      <div><span class="label">Lock key:</span>Argon2id(PIN, salt=random 128-bit hex) → 256-bit AES-GCM key</div>
+      <div><span class="label">Storage:</span>rooms.vault.v1.cipher — AES-256-GCM ciphertext of vault JSON</div>
+      <div><span class="label">Verification:</span>Separate AES-GCM ciphertext of a known plaintext — wrong PIN → nil plaintext, no oracle</div>
+    </div>
+
+    <h3>Biometric unlock (WebAuthn PRF)</h3>
+    <div class="spec">
+      <div><span class="label">Credential:</span>Platform authenticator (Face ID / Touch ID / Windows Hello), user verification required, attestation none</div>
+      <div><span class="label">Unlock key:</span>HKDF-SHA256(PRF output, info="lfk-vault-bio:v1") → 256-bit AES-GCM key that wraps the raw Argon2id PIN-key bytes</div>
+      <div><span class="label">Guarantee:</span>Biometric and PIN decrypt the same vault ciphertext — no second copy of the vault, nothing sent to any server. PIN always remains as fallback; changing the PIN invalidates the wrap and requires re-enrollment</div>
+    </div>
+
+    <h3>Persona keypairs</h3>
+    <div class="spec">
+      <div><span class="label">Algorithm:</span>X25519 (ECDH key agreement)</div>
+      <div><span class="label">Pairwise inbox key:</span>AES-256-GCM, key = ECDH(myPrivate, theirPublic)</div>
+      <div><span class="label">Private key:</span>Stored only in device vault — never transmitted</div>
+    </div>
+
+    <div class="callout key">
+      <span class="k">Implementation source</span>
+      <p>All crypto logic is in <code>packages/room-kit/src/crypto.ts</code>. It uses <code>crypto.subtle</code> (W3C Web Crypto API) exclusively — no third-party crypto libraries for the symmetric layer. Argon2id via <code>hash-wasm</code> (WASM, audited by Cure53 in 2021).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── ADVERSARY TABLE ─────────────── -->
+<section id="adversaries">
+  <div class="wrap">
+    <h2><span class="num">03</span>Adversary summary</h2>
+    <p class="lead">A quick reference before the per-adversary deep dives.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Adversary</th>
+          <th>Can see</th>
+          <th>Cannot see</th>
+          <th>Stops them</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Relay operator</td>
+          <td>IP addresses, room IDs (hashed), blob sizes, timing, connection graph</td>
+          <td>Room content, room codes, passphrase, member identity, key material</td>
+          <td>AES-256-GCM; relay stores opaque bytes only</td>
+        </tr>
+        <tr>
+          <td>Network observer / ISP</td>
+          <td>TLS traffic to relay domain, timing, sizes</td>
+          <td>Any plaintext (TLS); IP<br>hidden from relay if using VPN/Tor</td>
+          <td>TLS 1.3 + E2E encryption — two independent layers</td>
+        </tr>
+        <tr>
+          <td>Ex-member</td>
+          <td>Everything they had while a member; new data on public channel unless code rotated</td>
+          <td>Admin channel (different key); data added after code rotation</td>
+          <td>Room code rotation (manual), passphrase, admin-channel separation</td>
+        </tr>
+        <tr>
+          <td>Device thief (no PIN)</td>
+          <td>All rooms, keys, and vault content in <code>localStorage</code></td>
+          <td>Nothing, unless remote wipe is used before they open a browser</td>
+          <td>Enable PIN lock — vault becomes AES-256-GCM ciphertext</td>
+        </tr>
+        <tr>
+          <td>Device thief (PIN set)</td>
+          <td>Encrypted vault ciphertext only; cannot decrypt without PIN</td>
+          <td>Room content, keys, contact list</td>
+          <td>Argon2id key derivation makes brute-force slow (64 MiB/attempt)</td>
+        </tr>
+        <tr>
+          <td>Malicious room member</td>
+          <td>Everything on the public channel (same as any member)</td>
+          <td>Admin channel; other members' device vaults or persona private keys</td>
+          <td>Admin/member separation; no server accounts to hijack</td>
+        </tr>
+        <tr>
+          <td>AI proxy (genproxy)</td>
+          <td>The text prompt you type to describe a room — nothing else</td>
+          <td>Any existing room data or vault contents</td>
+          <td>Genproxy is stateless; it never touches room content</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─────────────── RELAY OPERATOR ─────────────── -->
+<section id="relay">
+  <div class="wrap">
+    <h2><span class="num">04</span>Relay operator</h2>
+    <p class="lead">The relay is intentionally "dumb." It was designed with the constraint that even a malicious operator should learn as little as possible about your rooms.</p>
+
+    <h3>What the relay does see</h3>
+    <ul>
+      <li><strong>IP addresses</strong> of connecting clients (unavoidable with TCP). Use a VPN or Tor to hide your IP from the relay.</li>
+      <li><strong>Derived room IDs</strong> — hex strings that are SHA-256 or Argon2id hashes of the actual room code. They reveal nothing about room content or purpose.</li>
+      <li><strong>Which IPs share a room ID</strong> — so the operator can infer that two IP addresses are in the same room (even without knowing what the room is).</li>
+      <li><strong>Blob sizes and timing</strong> — the size of each sync frame and when it was sent. A very active room produces larger, more frequent blobs.</li>
+      <li><strong>Connection counts</strong> — how many concurrent connections a room has.</li>
+    </ul>
+
+    <h3>What the relay cannot see</h3>
+    <ul>
+      <li><strong>Room content.</strong> Every frame is AES-256-GCM ciphertext. The relay stores and forwards opaque bytes. Source: <code>relay/main.go</code> — "It can never read the contents."</li>
+      <li><strong>Room codes or passphrases.</strong> These never travel to the relay. The relay ID is a one-way hash.</li>
+      <li><strong>Member identities.</strong> No accounts, no usernames, no profiles are registered on the server.</li>
+      <li><strong>Which room belongs to which person.</strong> Room IDs are hashes; without the pre-image (room code + passphrase) they cannot be reversed.</li>
+    </ul>
+
+    <div class="callout warn">
+      <span class="k">Social graph leakage</span>
+      <p>Even though the relay cannot read room data, it <em>can</em> observe that IP address A and IP address B both connect to the same hashed room ID. Over time this reveals a social graph: "these people are in the same room." This is inherent to any server-based sync architecture. Mitigation: use the same network (home Wi-Fi, VPN, or Tor) for all members, or accept this as a known limitation.</p>
+    </div>
+
+    <div class="callout good">
+      <span class="k">Why we can trust the relay's blindness</span>
+      <p>The relay's inability to read content is not a matter of policy — it is physically enforced by the encryption. Even if the relay operator wanted to read your room, they cannot, because they do not have the AES key. The key is derived from your room code (which lives only on your devices, never on the server).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── NETWORK OBSERVER ─────────────── -->
+<section id="network">
+  <div class="wrap">
+    <h2><span class="num">05</span>Network observer</h2>
+    <p class="lead">An attacker who can see your internet traffic (ISP, coffee shop Wi-Fi, corporate proxy) is blocked by two independent encryption layers.</p>
+
+    <ul>
+      <li><strong>TLS 1.3</strong> encrypts the connection to the relay. The observer sees a stream of encrypted bytes going to a server; they do not see room IDs, blob contents, or anything else.</li>
+      <li><strong>AES-256-GCM</strong> encrypts the room data itself. Even if TLS were somehow broken, the inner layer is intact.</li>
+      <li>The URL hash (room code, admin secret, passphrase) is <strong>never sent to any server</strong>. Browsers strip the hash before making requests. A network observer cannot capture your invite credentials from traffic.</li>
+    </ul>
+
+    <div class="callout good">
+      <span class="k">Invite link safety on the wire</span>
+      <p>Sharing a link like <code>rooms.example.com/join#c=abc123</code> — the <code>#c=abc123</code> fragment never appears in any HTTP request. CDN logs, server access logs, and link-preview bots see only <code>/join</code>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── DEVICE ACCESS ─────────────── -->
+<section id="device">
+  <div class="wrap">
+    <h2><span class="num">06</span>Physical device access</h2>
+    <p class="lead">The most dangerous adversary is one who physically has your unlocked device. Here is exactly what that means.</p>
+
+    <h3>Without PIN lock (default)</h3>
+    <div class="callout warn">
+      <span class="k">Your vault is in plain localStorage</span>
+      <p>By default, room bookmarks, invite codes, admin secrets, and your persona private key are stored as plaintext JSON in <code>localStorage</code> under the key <code>rooms.vault.v1</code>. Anyone who can open your browser's DevTools or access the browser profile on disk can read everything.</p>
+    </div>
+    <ul>
+      <li>IndexedDB stores the CRDT blobs. The blobs <em>are</em> encrypted (AES-256-GCM), but the key is derivable from the room code which is in the plain vault — so a device attacker can decrypt the blobs too.</li>
+      <li>This is the same threat model as any password manager that doesn't require a master password to open.</li>
+    </ul>
+
+    <h3>With PIN lock enabled</h3>
+    <div class="callout good">
+      <span class="k">Vault becomes ciphertext</span>
+      <p>When you set a PIN (Profile → App lock), the vault JSON is encrypted with AES-256-GCM using a key derived via Argon2id from your PIN and a random salt. The plaintext vault key (<code>rooms.vault.v1</code>) is deleted. Only the ciphertext (<code>rooms.vault.v1.cipher</code>) and the lock metadata remain.</p>
+    </div>
+    <ul>
+      <li><strong>Brute-force cost:</strong> Argon2id with 64 MiB memory and 2 iterations takes ~200–800 ms per attempt on a phone-class device. A 6-digit PIN has 1,000,000 combinations → worst-case ~200,000 seconds (~2.3 days) at one attempt per 200 ms. A passphrase is much stronger.</li>
+      <li><strong>No recovery.</strong> We do not hold a copy of your PIN or vault. Forget the PIN → rejoin rooms with their invite codes. This is by design: recovery requires a server that stores secrets, which undermines the privacy model.</li>
+      <li><strong>Session memory.</strong> While the app is open and unlocked, the decrypted vault lives in JavaScript memory. A browser crash dump or memory forensics tool could potentially extract it. Close the browser when not in use. (The PIN itself is not retained after unlock — only the derived AES key, which is needed to re-encrypt the vault on save.)</li>
+      <li><strong>Biometric unlock is convenience, not a stronger key.</strong> Enrolling Face ID / Touch ID lets the platform authenticator release a secret that unwraps the same vault key your PIN derives. It resists shoulder-surfing and is faster, but anyone who knows the PIN can still unlock — and enrollment is per device. The biometric template never leaves the platform's secure hardware; Rooms only ever sees the derived secret.</li>
+    </ul>
+
+    <h3>Remote wipe</h3>
+    <p>There is no remote wipe feature. If your device is stolen, the right action is to rotate room codes on another device (which generates a new room code and effectively locks out the old device — see <a href="#limits">Honest limits</a> for caveats).</p>
+  </div>
+</section>
+
+<!-- ─────────────── ROOM MEMBERS ─────────────── -->
+<section id="members">
+  <div class="wrap">
+    <h2><span class="num">07</span>Room members &amp; ex-members</h2>
+    <p class="lead">The security model treats the room code as the credential. Anyone who holds the code can read and write the public channel — including people who were "removed."</p>
+
+    <h3>Public channel (room code)</h3>
+    <ul>
+      <li>Any device with the room code can join the public channel. There is no server-side membership check — by design (no server accounts).</li>
+      <li><strong>Removing a member in the UI</strong> deletes their CRDT member entry from the document. It does <em>not</em> change the room code. The removed person can still read new data if they kept the code.</li>
+      <li><strong>To truly revoke access:</strong> the room admin must generate a new room code. New members get the new code; the old member's code becomes stale. This requires everyone to rejoin. The UI for this is planned but not yet in v1.</li>
+    </ul>
+
+    <h3>Admin channel (admin secret)</h3>
+    <ul>
+      <li>Admin-only data is encrypted with a separate key that includes the <code>adminSecret</code>. A member-only device physically cannot decrypt admin blobs — the key material is never on their device.</li>
+      <li>Removing someone from admin requires rotating the admin secret (same migration as rotating the room code).</li>
+    </ul>
+
+    <h3>Passphrase rooms</h3>
+    <div class="callout good">
+      <span class="k">Extra layer against code leaks</span>
+      <p>With an optional passphrase set, the AES key and even the relay room ID are Argon2id-derived from both the room code <em>and</em> the passphrase. Someone who obtains only the room code cannot decrypt the blobs — they need the passphrase too, which travels out-of-band (never in the invite URL).</p>
+    </div>
+
+    <h3>What a malicious member can do</h3>
+    <table>
+      <thead><tr><th>Action</th><th>Possible?</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Read all public channel data</td><td class="yes">Yes</td><td>By design — they have the room code</td></tr>
+        <tr><td>Write/modify CRDT data</td><td class="yes">Yes</td><td>CRDT merge is last-write-wins for most fields; admins can set status fields that override</td></tr>
+        <tr><td>Spam the relay with large blobs</td><td class="dep">Limited</td><td>Per-IP rate limiting and per-room blob size cap (64 MiB default) on the relay</td></tr>
+        <tr><td>Read admin channel data</td><td class="no">No</td><td>Different AES key, never on non-admin devices</td></tr>
+        <tr><td>Access other members' device vaults</td><td class="no">No</td><td>Vaults are local-only; never synced via relay</td></tr>
+        <tr><td>Impersonate another member</td><td class="partial">Partly</td><td>They can write CRDT entries with any member ID (no signatures in v1). Planned: per-member signing keys.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─────────────── AI PROXY ─────────────── -->
+<section id="genproxy">
+  <div class="wrap">
+    <h2><span class="num">08</span>AI generation proxy (genproxy)</h2>
+    <p class="lead">The "speak it into existence" feature lets you describe a room in plain English. Here is what the proxy sees and what it does not.</p>
+
+    <div class="callout good">
+      <span class="k">Stateless — room data never touches it</span>
+      <p>The genproxy receives only the text you type in the "Describe it" box (e.g. "a weekly chore chart for 3 kids and a dog"). It returns a JSON schema. It never sees your room contents, member list, vault, or any existing data.</p>
+    </div>
+
+    <ul>
+      <li><strong>What it receives:</strong> Your description prompt, device spell counter, and app version. Nothing else.</li>
+      <li><strong>What it sends to the AI model (Anthropic):</strong> The prompt text and a system prompt. No room data, no keys, no personal information beyond the text you wrote.</li>
+      <li><strong>No storage:</strong> The proxy is stateless and keeps no logs of prompts. Each request is independent.</li>
+      <li><strong>Anthropic's data practices</strong> apply to the prompt text itself. If your description contains sensitive names or details, consider using a generic description instead.</li>
+      <li><strong>Copy-paste fallback:</strong> If you prefer zero-server contact, the UI provides a copy-paste path — copy the system prompt, paste into any LLM you trust, paste the result back. No network call to the proxy.</li>
+    </ul>
+
+    <div class="callout key">
+      <span class="k">The proxy never touches your rooms</span>
+      <p>The genproxy only generates the initial schema. It has no access to the relay, no room codes, and no ability to read or write room data. Once you create the room, all sync goes directly device ↔ relay (encrypted).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── HONEST LIMITS ─────────────── -->
+<section id="limits">
+  <div class="wrap">
+    <h2><span class="num">09</span>Honest limits</h2>
+    <p class="lead">Every security design has limits. Here are ours, stated plainly. We think trust is built by naming what we don't do, not by overselling what we do.</p>
+
+    <div class="callout bad">
+      <span class="k">No forward secrecy</span>
+      <p>The room code is a static long-term secret. If it leaks in the future, historical ciphertext stored on the relay (up to the log compaction point) can potentially be decrypted. Passphrase rooms mitigate this significantly (Argon2id derivation means brute-force on the passphrase is expensive). A future version will add ephemeral per-session keys (Double Ratchet or similar).</p>
+    </div>
+
+    <div class="callout bad">
+      <span class="k">No member revocation (v1)</span>
+      <p>Removing a member from the room UI does not change the encryption key. The removed member can still connect to the relay and read new public-channel data using the same code. True revocation requires rotating the room code — everyone rejoins, the old code stops working. v1 does not have a UI for this yet. It's the #1 planned security enhancement.</p>
+    </div>
+
+    <div class="callout warn">
+      <span class="k">No CRDT content signatures (v1)</span>
+      <p>Any device with the room code can write CRDT entries with any member ID. There is no per-member signing key in v1 to prove authorship. A malicious member could write data attributed to another member. Planned: each member slot will carry a signing keypair; writes will be signed and verifiable.</p>
+    </div>
+
+    <div class="callout warn">
+      <span class="k">SHA-256 key derivation without passphrase</span>
+      <p>Rooms without a passphrase derive the AES key via SHA-256 — fast and non-iterated. This is secure against the relay (which has only the ciphertext) but provides no brute-force resistance if someone obtains the room code and is trying to guess it via dictionary attack. Room codes are 128-bit random — not guessable in practice. For sensitive rooms, add a passphrase.</p>
+    </div>
+
+    <div class="callout warn">
+      <span class="k">Browser storage model</span>
+      <p><code>localStorage</code> is origin-scoped but not process-isolated. Browser extensions with broad permissions, XSS vulnerabilities in the app, or shared browser profiles can access vault data. PIN lock encrypts the vault but JavaScript executing on the same origin can still read it from memory while the session is active. This is a fundamental web-platform limitation — a native app would have stronger isolation.</p>
+    </div>
+
+    <div class="callout warn">
+      <span class="k">Relay IP metadata</span>
+      <p>The relay logs connection events including IP addresses. Even with E2E encryption, the relay operator can build a social graph from IP co-location (who connects to the same hashed room). This metadata can be as sensitive as content. Use a VPN or Tor to prevent IP disclosure if this matters to you.</p>
+    </div>
+
+    <div class="callout warn">
+      <span class="k">No independent audit (yet)</span>
+      <p>The cryptographic implementation has not been reviewed by an independent security firm. The primitives are standard (AES-256-GCM, Argon2id, X25519), but the key derivation scheme, vault format, and relay protocol have only been reviewed internally. An external audit is planned before any use case with high-stakes data.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── SUMMARY ─────────────── -->
+<section id="summary">
+  <div class="wrap">
+    <h2><span class="num">10</span>Summary: the one-page version</h2>
+
+    <div class="grid cols-2">
+      <div>
+        <h3 style="color:#4ade80;margin-top:0">What is true today</h3>
+        <ul>
+          <li>Room data is AES-256-GCM encrypted on your device before sync</li>
+          <li>The relay stores and moves only opaque ciphertext — it physically cannot read your data</li>
+          <li>Invite codes live only in the URL hash — servers, CDNs, and proxies never see them</li>
+          <li>Admin data uses a separate key that never touches member-only devices</li>
+          <li>Passphrase rooms use Argon2id — expensive to brute-force even with the room code</li>
+          <li>PIN lock (opt-in) protects the vault at rest with Argon2id key derivation</li>
+          <li>Persona private keys never leave your device</li>
+          <li>No accounts, no passwords, no password-reset emails, no central identity store</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="color:#f87171;margin-top:0">What is not true (yet)</h3>
+        <ul>
+          <li>No forward secrecy — room code is a static long-term credential</li>
+          <li>No member revocation without rotating the room code manually</li>
+          <li>No per-member content signatures — authorship not cryptographically provable in v1</li>
+          <li>No remote wipe</li>
+          <li>No independent security audit yet</li>
+          <li>IP addresses visible to relay operator</li>
+          <li>Without PIN, vault is plain localStorage — open to anyone with device access</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout key" style="margin-top:24px">
+      <span class="k">The honest bottom line</span>
+      <p>Rooms is meaningfully more private than cloud alternatives for the threat models that matter most to most people: a curious platform, a nosy server admin, a link leak to the wrong person, or someone grabbing the invite URL from a CDN log. It is not a tool for journalists in adversarial environments or anyone whose threat model includes a device seizure or a subpoena to the relay operator. For those cases: no audit yet, no forward secrecy, no revocation — wait for v2 of the security layer.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Rooms threat model · v1 · June 2026</p>
+    <div class="footer-links">
+      <a href="business-plan-and-next-steps.html">Business plan</a>
+      <a href="go-to-market.html">Go-to-market</a>
+      <a href="pricing-and-operating-costs.html">Pricing &amp; costs</a>
+      <a href="html/rooms/security.html">Security &amp; invites (tech docs)</a>
+    </div>
+    <p style="margin-top:12px;font-size:12px">Crypto sources: <code>packages/room-kit/src/crypto.ts</code> · <code>packages/room-kit/src/vaultLock.ts</code> · <code>relay/main.go</code></p>
+  </div>
+</footer>
+
+</body>
+</html>
