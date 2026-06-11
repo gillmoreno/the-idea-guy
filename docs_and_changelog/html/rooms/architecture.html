@@ -41,10 +41,10 @@
 
         <h2>The meta-app idea</h2>
         <p>Every small group app Gil wants to ship — family chores, trip expenses, a book club tracker — has the same skeleton: people join a shared space with an invite code, everyone's devices keep the data locally, and changes sync between devices through a server that can't read anything. Instead of building and deploying that skeleton over and over, Rooms builds it <em>once</em> and turns each product idea into a <strong>template</strong>.</p>
-        <p>The result is a "mini-app factory": shipping Trip Split after ChoreBoard meant adding a folder and a registry entry, not a new Cloudflare project, subdomain, relay, or PWA. Marketing can still say "ChoreBoard on Rooms" — the template is the brand, the platform is the plumbing.</p>
+        <p>The result is a "mini-app factory": shipping Trip Split after ChoreBoard meant adding a folder and a registry entry, not a new deploy, subdomain, relay, or PWA. Marketing can still say "ChoreBoard on Rooms" — the template is the brand, the platform is the plumbing.</p>
 
         <div class="card">
-          <p><strong>One-sentence version:</strong> one PWA at <code>rooms.the-idea-guy.com</code>, one Go relay at <code>relay.the-idea-guy.com</code>, and N templates living inside them. A "room" is an invite code plus local device storage — never a subdomain, never a server-side account.</p>
+          <p><strong>One-sentence version:</strong> one Docker container at <code>rooms.the-idea-guy.com</code> that serves the PWA and runs the Go relay on the same origin (<code>/sync</code>), with N templates living inside it. A "room" is an invite code plus local device storage — never a subdomain, never a server-side account.</p>
         </div>
 
         <h2>The four layers</h2>
@@ -55,7 +55,7 @@
               <tr><td><strong>Shell</strong></td><td>Cross-template chrome: home (my rooms), create, join, room session, profile, themes, contacts, invites, settings. Owns the device vault, room metadata, and member roles.</td><td><code>apps/rooms/web/src/shell/</code> + routes in <code>src/app/</code></td></tr>
               <tr><td><strong>Templates</strong></td><td>The actual products. Each template is a React UI plus a slice of CRDT data under its own <code>template.*</code> keys. Mounted by the shell once the room's synced metadata says which template it is.</td><td><code>apps/rooms/web/src/templates/</code></td></tr>
               <tr><td><strong>Room kit</strong></td><td>Shared TypeScript library with no UI: crypto (key derivation, encrypt/decrypt), the <code>LocalFirstDoc</code> sync engine, relay protocol framing, invite links, the device vault, personas/contacts, and the single shared Yjs instance.</td><td><code>packages/room-kit/</code></td></tr>
-              <tr><td><strong>Relay</strong></td><td>A small Go WebSocket server that broadcasts and replays opaque encrypted blobs per room. No accounts, no auth, no app logic, no ability to decrypt. Shared by every template forever.</td><td><code>relay/</code></td></tr>
+              <tr><td><strong>Relay</strong></td><td>A small Go WebSocket server that broadcasts and replays opaque encrypted blobs per room. No accounts, no auth, no app logic, no ability to decrypt. Shared by every template forever, and shipped in the same container as the web app in production.</td><td><code>relay/</code></td></tr>
             </tbody>
           </table>
         </div>
@@ -72,27 +72,34 @@
 
         <h2>Why one app instead of many</h2>
         <ul>
-          <li><strong>Zero marginal infrastructure per product.</strong> No new subdomain, Pages project, relay namespace, or deploy script per template. One static export serves them all; the relay isolates tenants by hashing the room id.</li>
+          <li><strong>Zero marginal infrastructure per product.</strong> No new subdomain, container, relay namespace, or deploy script per template. One static export serves them all; the relay isolates tenants by hashing the room id.</li>
           <li><strong>Shared hard parts.</strong> E2E encryption, offline persistence, invite/role security, themes, personas, and background sync are solved once in the shell and room kit. ChoreBoard's two-channel public/admin security model became the precedent every template inherits.</li>
           <li><strong>One install for users.</strong> A family that uses ChoreBoard already has Trip Split installed — every new template is instantly available on the same home screen, with the same vault and contacts.</li>
-          <li><strong>Cheap to run, low liability.</strong> Static files on a CDN cost pennies; the relay only moves blobs it cannot read. There is no per-app server holding user data (see the Sync &amp; local-first page).</li>
+          <li><strong>Cheap to run, low liability.</strong> One small container serves static files and moves blobs the relay cannot read. There is no per-app server holding user data (see the Sync &amp; local-first page).</li>
         </ul>
         <p>The main tradeoff: all templates ship in one bundle (mitigated by lazy loading) and share one version — a breaking shell change touches every product at once. For a solo builder, that coupling is mostly a feature: one codebase to reason about, one thing to deploy.</p>
 
+        <h2>One container in production</h2>
+        <p>Rooms used to deploy as two independent pieces — a static site on Cloudflare Pages and a separately deployed relay. That split allowed a real outage: an old relay image speaking a stale protocol against new clients silently broke sync. The fix was structural, not procedural: <strong>the web app and the relay now ship as a single Docker bundle</strong>, always built from the same commit, so protocol version skew between them is impossible by construction.</p>
+        <div class="card">
+          <p><strong>Inside the container</strong> (<code>deploy/rooms/</code>): supervisord runs two processes — nginx and the Go relay. nginx serves the static Next.js export and proxies exactly two paths to the relay on localhost: <code>/sync</code> (the long-lived WebSocket) and <code>/healthz</code>. The web app's relay URL (<code>NEXT_PUBLIC_RELAY_URL</code>) is baked into the image at build time and points at its own origin — clients sync over <code>wss://rooms.the-idea-guy.com/sync</code>, same-origin, no CORS, no second hostname to misconfigure.</p>
+        </div>
+        <p>The container is exposed through a cloudflared tunnel. <code>relay.the-idea-guy.com</code> also points at the same bundle so the legacy standalone ChoreBoard app keeps working, and the relay reuses the existing persistent room-data volume (<code>relay_choreboard-relay-data</code>) so no rooms were lost in the migration. Deploying is one command: <code>deploy/rooms/redeploy.sh</code> rebuilds, restarts, and health-checks the bundle.</p>
+
         <h2>URLs, ports &amp; dev commands</h2>
-        <p>All routes are client-side in a Next.js 15 static export: <code>/</code> (my rooms), <code>/create</code>, <code>/join?code=…</code>, <code>/room?c={roomCode}</code>, plus <code>/profile</code>, <code>/contacts</code>, and <code>/schema</code>. Secrets like admin keys ride in the URL <em>hash</em> so they never reach CDN logs.</p>
+        <p>All routes are client-side in a Next.js 15 static export: <code>/</code> (my rooms), <code>/create</code>, <code>/join</code>, <code>/room#c={roomCode}</code>, plus <code>/profile</code>, <code>/contacts</code>, and <code>/schema</code>. Secrets like admin keys ride in the URL <em>hash</em> so they never reach CDN or server logs. Two newer link conventions follow the same rule: contact "add me" links put the whole contact card in the hash of <code>/contacts</code> (so a phone camera scan opens the app and auto-sends the connection request — the QR code and the copy button share the exact same URL), and member/admin invite links can carry a one-bit <code>pp=1</code> hash flag signalling the room is passphrase-protected, never the passphrase itself. The <code>/join</code> page can also scan an invite QR with the camera and auto-join on a valid scan, using the shared <code>QRScanner</code> component (generic, filter-by-callback; the contact scanner is a thin wrapper around it).</p>
         <div class="card">
           <table>
             <thead><tr><th>Thing</th><th>Where</th></tr></thead>
             <tbody>
               <tr><td>Web app (dev)</td><td><code>http://localhost:3300</code></td></tr>
               <tr><td>Relay (dev)</td><td><code>ws://localhost:4500</code></td></tr>
-              <tr><td>Web app (prod)</td><td><code>https://rooms.the-idea-guy.com</code> (Cloudflare Pages)</td></tr>
-              <tr><td>Relay (prod)</td><td><code>wss://relay.the-idea-guy.com</code> (shared, tunneled)</td></tr>
+              <tr><td>Web app + relay (prod)</td><td><code>https://rooms.the-idea-guy.com</code> — one Docker container (nginx + relay via supervisord), exposed through a cloudflared tunnel; sync at <code>wss://rooms.the-idea-guy.com/sync</code></td></tr>
+              <tr><td>Legacy alias</td><td><code>relay.the-idea-guy.com</code> points at the same bundle so the standalone ChoreBoard app keeps working</td></tr>
             </tbody>
           </table>
         </div>
-        <p>From <code>apps/rooms</code>: <code>make dev</code> starts relay + Next dev with hot reload (<code>make dev-stop</code> kills ports 4500/3300; <code>make dev-relay</code> / <code>make dev-web</code> for two terminals). <code>make preview-all</code> does a production-like static build served locally, with build-time env pointing at the local relay. Deploys: <code>./scripts/deploy-rooms.sh</code> for the frontend, <code>./scripts/deploy-relay.sh</code> for the relay.</p>
+        <p>From <code>apps/rooms</code>: <code>make dev</code> starts relay + Next dev with hot reload (<code>make dev-stop</code> kills ports 4500/3300; <code>make dev-relay</code> / <code>make dev-web</code> for two terminals). <code>make preview-all</code> does a production-like static build served locally, with build-time env pointing at the local relay. Deploy: <code>deploy/rooms/redeploy.sh</code> rebuilds and restarts the whole bundle in one step.</p>
 
         <h2>Key code paths</h2>
         <ul>
@@ -101,11 +108,14 @@
           <li><code>apps/rooms/web/src/templates/</code> — template plugins (choreboard, tripsplit, bookclub, backlog, fitcrew)</li>
           <li><code>apps/rooms/web/src/app/</code> — client-side routes (home, create, join, room, profile)</li>
           <li><code>packages/room-kit/src/</code> — shared crypto, sync, vault, invites, relay protocol, types</li>
+          <li><code>packages/room-kit/src/links.ts</code> — invite/contact deep links (hash-only secrets, <code>pp</code> flag, contact-add URLs)</li>
+          <li><code>apps/rooms/web/src/components/QRScanner.tsx</code> — shared camera QR scanner (invite + contact scanning)</li>
           <li><code>relay/main.go</code> — the dumb Go relay</li>
+          <li><code>deploy/rooms/</code> — production bundle: Dockerfile, nginx.conf, supervisord.conf, docker-compose.yml, redeploy.sh</li>
           <li><code>apps/rooms/Makefile</code> — dev/preview commands</li>
         </ul>
 
-        <p class="footer">Sources: <code>docs_and_changelog/ROOM_KIT.md, docs_and_changelog/ROOM_KIT_ARCHITECTURE.md, docs_and_changelog/ARCHITECTURE.md, apps/rooms/web/package.json, apps/rooms/web/src/templates/registry.ts, packages/room-kit/src/types.ts</code> · Last synced 2026-06-10</p>
+        <p class="footer">Sources: <code>docs_and_changelog/ROOM_KIT.md, docs_and_changelog/ROOM_KIT_ARCHITECTURE.md, docs_and_changelog/ARCHITECTURE.md, apps/rooms/web/package.json, apps/rooms/web/src/templates/registry.ts, packages/room-kit/src/types.ts, packages/room-kit/src/links.ts, apps/rooms/web/src/components/QRScanner.tsx, deploy/rooms/</code> · Last synced 2026-06-11</p>
       </article>
     </main>
   </div>

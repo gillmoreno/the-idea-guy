@@ -51,10 +51,12 @@
   <table>
     <tr><th>Link</th><th>Format</th></tr>
     <tr><td>Open a room</td><td><code>/room#c={roomCode}</code></td></tr>
-    <tr><td>Member join</td><td><code>/join#c={roomCode}</code></td></tr>
-    <tr><td>Admin join</td><td><code>/join#c={code}&amp;admin={secret}&amp;template={id}</code></td></tr>
+    <tr><td>Member join</td><td><code>/join#c={roomCode}</code> (plus <code>&amp;pp=1</code> if the room has a passphrase)</td></tr>
+    <tr><td>Admin join</td><td><code>/join#c={code}&amp;admin={secret}&amp;template={id}</code> (plus <code>&amp;pp=1</code> if passphrase-protected)</td></tr>
+    <tr><td>Add a contact</td><td><code>/contacts#{contactCard}</code></td></tr>
   </table>
-  <p>What users see: an invite link or QR code works exactly the same as before. Behind the scenes, the code never appears in any server or CDN log. Legacy query-string links still parse for backward compatibility, and after a link loads, the app scrubs invite parameters out of the address bar so secrets don't linger in browser history.</p>
+  <p>What users see: an invite link or QR code works exactly the same as before. Behind the scenes, the code never appears in any server or CDN log. Legacy query-string links still parse for backward compatibility, and after a link loads, the app scrubs invite parameters out of the address bar so secrets don't linger in browser history. The join page can also scan invite QR codes with the camera — the scanner only accepts payloads that parse as valid invites.</p>
+  <p>The <code>pp=1</code> flag deserves a note: it is a <strong>one-bit hint</strong> meaning "this room needs a passphrase." The passphrase itself is never in the link — the flag just tells the join page to demand it. Like everything else in the invite, it rides in the hash, so even this one bit stays out of CDN and server logs.</p>
 
   <h2>Room code + admin secret: two tiers of access</h2>
   <p>Each room has two encrypted channels with separate keys:</p>
@@ -75,6 +77,14 @@
   <div class="card">
     <strong>Tradeoff: no recovery.</strong>
     Because no server ever sees the passphrase, there is no "forgot passphrase" flow. Lose it and the room is unreadable, period. The UI warns loudly about this at creation time. This is the same deliberate tradeoff made everywhere in Rooms: stronger privacy in exchange for personal responsibility for secrets.
+  </div>
+
+  <h3>The "empty parallel room" trap — and the one-bit fix</h3>
+  <p>Because the passphrase feeds both the encryption key <em>and</em> the relay channel id, a joiner who is missing it (or types it wrong) doesn't get an error — they silently land in an empty parallel channel that looks identical to "the organizer hasn't synced yet." That's the zero-knowledge property working exactly as designed, but it doubled as a UX trap: people sat staring at an empty room with no clue why.</p>
+  <p>The fix is the <code>pp=1</code> hint described above. Invite links and QR codes for passphrase-protected rooms carry the flag, and when the join page sees it — from a deep link or a scanned QR — it <strong>refuses to auto-join</strong> and requires the passphrase field first, explaining that joining without it would land in an empty copy of the room. As a second line of defense, the connecting screen shows a hint after 20 seconds of "connected but empty": if this room has a passphrase, a wrong or missing one looks exactly like an empty room — leave and rejoin with the right passphrase.</p>
+  <div class="card">
+    <strong>Honest limitation.</strong>
+    Invites sent as encrypted contact messages (<code>room_invite</code>) don't carry the flag yet, and a bare pasted room code can't carry it at all — there's nowhere to put the bit. For those paths, the 20-second hint on the connecting screen is the fallback.
   </div>
 
   <h2>End-to-end encryption: AES-256-GCM</h2>
@@ -112,6 +122,7 @@
 
   <h2>Invites between contacts</h2>
   <p>Beyond shareable links, rooms can be offered directly to <strong>mutual contacts</strong> (see <a href="personas-and-contacts.html">Personas &amp; contacts</a>). The organizer picks contacts during setup (optional — a soft reminder appears if skipped, and admins can invite later from room settings). Each invitee receives a <code>room_invite</code> message over their end-to-end encrypted pairwise inbox, containing the room code, name, template, and a pre-reserved member slot bound to their persona key. Accepting adds the room to their vault and drops them straight in — no profile-picking step, and the room code never travels in the clear.</p>
+  <p>Becoming contacts in the first place now uses the same hash-link discipline. Your contact QR and the copy button both share a <strong>link</strong> (<code>/contacts#rooms1.…</code>) rather than the raw token, so a phone camera opens the app directly instead of showing an opaque string. The contact card rides in the URL hash — never the query string or path — and the contacts page consumes it, strips it from the address bar via <code>history.replaceState</code>, and auto-sends the connection request. The mutual-accept gate is unchanged: your own code, blocked contacts, and duplicates are rejected, and messages and invites only flow after <strong>both sides accept</strong>.</p>
 
   <h2>Key code paths</h2>
   <ul>
@@ -119,15 +130,19 @@
     <li><code>packages/room-kit/src/vault.ts</code> — vault unlock result structure and session key storage</li>
     <li><code>packages/room-kit/src/vaultLock.ts</code> — PIN lock enable/unlock/change, encrypted vault storage, per-device secret rotation</li>
     <li><code>packages/room-kit/src/vaultBio.ts</code> — biometric enrollment via WebAuthn platform authenticator with PRF extension, HKDF-SHA256 key derivation, AES-256-GCM wrapping of PIN key</li>
-    <li><code>packages/room-kit/src/links.ts</code> — hash-based invite links, legacy parsing, address-bar scrubbing</li>
+    <li><code>packages/room-kit/src/links.ts</code> — hash-based invite links, <code>pp=1</code> passphrase hint, contact add links, legacy parsing, address-bar scrubbing</li>
     <li><code>packages/room-kit/src/pairInbox.ts</code> — pairwise encrypted inbox carrying <code>room_invite</code> messages</li>
+    <li><code>apps/rooms/web/src/app/join/page.tsx</code> — join flow, camera QR scanning, passphrase-required gate on <code>pp=1</code></li>
+    <li><code>apps/rooms/web/src/app/contacts/page.tsx</code> — contact link consumption from the hash, auto connection request</li>
+    <li><code>apps/rooms/web/src/shell/RoomConnecting.tsx</code> — 20-second "looks empty? check the passphrase" hint</li>
+    <li><code>apps/rooms/web/src/shell/RoomCodeShare.tsx</code> — invite QR/code sharing with the passphrase flag and share-it-separately warning</li>
     <li><code>apps/rooms/web/src/shell/VaultLockProvider.tsx</code> — app-lock session handling, unlock screen with biometric as primary action</li>
     <li><code>apps/rooms/web/src/shell/AppLockSettings.tsx</code> — PIN and biometric enrollment UI</li>
     <li><code>apps/rooms/web/src/shell/RoomInviteSettings.tsx</code> — post-setup admin invites</li>
     <li><code>apps/rooms/web/src/lib/purgeRoomFromDevice.ts</code> — local-only room removal</li>
   </ul>
 
-  <p class="footer">Sources: <code>docs_and_changelog/ROOM_SECURITY.md, docs_and_changelog/ROOM_INVITES.md, docs_and_changelog/ROOM_DEVICE_DATA.md, packages/room-kit/src/crypto.ts, packages/room-kit/src/vault.ts, packages/room-kit/src/vaultLock.ts, packages/room-kit/src/vaultBio.ts, packages/room-kit/src/links.ts, packages/room-kit/src/pairInbox.ts</code> · Last synced 2026-06-11</p>
+  <p class="footer">Sources: <code>docs_and_changelog/ROOM_SECURITY.md, docs_and_changelog/ROOM_INVITES.md, docs_and_changelog/ROOM_DEVICE_DATA.md, packages/room-kit/src/crypto.ts, packages/room-kit/src/vault.ts, packages/room-kit/src/vaultLock.ts, packages/room-kit/src/vaultBio.ts, packages/room-kit/src/links.ts, packages/room-kit/src/pairInbox.ts, apps/rooms/web/src/app/join/page.tsx, apps/rooms/web/src/app/contacts/page.tsx, apps/rooms/web/src/shell/RoomConnecting.tsx, apps/rooms/web/src/shell/RoomCodeShare.tsx</code> · Last synced 2026-06-11</p>
 </article>
 </main>
 </div>
