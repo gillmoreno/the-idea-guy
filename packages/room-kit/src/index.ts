@@ -46,6 +46,7 @@ export {
 export {
   adminJoinUrl,
   appOrigin,
+  contactAddUrl,
   memberJoinUrl,
   parseDeepLink,
   parseJoinFromUrl,

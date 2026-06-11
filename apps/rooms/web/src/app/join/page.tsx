@@ -9,8 +9,26 @@ import {
   parseJoinLocation,
   roomUrl,
   stripInviteParamsFromUrl,
+  type DeepLink,
 } from "@the-idea-guy/room-kit";
 import { useDevice } from "@/shell/DeviceProvider";
+import { QRScanner } from "@/components/QRScanner";
+
+/** Accept an invite link (code in the hash) or a bare room code. */
+function normalizeJoinScan(decoded: string): Extract<DeepLink, { type: "join" }> | null {
+  const t = decoded.trim();
+  if (!t) return null;
+  try {
+    const url = new URL(t);
+    const parsed = parseJoinLocation(url.search, url.hash);
+    if (parsed?.type === "join" && parsed.roomCode) return parsed;
+    return null;
+  } catch {
+    /* not a URL */
+  }
+  if (/\s/.test(t)) return null;
+  return { type: "join", roomCode: t };
+}
 
 function JoinInner() {
   const router = useRouter();
@@ -18,6 +36,14 @@ function JoinInner() {
   const [code, setCode] = useState("");
   const [adminSecret, setAdminSecret] = useState("");
   const [passphrase, setPassphrase] = useState("");
+  const [scanning, setScanning] = useState(false);
+
+  const handleScan = (parsed: Extract<DeepLink, { type: "join" }>) => {
+    setScanning(false);
+    setCode(parsed.roomCode);
+    if (parsed.adminSecret) setAdminSecret(parsed.adminSecret);
+    finishJoin(parsed.roomCode, parsed.adminSecret, parsed.templateId, passphrase || undefined, true);
+  };
 
   useEffect(() => {
     const parsed = parseJoinLocation(window.location.search, window.location.hash);
@@ -65,6 +91,21 @@ function JoinInner() {
         <h1>Join a room</h1>
       </div>
       <div className="app-main stack">
+        {scanning ? (
+          <QRScanner
+            normalize={normalizeJoinScan}
+            onScan={handleScan}
+            onClose={() => setScanning(false)}
+            hint="Point your camera at the room invite QR code"
+          />
+        ) : (
+          <>
+        <button type="button" className="btn btn-block" onClick={() => setScanning(true)}>
+          Scan invite QR code
+        </button>
+        <p className="muted" style={{ fontSize: 12, margin: 0, textAlign: "center" }}>
+          or paste the invite code
+        </p>
         <div className="field">
           <label>Room code</label>
           <input
@@ -112,6 +153,8 @@ function JoinInner() {
         <p className="muted" style={{ fontSize: 12 }}>
           Member invite = room code only. Passphrase (if any) is shared out-of-band — never in the link.
         </p>
+          </>
+        )}
       </div>
     </div>
   );

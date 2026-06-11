@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { contactDisplayName } from "@the-idea-guy/room-kit";
+import { contactAddUrl, contactDisplayName } from "@the-idea-guy/room-kit";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { QRBlock } from "@/shell/QRBlock";
 import { PersonaAvatar } from "@/components/PersonaAvatar";
@@ -60,6 +60,20 @@ export default function ContactsPage() {
     tryAdd(contactCard);
   };
 
+  // Scanned someone's QR with a phone camera → /contacts#rooms1.… → auto-send the request.
+  const consumedHash = useRef(false);
+  useEffect(() => {
+    if (consumedHash.current || !persona || !myContactCard) return;
+    const hash = window.location.hash.replace(/^#/, "").trim();
+    if (!hash) return;
+    const card = normalizeContactCardInput(hash);
+    if (!card) return;
+    consumedHash.current = true;
+    window.history.replaceState(null, "", window.location.pathname);
+    tryAdd(card);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [persona, myContactCard]);
+
   if (!persona || !myContactCard) return null;
 
   return (
@@ -97,16 +111,16 @@ export default function ContactsPage() {
             Friends add you with this code or QR. Messages and invites only flow after{" "}
             <strong>both sides accept</strong>. You can block anyone unilaterally.
           </p>
-          <QRBlock value={myContactCard} label="Scan to add me" size={160} />
+          <QRBlock value={contactAddUrl(myContactCard)} label="Scan to add me" size={160} />
           <div className="code-box" style={{ fontSize: 11, wordBreak: "break-all" }}>
             {myContactCard}
           </div>
           <button
             className="btn btn-block"
             type="button"
-            onClick={() => void navigator.clipboard.writeText(myContactCard)}
+            onClick={() => void navigator.clipboard.writeText(contactAddUrl(myContactCard))}
           >
-            Copy contact code
+            Copy contact link
           </button>
         </div>
 

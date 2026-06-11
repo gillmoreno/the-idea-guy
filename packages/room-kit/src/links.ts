@@ -16,6 +16,11 @@ function hashLink(path: string, params: Record<string, string | undefined>): str
   return qs ? `${appOrigin()}${path}#${qs}` : `${appOrigin()}${path}`;
 }
 
+/** Add-me contact link — contact card in hash only, so phone cameras open the app directly. */
+export function contactAddUrl(contactCard: string): string {
+  return `${appOrigin()}/contacts#${contactCard.trim()}`;
+}
+
 /** Open an existing room — room code in hash only. */
 export function roomUrl(roomCode: string): string {
   return hashLink("/room", { c: roomCode.trim() });
