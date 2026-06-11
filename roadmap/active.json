@@ -59,6 +59,10 @@
         {
           "date": "2026-06-11",
           "note": "Draft exists as untracked docs_and_changelog/threat-model.html; needs review, commit, and a public link once the site ships."
+        },
+        {
+          "date": "2026-06-11",
+          "note": "Committed in bf0c473 with biometric unlock coverage added. Remaining: publish publicly when the website ships (RM-001)."
         }
       ]
     },
