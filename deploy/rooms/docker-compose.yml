@@ -1,0 +1,22 @@
+services:
+  rooms:
+    build:
+      context: ../..
+      dockerfile: deploy/rooms/Dockerfile
+    image: rooms-bundle:latest
+    container_name: rooms
+    ports:
+      - "4510:80"
+    environment:
+      RELAY_ADDR: ":4500"
+      RELAY_DATA_DIR: "/data"
+      # Abuse caps / cache knobs: see relay/docker-compose.yml for the full list.
+    volumes:
+      - relay-data:/data
+    restart: unless-stopped
+
+volumes:
+  relay-data:
+    # Same volume the standalone choreboard-relay used — existing rooms survive.
+    name: relay_choreboard-relay-data
+    external: true

@@ -1,9 +1,24 @@
+# Shared by all repo-root build contexts: the website image (./Dockerfile)
+# and the Rooms bundle (deploy/rooms/Dockerfile).
+.git
 frontend/node_modules/
 frontend/.next/
 frontend/out/
 backend/bin/
+**/node_modules
+**/.next
+**/out
+**/test-results
+**/*.tsbuildinfo
 *.log
 .env
 .env.*
 !.env.example
 .DS_Store
+
+# Heavy trees no root-context Dockerfile copies from.
+inkanto/
+secondbrain/
+choreboard/
+docs_and_changelog/
+genproxy/
