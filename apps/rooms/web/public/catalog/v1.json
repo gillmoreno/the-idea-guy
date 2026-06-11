@@ -364,6 +364,48 @@
           }
         ]
       }
+    },
+    {
+      "id": "plant-pet-sitter",
+      "name": "Plant & Pet Sitter",
+      "description": "Care tasks while you're away — who did what, when, with photo proof.",
+      "emoji": "🪴",
+      "accent": "#16a34a",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "plant-pet-sitter",
+        "name": "Plant & Pet Sitter",
+        "description": "Watering, feeding, and house checks — sitters mark tasks done with a photo, owners see who and when.",
+        "emoji": "🪴",
+        "accent": "#16a34a",
+        "collections": [
+          {
+            "id": "tasks",
+            "label": "Care tasks",
+            "singular": "task",
+            "fields": [
+              { "key": "title", "label": "Task", "type": "text", "required": true },
+              { "key": "when", "label": "How often / when", "type": "text" },
+              { "key": "instructions", "label": "Instructions", "type": "textarea" },
+              { "key": "proof", "label": "Photo proof", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "tasks",
+            "values": [
+              { "id": "due", "label": "Needs doing" },
+              { "id": "done", "label": "Done ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }

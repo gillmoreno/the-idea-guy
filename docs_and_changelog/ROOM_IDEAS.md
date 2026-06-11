@@ -27,6 +27,7 @@ _(empty)_
 - [x] **Lend & Borrow** 🔁 — who borrowed what: item, who has it, due back, returned · declarative · 2026-06-12. Pure catalog entry (member status out → returned).
 - [x] **Packing List** 🧳 — shared trip packing: claim what you'll bring, no duplicates · declarative · 2026-06-12. Pure catalog entry (claim status + attribution chip).
 - [x] **Moving Day** 📦 — box inventory (photo of contents) + claimable moving tasks · declarative · 2026-06-12. First catalog template with two collections and an image field.
+- [x] **Plant & Pet Sitter** 🪴 — care tasks while away: mark done with photo proof, owners see who & when · declarative · 2026-06-12. New shared brick: **relative time on attribution chip** ("Anna · 2h ago", `src/lib/relativeTime.ts`) — every status change now answers "when?".
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -34,7 +35,6 @@ _(empty)_
 - [ ] **Who's In?** 🙋 — recurring event availability: Sunday football, weekly poker — who's coming this week, headcount, waitlist. Declarative-ish; builtin if per-occurrence logic needed.
 - [ ] **Carpool Rota** 🚗 — school-run / commute driving rotation: whose turn, swaps, fairness counter. Builtin (rotation logic).
 - [ ] **Secret Santa** 🎁 — draw names privately, wishlists, budget. Builtin (private assignment needs crypto/per-member secrets).
-- [ ] **Plant & Pet Sitter** 🪴 — watering/feeding schedule while someone is away: tasks, photos as proof, last-done timestamps. Declarative + image field.
 - [ ] **Game Night** 🎲 — running scoreboard across game nights, win streaks, who hosts next. Builtin (scores/streak math, like Fit Crew).
 - [ ] **Meal Week** 🍽️ — plan the week's dinners together: propose meals, assign cook per day, auto-derive shopping notes. Builtin or declarative.
 - [ ] **Care Circle** ❤️ — siblings coordinating care for a parent: visits, meds picked up, doctor notes, "who's on this week". Builtin (sensitive — lean on E2E story).

@@ -3,6 +3,7 @@
 import { bodyFields, emojiField, titleField } from "@/schema/display";
 import { DEFAULT_RECORD_EMOJI } from "@/lib/emoji";
 import { imageValueSrc, parseImageValue } from "@/lib/imageValue";
+import { formatRelativeTime } from "@/lib/relativeTime";
 import type { CollectionDef, FieldDef, SchemaMember, SchemaRecord } from "@/schema/types";
 
 function fieldValue(record: SchemaRecord, key: string): string {
@@ -148,6 +149,7 @@ export function RecordCard({
             aria-hidden
           />
           {statusBy.name}
+          {record.statusAt ? ` · ${formatRelativeTime(record.statusAt)}` : null}
         </p>
       )}
     </article>
