@@ -180,13 +180,22 @@
       "title": "Biometric vault unlock (WebAuthn/PassKey)",
       "description": "Replace the device PIN with FaceID/TouchID/Windows Hello via platform authenticators; same Argon2id key derivation underneath. Biggest perceived-security win for the least friction.",
       "source": "security V2 plan (chat, 2026-06-11)",
-      "impact": 4,
+      "impact": 5,
       "impact_rationale": "Banking-app-grade unlock is the strongest perceived-trust signal for the privacy positioning, and better UX than the PIN.",
       "effort": 2,
       "effort_rationale": "WebAuthn is well supported and the key derivation stays as-is; estimated 3-4 days plus cross-device re-enrollment handling.",
-      "priority": 6,
-      "status": "todo",
-      "notes": []
+      "priority": 8,
+      "status": "in-progress",
+      "notes": [
+        {
+          "date": "2026-06-11",
+          "note": "Gil prioritized this as the first security build — perceived security ('feels super secure') is the centerpiece of his marketing message. Impact bumped 4→5."
+        },
+        {
+          "date": "2026-06-11",
+          "note": "Implemented in commit def9122 (WebAuthn PRF wraps the PIN-derived vault key; PIN stays as fallback). Passed 15/15 Playwright checks with a virtual authenticator. Remaining: verify on a real iPhone (Face ID) and Mac (Touch ID) once deployed over HTTPS — WebAuthn needs a secure context, so full validation lands with RM-003."
+        }
+      ]
     },
     {
       "id": "RM-016",
