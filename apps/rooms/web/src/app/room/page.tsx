@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { parseRoomCodeFromLocation, stripInviteParamsFromUrl } from "@the-idea-guy/room-kit";
+import { parseRoomCodeFromLocation } from "@the-idea-guy/room-kit";
 import { RoomSessionProvider } from "@/shell/RoomSessionProvider";
 import { TemplateApp } from "@/templates/TemplateApp";
 
@@ -11,12 +11,14 @@ function RoomInner() {
     return parseRoomCodeFromLocation(window.location.search, window.location.hash);
   });
 
+  // Keep the room code in the URL hash — it is this page's identity, not a
+  // one-time secret. Stripping it (as /join does for admin secrets) left the
+  // code only in component state, so any remount — Strict Mode in dev, or a
+  // plain refresh in prod — re-read an empty hash and showed "Missing room code".
+  // Hashes are never sent to servers/CDN logs, so keeping it satisfies the rule.
   useEffect(() => {
     const code = parseRoomCodeFromLocation(window.location.search, window.location.hash);
-    if (code) {
-      stripInviteParamsFromUrl();
-      setRoomCode(code);
-    }
+    if (code) setRoomCode(code);
   }, []);
 
   if (!roomCode) {
