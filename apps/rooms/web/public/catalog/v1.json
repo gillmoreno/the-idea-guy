@@ -1020,6 +1020,47 @@
           }
         ]
       }
+    },
+    {
+      "id": "visiting-hours",
+      "name": "Visiting Hours",
+      "description": "Hospital visits, coordinated — never overwhelmed, never alone.",
+      "emoji": "🏥",
+      "accent": "#0d9488",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "visiting-hours",
+        "name": "Visiting Hours",
+        "description": "When someone's in hospital or rehab — post the visit slots, claim \"I'll go\", and make sure no day goes uncovered and no afternoon gets five visitors at once.",
+        "emoji": "🏥",
+        "accent": "#0d9488",
+        "collections": [
+          {
+            "id": "slots",
+            "label": "Visit slots",
+            "singular": "slot",
+            "fields": [
+              { "key": "title", "label": "When", "type": "text", "required": true },
+              { "key": "notes", "label": "Notes (what to bring, how they were)", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "slots",
+            "values": [
+              { "id": "open", "label": "Needs a visitor" },
+              { "id": "claimed", "label": "I'll go" },
+              { "id": "visited", "label": "Visited ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
