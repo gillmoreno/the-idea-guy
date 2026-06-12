@@ -30,6 +30,7 @@ _(empty)_
 - [x] **Plant & Pet Sitter** 🪴 — care tasks while away: mark done with photo proof, owners see who & when · declarative · 2026-06-12. New shared brick: **relative time on attribution chip** ("Anna · 2h ago", `src/lib/relativeTime.ts`) — every status change now answers "when?".
 - [x] **Roommate Ledger** 🏠 — household bills & shared purchases: who paid, who owes, settle up · builtin · 2026-06-12. Beyond Trip Split: expense categories, month-grouped history, and **recordable settle-up payments** (Mark paid → settlement entry, balances actually clear). New shared brick: **`src/lib/splitMath.ts`** — settlement math promoted out of tripsplit (tripsplit now re-exports it).
 - [x] **Who's In?** 🙋 — recurring event headcount: In/Maybe/Out per date, capacity + first-come waitlist (RSVP keeps original response time so flipping maybe → in doesn't jump the queue), history of past turnouts · builtin · 2026-06-12.
+- [x] **Gift Plan** 🎁 — gift ideas for one person: vote, claim the buy, mark bought & wrapped (recipient simply not invited; E2E keeps the secret) · declarative · 2026-06-12. Pure catalog entry (votes + claim status).
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -38,6 +39,11 @@ _(empty)_
 - [ ] **Game Night** 🎲 — running scoreboard across game nights, win streaks, who hosts next. Builtin (scores/streak math, like Fit Crew).
 - [ ] **Meal Week** 🍽️ — plan the week's dinners together: propose meals, assign cook per day, auto-derive shopping notes. Builtin or declarative.
 - [ ] **Care Circle** ❤️ — siblings coordinating care for a parent: visits, meds picked up, doctor notes, "who's on this week". Builtin (sensitive — lean on E2E story).
+- [ ] **Dose Log** 💊 — shared medication log for a kid/parent/pet: tap to log a dose, see who gave it and when — no double-dosing. Builtin (event log; strong E2E health story).
+- [ ] **Babysitter Handoff** 👶 — standing instructions (bedtime, allergies, emergency contacts) + a day log between parents and sitter. Declarative (two collections; E2E for kid data).
+- [ ] **Cabin Calendar** 🏔️ — co-owned vacation home: claim weekends/weeks, see who's up next, no double-booking. Builtin (date-range claims).
+- [ ] **Emergency Vault** 🚨 — family's critical info in one E2E place: doctors, policy numbers, allergies, blood types. Declarative (records; E2E is the whole point).
+- [ ] **Freezer Stash** 🧊 — household freezer/pantry inventory: what's in there, use-by, claim "I'll cook it". Declarative (status).
 
 ## Parked
 

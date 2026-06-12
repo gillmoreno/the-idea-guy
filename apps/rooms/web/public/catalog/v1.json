@@ -406,6 +406,50 @@
           }
         ]
       }
+    },
+    {
+      "id": "gift-plan",
+      "name": "Gift Plan",
+      "description": "Plan a gift together — ideas, votes, who buys it. Don't invite the recipient.",
+      "emoji": "🎁",
+      "accent": "#db2777",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "gift-plan",
+        "name": "Gift Plan",
+        "description": "Collect gift ideas for someone, vote on the winner, and claim who buys it — all E2E encrypted, so the secret keeps.",
+        "emoji": "🎁",
+        "accent": "#db2777",
+        "collections": [
+          {
+            "id": "ideas",
+            "label": "Gift ideas",
+            "singular": "idea",
+            "fields": [
+              { "key": "title", "label": "Idea", "type": "text", "required": true },
+              { "key": "price", "label": "Rough price", "type": "text" },
+              { "key": "where", "label": "Where to get it / link", "type": "text" },
+              { "key": "notes", "label": "Why they'd love it", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          { "type": "votes", "collection": "ideas", "onePerMember": true },
+          {
+            "type": "status",
+            "collection": "ideas",
+            "values": [
+              { "id": "idea", "label": "Idea" },
+              { "id": "claimed", "label": "I'll buy it" },
+              { "id": "bought", "label": "Bought & wrapped ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
