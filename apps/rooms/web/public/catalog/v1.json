@@ -976,6 +976,50 @@
           }
         ]
       }
+    },
+    {
+      "id": "recipe-box",
+      "name": "Recipe Box",
+      "description": "The family recipe archive — photos, votes, and which ones are keepers.",
+      "emoji": "🍳",
+      "accent": "#ea580c",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "recipe-box",
+        "name": "Recipe Box",
+        "description": "Grandma's handwriting, that one pasta everyone requests — the recipes your family actually makes, in one box that can't get lost.",
+        "emoji": "🍳",
+        "accent": "#ea580c",
+        "collections": [
+          {
+            "id": "recipes",
+            "label": "Recipes",
+            "singular": "recipe",
+            "fields": [
+              { "key": "title", "label": "Recipe", "type": "text", "required": true },
+              { "key": "from", "label": "Whose recipe is it", "type": "text" },
+              { "key": "details", "label": "Ingredients & how to make it", "type": "textarea" },
+              { "key": "tags", "label": "Tags (weeknight, dessert, holiday)", "type": "tags" },
+              { "key": "photo", "label": "Photo (the dish or the card)", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          { "type": "votes", "collection": "recipes", "onePerMember": true },
+          {
+            "type": "status",
+            "collection": "recipes",
+            "values": [
+              { "id": "totry", "label": "To try" },
+              { "id": "keeper", "label": "Keeper ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
