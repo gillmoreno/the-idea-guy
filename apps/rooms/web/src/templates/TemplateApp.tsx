@@ -37,6 +37,9 @@ const DoseLogApp = lazy(() =>
 const CarpoolApp = lazy(() =>
   import("./carpool/CarpoolApp").then((m) => ({ default: m.CarpoolApp })),
 );
+const GameNightApp = lazy(() =>
+  import("./gamenight/GameNightApp").then((m) => ({ default: m.GameNightApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -78,6 +81,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return DoseLogApp;
       case "carpool":
         return CarpoolApp;
+      case "gamenight":
+        return GameNightApp;
       default:
         return null;
     }

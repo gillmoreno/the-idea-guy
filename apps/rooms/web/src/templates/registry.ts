@@ -11,7 +11,8 @@ export type BuiltinTemplateId =
   | "roomledger"
   | "whosin"
   | "doselog"
-  | "carpool";
+  | "carpool"
+  | "gamenight";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -101,6 +102,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "Whose turn to drive — log drives, fairness counter, swaps sort themselves.",
     emoji: "🚗🔁",
     accent: "#2563eb",
+  },
+  {
+    kind: "builtin",
+    id: "gamenight",
+    name: "Game Night",
+    description: "Running scoreboard across game nights — wins, streaks, who hosts next.",
+    emoji: "🎲🏆",
+    accent: "#9333ea",
   },
   {
     kind: "builtin",
