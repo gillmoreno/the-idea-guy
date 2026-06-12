@@ -1061,6 +1061,39 @@
           }
         ]
       }
+    },
+    {
+      "id": "heirloom-box",
+      "name": "Heirloom Box",
+      "description": "The family's things and their stories — before the stories get lost.",
+      "emoji": "📦",
+      "accent": "#92400e",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "heirloom-box",
+        "name": "Heirloom Box",
+        "description": "Grandpa's watch, the ring, the photo albums — a photo and the story behind each one, recorded while the people who remember are still here to tell it.",
+        "emoji": "📦",
+        "accent": "#92400e",
+        "collections": [
+          {
+            "id": "heirlooms",
+            "label": "Heirlooms",
+            "singular": "heirloom",
+            "fields": [
+              { "key": "title", "label": "What is it", "type": "text", "required": true },
+              { "key": "story", "label": "Its story", "type": "textarea", "required": true },
+              { "key": "from", "label": "Who it came from", "type": "text" },
+              { "key": "keeper", "label": "Who keeps it now", "type": "text" },
+              { "key": "tags", "label": "Tags (jewelry, photos, letters)", "type": "tags" },
+              { "key": "photo", "label": "Photo", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ]
+      }
     }
   ]
 }
