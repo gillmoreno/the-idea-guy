@@ -1,10 +1,23 @@
-// Minimal offline-first service worker for ChoreBoard.
+// Minimal offline-first service worker for Rooms.
 // The app is local-first, so caching the shell lets it open with no network.
-const CACHE = "choreboard-v1";
+const CACHE = "rooms-v2";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
-  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(["/", "/manifest.webmanifest", "/icon.svg"])));
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((c) =>
+        c.addAll([
+          "/",
+          "/manifest.webmanifest",
+          "/icon.svg",
+          "/icon-192.png",
+          "/icon-512.png",
+          "/apple-touch-icon.png",
+        ]),
+      ),
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -30,7 +43,9 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE).then((c) => c.put("/", copy));
           return res;
         })
-        .catch(() => caches.match("/").then((r) => r || caches.match(req)) as Promise<Response>),
+        .catch(() =>
+          caches.match("/").then((r) => r || caches.match(req)),
+        ),
     );
     return;
   }

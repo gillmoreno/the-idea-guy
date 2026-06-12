@@ -10,6 +10,7 @@ import { useBackgroundRoomSync } from "@/shell/useBackgroundRoomSync";
 import { PersonaAvatar } from "@/components/PersonaAvatar";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { RoomInvitesBanner } from "@/components/RoomInvitesBanner";
+import { InstallAppPrompt } from "@/shell/InstallAppPrompt";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { roomUrl } from "@the-idea-guy/room-kit/links";
 import { DECLARATIVE_TEMPLATE_ID } from "@the-idea-guy/room-kit";
@@ -100,6 +101,8 @@ export default function HomePage() {
         </Link>
 
         <RoomInvitesBanner />
+
+        <InstallAppPrompt />
 
         {rooms.length > 0 && (
           <>
