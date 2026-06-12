@@ -55,6 +55,9 @@ const CarLogApp = lazy(() =>
 const CoParentApp = lazy(() =>
   import("./coparent/CoParentApp").then((m) => ({ default: m.CoParentApp })),
 );
+const GroupFundApp = lazy(() =>
+  import("./groupfund/GroupFundApp").then((m) => ({ default: m.GroupFundApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -108,6 +111,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return CarLogApp;
       case "coparent":
         return CoParentApp;
+      case "groupfund":
+        return GroupFundApp;
       default:
         return null;
     }

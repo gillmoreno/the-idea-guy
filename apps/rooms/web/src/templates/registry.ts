@@ -17,7 +17,8 @@ export type BuiltinTemplateId =
   | "cabincal"
   | "bracket"
   | "carlog"
-  | "coparent";
+  | "coparent"
+  | "groupfund";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -155,6 +156,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "Two households, one calm place — schedule, updates, and the kid-expenses ledger.",
     emoji: "👨‍👩‍👧🗓️",
     accent: "#0369a1",
+  },
+  {
+    kind: "builtin",
+    id: "groupfund",
+    name: "Group Fund",
+    description: "Save toward something together — chip in, watch the bar fill up.",
+    emoji: "💰🎯",
+    accent: "#15803d",
   },
   {
     kind: "builtin",

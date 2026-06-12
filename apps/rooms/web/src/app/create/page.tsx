@@ -43,6 +43,7 @@ const PLACEHOLDERS: Record<string, string> = {
   bracket: "FIFA night",
   carlog: "The Corolla",
   coparent: "Emma & Noah",
+  groupfund: "Mallorca 2027",
 };
 
 export default function CreatePage() {
