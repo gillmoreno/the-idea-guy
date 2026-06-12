@@ -49,6 +49,9 @@ const CabinCalApp = lazy(() =>
 const BracketApp = lazy(() =>
   import("./bracket/BracketApp").then((m) => ({ default: m.BracketApp })),
 );
+const CarLogApp = lazy(() =>
+  import("./carlog/CarLogApp").then((m) => ({ default: m.CarLogApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -98,6 +101,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return CabinCalApp;
       case "bracket":
         return BracketApp;
+      case "carlog":
+        return CarLogApp;
       default:
         return null;
     }

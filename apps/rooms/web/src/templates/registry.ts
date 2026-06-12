@@ -15,7 +15,8 @@ export type BuiltinTemplateId =
   | "gamenight"
   | "carecircle"
   | "cabincal"
-  | "bracket";
+  | "bracket"
+  | "carlog";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -137,6 +138,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "Knockout night — seed a bracket, tap winners, crown a champion.",
     emoji: "🏆🎮",
     accent: "#ca8a04",
+  },
+  {
+    kind: "builtin",
+    id: "carlog",
+    name: "Shared Car Log",
+    description: "One shared car — who has it, fill-ups, odometer, service history.",
+    emoji: "🚙🔑",
+    accent: "#475569",
   },
   {
     kind: "builtin",

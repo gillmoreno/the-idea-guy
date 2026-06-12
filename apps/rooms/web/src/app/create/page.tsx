@@ -41,6 +41,7 @@ const PLACEHOLDERS: Record<string, string> = {
   carecircle: "Mum",
   cabincal: "The cabin",
   bracket: "FIFA night",
+  carlog: "The Corolla",
 };
 
 export default function CreatePage() {

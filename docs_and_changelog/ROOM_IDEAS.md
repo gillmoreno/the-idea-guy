@@ -45,6 +45,7 @@ _(empty)_
 - [x] **Tournament Bracket** 🏆 — knockout night: shuffle-seed a bracket from selected players, tap winners (tap again to undo), byes auto-advance, champion banner + hall of champions · builtin · 2026-06-12. Bracket math is pure functions over a CRDT results map (`templates/bracket/lib/bracket.ts`) — unit-sanity-checked with byes.
 - [x] **House Manual** 🏡 — host + co-host/cleaner HQ: supplies board (Stocked → Running low → I'll restock) + photo issue log (Open → I'm on it → Fixed) · declarative · 2026-06-12. Pure catalog entry (two collections, two status flows).
 - [x] **Emergency Vault** 🚨 — family's critical info: policies, doctors, allergies, document photos — no status flows, just E2E records with author footers · declarative · 2026-06-12. The platform's purest E2E showcase.
+- [x] **Shared Car Log** 🚙 — one shared car: one-tap "I've got the car" holder status, fill-ups with cost + odometer, service/repair notes with costs, day-grouped history, latest odometer at a glance · builtin · 2026-06-12.
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -52,7 +53,6 @@ _(empty)_
 - [ ] **Team Snacks** ⚽ — kids' sports team parents: who brings snacks/washes kit each match, fairness rotation. Builtin (fairness brick) or declarative claim.
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
 - [ ] **Street Notice** 🏘️ — a street's noticeboard: heads-ups (water shutoff, lost cat), offers, asks. Declarative (records + tags + author footer).
-- [ ] **Shared Car Log** 🚙 — household shared car: fuel fill-ups, odometer, maintenance due, who's got it today. Builtin (event log + reminders-by-eyeball).
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 
 ## Parked
