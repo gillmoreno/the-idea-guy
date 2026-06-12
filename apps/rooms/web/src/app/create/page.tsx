@@ -45,6 +45,7 @@ const PLACEHOLDERS: Record<string, string> = {
   coparent: "Emma & Noah",
   groupfund: "Mallorca 2027",
   sitcoop: "Elm St sitting co-op",
+  supperclub: "First Saturday club",
 };
 
 export default function CreatePage() {

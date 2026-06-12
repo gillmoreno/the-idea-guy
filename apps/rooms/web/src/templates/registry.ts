@@ -19,7 +19,8 @@ export type BuiltinTemplateId =
   | "carlog"
   | "coparent"
   | "groupfund"
-  | "sitcoop";
+  | "sitcoop"
+  | "supperclub";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -173,6 +174,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "Trade sitting hours with other families — earn by sitting, spend going out.",
     emoji: "👶⏱️",
     accent: "#be185d",
+  },
+  {
+    kind: "builtin",
+    id: "supperclub",
+    name: "Supper Club",
+    description: "Rotating dinner parties — fair hosting, theme votes, dinner history.",
+    emoji: "🍷🍽️",
+    accent: "#9f1239",
   },
   {
     kind: "builtin",

@@ -55,6 +55,7 @@ _(empty)_
 - [x] **Babysitting Co-op** 👶 — families trade sitting hours: log "X sat for Y, 2.5h", time-credit balances (earn by sitting, spend going out; minutes stored as integers) · builtin · 2026-06-12. First time-as-currency room.
 - [x] **Recipe Box** 🍳 — family recipe archive: photo (dish or grandma's card), ingredients, whose-recipe attribution, vote "make it again", To try → Keeper · declarative · 2026-06-12. Pure catalog entry.
 - [x] **Visiting Hours** 🏥 — hospital/rehab visits coordinated: post slots, claim "I'll go", mark visited with notes for the next visitor · declarative · 2026-06-12. Completes the care suite (Care Circle, Meal Train, Dose Log).
+- [x] **Supper Club** 🍷 — rotating dinner parties: "who hosts next" (fairness brick), theme ideas with ♥ votes, dinner history with themes & notes · builtin · 2026-06-12.
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -64,7 +65,6 @@ _(empty)_
 - [ ] **Street Notice** 🏘️ — a street's noticeboard: heads-ups (water shutoff, lost cat), offers, asks. Declarative (records + tags + author footer).
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 - [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).
-- [ ] **Supper Club** 🍷 — rotating dinner party: theme proposals + votes, who hosts next (fairness brick), past dinners log. Builtin composing existing bricks.
 - [ ] **Heirloom Box** 📦 — family memory archive: photos + stories of heirlooms, tags for who-it-came-from. Declarative (records + image); inheritance talk is the E2E-est of data.
 - [ ] **Stage Crew** 🎭 — amateur theater production: props checklist with claims + costumes/scenes notes. Declarative (two collections).
 
