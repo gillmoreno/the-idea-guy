@@ -1,6 +1,6 @@
 // Minimal offline-first service worker for Rooms.
 // The app is local-first, so caching the shell lets it open with no network.
-const CACHE = "rooms-v2";
+const CACHE = "rooms-v3";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
