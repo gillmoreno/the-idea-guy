@@ -52,6 +52,7 @@ _(empty)_
 - [x] **Setlist** 🎵 — band/choir song pipeline: propose, vote, track Proposed → Rehearsing → Performance-ready · declarative · 2026-06-12. Pure catalog entry (votes + member status).
 - [x] **Group Fund** 💰 — pool money toward a shared target: chip in with a note, animated progress bar (open-ended funds supported), per-saver leaderboard, history with self-correction · builtin · 2026-06-12. First *pooling* money room (vs splitting).
 - [x] **Study Crew** 📖 — exam prep: vote on the scariest topics, claim "I'll summarize it", open-questions tracker (Open → Got the answer) · declarative · 2026-06-12. Pure catalog entry (two collections, votes + dual status).
+- [x] **Babysitting Co-op** 👶 — families trade sitting hours: log "X sat for Y, 2.5h", time-credit balances (earn by sitting, spend going out; minutes stored as integers) · builtin · 2026-06-12. First time-as-currency room.
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -62,7 +63,6 @@ _(empty)_
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 - [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).
 - [ ] **Supper Club** 🍷 — rotating dinner party: theme proposals + votes, who hosts next (fairness brick), past dinners log. Builtin composing existing bricks.
-- [ ] **Babysitting Co-op** 👶 — neighborhood parents trade sitting hours: log hours given/received, running balances. Builtin (hours economy, like a ledger in time).
 
 ## Parked
 

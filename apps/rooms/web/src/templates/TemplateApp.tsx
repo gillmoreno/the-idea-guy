@@ -58,6 +58,9 @@ const CoParentApp = lazy(() =>
 const GroupFundApp = lazy(() =>
   import("./groupfund/GroupFundApp").then((m) => ({ default: m.GroupFundApp })),
 );
+const SitCoopApp = lazy(() =>
+  import("./sitcoop/SitCoopApp").then((m) => ({ default: m.SitCoopApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -113,6 +116,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return CoParentApp;
       case "groupfund":
         return GroupFundApp;
+      case "sitcoop":
+        return SitCoopApp;
       default:
         return null;
     }

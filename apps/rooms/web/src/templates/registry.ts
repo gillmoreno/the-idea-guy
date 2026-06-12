@@ -18,7 +18,8 @@ export type BuiltinTemplateId =
   | "bracket"
   | "carlog"
   | "coparent"
-  | "groupfund";
+  | "groupfund"
+  | "sitcoop";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -164,6 +165,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "Save toward something together — chip in, watch the bar fill up.",
     emoji: "💰🎯",
     accent: "#15803d",
+  },
+  {
+    kind: "builtin",
+    id: "sitcoop",
+    name: "Babysitting Co-op",
+    description: "Trade sitting hours with other families — earn by sitting, spend going out.",
+    emoji: "👶⏱️",
+    accent: "#be185d",
   },
   {
     kind: "builtin",
