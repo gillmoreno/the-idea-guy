@@ -20,7 +20,8 @@ export type BuiltinTemplateId =
   | "coparent"
   | "groupfund"
   | "sitcoop"
-  | "supperclub";
+  | "supperclub"
+  | "symptomdiary";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -182,6 +183,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "Rotating dinner parties — fair hosting, theme votes, dinner history.",
     emoji: "🍷🍽️",
     accent: "#9f1239",
+  },
+  {
+    kind: "builtin",
+    id: "symptomdiary",
+    name: "Symptom Diary",
+    description: "The record the doctor asks for — symptoms, severity, who noticed what.",
+    emoji: "🩺📓",
+    accent: "#0f766e",
   },
   {
     kind: "builtin",

@@ -46,6 +46,7 @@ const PLACEHOLDERS: Record<string, string> = {
   groupfund: "Mallorca 2027",
   sitcoop: "Elm St sitting co-op",
   supperclub: "First Saturday club",
+  symptomdiary: "Gil",
 };
 
 export default function CreatePage() {
