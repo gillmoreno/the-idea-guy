@@ -783,6 +783,37 @@
           }
         ]
       }
+    },
+    {
+      "id": "emergency-vault",
+      "name": "Emergency Vault",
+      "description": "Your family's critical info — policies, doctors, allergies. Readable by no server.",
+      "emoji": "🚨",
+      "accent": "#b91c1c",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "emergency-vault",
+        "name": "Emergency Vault",
+        "description": "The information your family scrambles for in a bad moment — insurance, doctors, allergies, document photos — end-to-end encrypted and on everyone's phone.",
+        "emoji": "🚨",
+        "accent": "#b91c1c",
+        "collections": [
+          {
+            "id": "entries",
+            "label": "Vault entries",
+            "singular": "entry",
+            "fields": [
+              { "key": "title", "label": "What is it", "type": "text", "required": true },
+              { "key": "details", "label": "The details (numbers, contacts, doses)", "type": "textarea", "required": true },
+              { "key": "category", "label": "Category", "type": "tags" },
+              { "key": "photo", "label": "Photo of the document", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ]
+      }
     }
   ]
 }
