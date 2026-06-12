@@ -10,6 +10,7 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { Entry } from "../lib/types";
 import { SEVERITY_LABELS, severityColor } from "../lib/types";
 import { useSymptomDiaryStore } from "../lib/useSymptomDiaryStore";
@@ -238,6 +239,7 @@ export function MainView({ memberId }: { memberId: string }) {
           <Link className="btn btn-ghost btn-block" href="/">
             Home
           </Link>
+          <SwitchProfile currentName={byId.get(memberId)?.name} />
           <button className="btn btn-ghost btn-block" onClick={leaveRoom}>
             Leave room
           </button>

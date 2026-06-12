@@ -1,38 +1,25 @@
 "use client";
 
 import { useRoomSession } from "@/shell/RoomSessionProvider";
-import { Avatar } from "./ui";
+import { ClaimProfile } from "@/shell/ClaimProfile";
 import { useCabinCalStore } from "../lib/useCabinCalStore";
+import { OWNER_COLORS } from "../lib/types";
 
 export function ProfilePicker() {
   const { setCurrentMember } = useRoomSession();
   const store = useCabinCalStore();
-  const place = store?.getPlace();
-  const owners = store?.listOwners() ?? [];
+  if (!store) return null;
 
   return (
-    <div className="app">
-      <div className="topbar">
-        <div>
-          <h1>{place?.name ?? "Cabin Calendar"}</h1>
-          <div className="sub">Who&apos;s on this device? Tap your name.</div>
-        </div>
-      </div>
-      <div className="app-main">
-        <div className="profile-grid">
-          {owners.map((o) => (
-            <button key={o.id} className="profile-card" onClick={() => setCurrentMember(o.id)}>
-              <Avatar owner={o} large />
-              <div>
-                <div className="name">{o.name}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-        {owners.length === 0 && (
-          <div className="empty">No co-owners yet. Whoever set up the room can add them during setup.</div>
-        )}
-      </div>
-    </div>
+    <ClaimProfile
+      title={store.getPlace()?.name ?? "Cabin Calendar"}
+      personLabel="co-owner"
+      people={store.listOwners()}
+      onClaim={(id) => setCurrentMember(id)}
+      addSelf={{
+        colors: OWNER_COLORS,
+        onAdd: (p) => store.addOwner({ name: p.name, color: p.color }).id,
+      }}
+    />
   );
 }

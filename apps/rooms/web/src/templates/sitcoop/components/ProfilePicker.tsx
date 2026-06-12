@@ -1,38 +1,26 @@
 "use client";
 
 import { useRoomSession } from "@/shell/RoomSessionProvider";
-import { Avatar } from "./ui";
+import { ClaimProfile } from "@/shell/ClaimProfile";
 import { useSitCoopStore } from "../lib/useSitCoopStore";
+import { FAMILY_COLORS } from "../lib/types";
 
 export function ProfilePicker() {
   const { setCurrentMember } = useRoomSession();
   const store = useSitCoopStore();
-  const coop = store?.getCoop();
-  const families = store?.listFamilies() ?? [];
+  if (!store) return null;
 
   return (
-    <div className="app">
-      <div className="topbar">
-        <div>
-          <h1>{coop?.name ?? "Babysitting Co-op"}</h1>
-          <div className="sub">Which family is this device? Tap your name.</div>
-        </div>
-      </div>
-      <div className="app-main">
-        <div className="profile-grid">
-          {families.map((f) => (
-            <button key={f.id} className="profile-card" onClick={() => setCurrentMember(f.id)}>
-              <Avatar family={f} large />
-              <div>
-                <div className="name">{f.name}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-        {families.length === 0 && (
-          <div className="empty">No families yet. Whoever set up the co-op can add them during setup.</div>
-        )}
-      </div>
-    </div>
+    <ClaimProfile
+      title={store.getCoop()?.name ?? "Babysitting Co-op"}
+      subtitle="Which family is this device? Tap your name."
+      personLabel="family"
+      people={store.listFamilies()}
+      onClaim={(id) => setCurrentMember(id)}
+      addSelf={{
+        colors: FAMILY_COLORS,
+        onAdd: (p) => store.addFamily({ name: p.name, color: p.color }).id,
+      }}
+    />
   );
 }

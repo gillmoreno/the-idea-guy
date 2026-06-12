@@ -7,6 +7,7 @@ import { SyncBadge } from "@/shell/SyncBadge";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { IdeaStatus } from "../lib/types";
 import { useBacklogStore } from "../lib/useBacklogStore";
 import { AddIdea } from "./AddIdea";
@@ -134,6 +135,7 @@ export function BacklogView({ memberId }: { memberId: string }) {
           <Link className="btn btn-ghost btn-block" href="/">
             Home
           </Link>
+          <SwitchProfile currentName={me?.name} />
           <button className="btn btn-ghost btn-block" onClick={leaveRoom}>
             Leave room
           </button>

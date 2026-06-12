@@ -1,42 +1,25 @@
 "use client";
 
 import { useRoomSession } from "@/shell/RoomSessionProvider";
-import { Avatar } from "./ui";
+import { ClaimProfile } from "@/shell/ClaimProfile";
 import { useBracketStore } from "../lib/useBracketStore";
+import { PLAYER_COLORS } from "../lib/types";
 
 export function ProfilePicker() {
   const { setCurrentMember } = useRoomSession();
   const store = useBracketStore();
-  const arena = store?.getArena();
-  const players = store?.listPlayers() ?? [];
+  if (!store) return null;
 
   return (
-    <div className="app">
-      <div className="topbar">
-        <div>
-          <h1>{arena?.name ?? "Tournament Bracket"}</h1>
-          <div className="sub">Who&apos;s on this device? Tap your name.</div>
-        </div>
-      </div>
-      <div className="app-main">
-        <div className="profile-grid">
-          {players.map((p) => (
-            <button key={p.id} className="profile-card" onClick={() => setCurrentMember(p.id)}>
-              <Avatar player={p} large />
-              <div>
-                <div className="name">{p.name}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-        {players.length === 0 ? (
-          <div className="empty">No players yet. Anyone already in the room can add players from the Bracket tab.</div>
-        ) : (
-          <p className="muted" style={{ fontSize: 13, textAlign: "center" }}>
-            Not listed? Anyone already in the room can add you from the Bracket tab.
-          </p>
-        )}
-      </div>
-    </div>
+    <ClaimProfile
+      title={store.getArena()?.name ?? "Tournament Bracket"}
+      personLabel="player"
+      people={store.listPlayers()}
+      onClaim={(id) => setCurrentMember(id)}
+      addSelf={{
+        colors: PLAYER_COLORS,
+        onAdd: (p) => store.addPlayer({ name: p.name, color: p.color }).id,
+      }}
+    />
   );
 }

@@ -8,6 +8,7 @@ import { SyncBadge } from "@/shell/SyncBadge";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { SwitchProfile } from "@/shell/SwitchProfile";
 import { ACTIVITY_META } from "../lib/types";
 import { useFitCrewStore } from "../lib/useFitCrewStore";
 import { AddPrize } from "./AddPrize";
@@ -205,6 +206,7 @@ export function FitCrewView({ memberId }: { memberId: string }) {
           <Link className="btn btn-ghost btn-block" href="/">
             Home
           </Link>
+          <SwitchProfile currentName={me?.name} />
           <button className="btn btn-ghost btn-block" onClick={leaveRoom}>
             Leave crew
           </button>

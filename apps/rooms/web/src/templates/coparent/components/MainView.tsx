@@ -12,6 +12,7 @@ import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
 import { AddPersonByName } from "@/shell/AddPersonByName";
+import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { Parent, Stay } from "../lib/types";
 import { PARENT_COLORS, overlappingStayIds, stayOn, staysOverlap } from "../lib/types";
 import { todayStr } from "../lib/store";
@@ -306,6 +307,7 @@ export function MainView({ memberId }: { memberId: string }) {
           <Link className="btn btn-ghost btn-block" href="/">
             Home
           </Link>
+          <SwitchProfile currentName={byId.get(memberId)?.name} />
           <button className="btn btn-ghost btn-block" onClick={leaveRoom}>
             Leave room
           </button>

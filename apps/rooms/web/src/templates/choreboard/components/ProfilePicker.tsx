@@ -111,7 +111,7 @@ export function ProfilePicker() {
           ))}
         </div>
         {members.length === 0 && (
-          <div className="empty">No members yet. A parent can add them in Settings.</div>
+          <div className="empty">No members yet. A parent can add kids by name in Settings.</div>
         )}
       </div>
     </div>

@@ -10,6 +10,7 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { SwitchProfile } from "@/shell/SwitchProfile";
 import { AddPersonByName } from "@/shell/AddPersonByName";
 import { TRAVELER_COLORS } from "../lib/types";
 import { useTripSplitStore } from "../lib/useTripSplitStore";
@@ -143,6 +144,7 @@ export function TripView({ memberId }: { memberId: string }) {
           <Link className="btn btn-ghost btn-block" href="/">
             Home
           </Link>
+          <SwitchProfile currentName={me?.name} />
           <button className="btn btn-ghost btn-block" onClick={leaveRoom}>
             Leave room
           </button>

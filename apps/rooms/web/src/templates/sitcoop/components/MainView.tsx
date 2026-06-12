@@ -10,6 +10,7 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { SwitchProfile } from "@/shell/SwitchProfile";
 import { AddPersonByName } from "@/shell/AddPersonByName";
 import type { Family } from "../lib/types";
 import { FAMILY_COLORS, formatHours, minuteBalances, parseHoursToMinutes } from "../lib/types";
@@ -266,6 +267,7 @@ export function MainView({ memberId }: { memberId: string }) {
           <Link className="btn btn-ghost btn-block" href="/">
             Home
           </Link>
+          <SwitchProfile currentName={byId.get(memberId)?.name} />
           <button className="btn btn-ghost btn-block" onClick={leaveRoom}>
             Leave room
           </button>

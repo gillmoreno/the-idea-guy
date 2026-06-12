@@ -1,38 +1,25 @@
 "use client";
 
 import { useRoomSession } from "@/shell/RoomSessionProvider";
-import { Avatar } from "./ui";
+import { ClaimProfile } from "@/shell/ClaimProfile";
 import { useGroupFundStore } from "../lib/useGroupFundStore";
+import { SAVER_COLORS } from "../lib/types";
 
 export function ProfilePicker() {
   const { setCurrentMember } = useRoomSession();
   const store = useGroupFundStore();
-  const fund = store?.getFund();
-  const savers = store?.listSavers() ?? [];
+  if (!store) return null;
 
   return (
-    <div className="app">
-      <div className="topbar">
-        <div>
-          <h1>{fund?.name ?? "Group Fund"}</h1>
-          <div className="sub">Who&apos;s on this device? Tap your name.</div>
-        </div>
-      </div>
-      <div className="app-main">
-        <div className="profile-grid">
-          {savers.map((s) => (
-            <button key={s.id} className="profile-card" onClick={() => setCurrentMember(s.id)}>
-              <Avatar saver={s} large />
-              <div>
-                <div className="name">{s.name}</div>
-              </div>
-            </button>
-          ))}
-        </div>
-        {savers.length === 0 && (
-          <div className="empty">No savers yet. Whoever set up the fund can add them during setup.</div>
-        )}
-      </div>
-    </div>
+    <ClaimProfile
+      title={store.getFund()?.name ?? "Group Fund"}
+      personLabel="saver"
+      people={store.listSavers()}
+      onClaim={(id) => setCurrentMember(id)}
+      addSelf={{
+        colors: SAVER_COLORS,
+        onAdd: (p) => store.addSaver({ name: p.name, color: p.color }).id,
+      }}
+    />
   );
 }
