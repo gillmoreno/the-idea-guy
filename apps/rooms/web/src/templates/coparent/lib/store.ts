@@ -6,7 +6,16 @@ import {
   readTemplateBranch,
 } from "@/lib/yjsTemplate";
 import { writeRoomMeta } from "@/shell/roomMeta";
-import type { HubSettings, Parent, Stay, Update } from "./types";
+import type {
+  ExpenseSplit,
+  HubSettings,
+  KidExpense,
+  MoneyConfig,
+  MonthSettlement,
+  Parent,
+  Stay,
+  Update,
+} from "./types";
 
 export const COPARENT_TEMPLATE_ID = "coparent";
 
@@ -50,6 +59,16 @@ export class CoParentStore {
     return pub ? readNestedMap<Update>(pub, "updates") : null;
   }
 
+  private readExpensesMap(): Y.Map<KidExpense> | null {
+    const pub = readTemplateBranch(this.publicDoc, COPARENT_TEMPLATE_ID);
+    return pub ? readNestedMap<KidExpense>(pub, "expenses") : null;
+  }
+
+  private readSettlementsMap(): Y.Map<MonthSettlement> | null {
+    const pub = readTemplateBranch(this.publicDoc, COPARENT_TEMPLATE_ID);
+    return pub ? readNestedMap<MonthSettlement>(pub, "settlements") : null;
+  }
+
   isInitialized(): boolean {
     const hub = this.readHubMap();
     return typeof hub?.get("kidsLabel") === "string";
@@ -81,6 +100,8 @@ export class CoParentStore {
       ensureNestedMap<Parent>(pub, "parents");
       ensureNestedMap<Stay>(pub, "stays");
       ensureNestedMap<Update>(pub, "updates");
+      ensureNestedMap<KidExpense>(pub, "expenses");
+      ensureNestedMap<MonthSettlement>(pub, "settlements");
     });
   }
 
@@ -167,6 +188,100 @@ export class CoParentStore {
   removeUpdate(id: string) {
     this.publicDoc.transact(() => {
       this.readUpdatesMap()?.delete(id);
+    });
+  }
+
+  /** Money config lives on the hub map; defaults to no support, EUR. */
+  getMoneyConfig(): MoneyConfig {
+    const hub = this.readHubMap();
+    return {
+      currency: (hub?.get("moneyCurrency") as string) ?? "EUR",
+      supportCents: (hub?.get("supportCents") as number) ?? 0,
+      supportFromId: (hub?.get("supportFromId") as string) ?? "",
+      supportToId: (hub?.get("supportToId") as string) ?? "",
+    };
+  }
+
+  setMoneyConfig(config: MoneyConfig) {
+    this.publicDoc.transact(() => {
+      const pub = ensureTemplateBranch(this.publicDoc, COPARENT_TEMPLATE_ID);
+      const hub = ensureNestedMap(pub, "hub");
+      hub.set("moneyCurrency", config.currency);
+      hub.set("supportCents", config.supportCents);
+      hub.set("supportFromId", config.supportFromId);
+      hub.set("supportToId", config.supportToId);
+    });
+  }
+
+  /** All expenses, newest date first. */
+  listExpenses(): KidExpense[] {
+    const expenses = this.readExpensesMap();
+    if (!expenses) return [];
+    return [...expenses.values()].sort((a, b) => {
+      const dateCmp = b.date.localeCompare(a.date);
+      return dateCmp !== 0 ? dateCmp : b.createdAt - a.createdAt;
+    });
+  }
+
+  addExpense(input: {
+    description: string;
+    amountCents: number;
+    paidById: string;
+    split: ExpenseSplit;
+    date?: string;
+  }): KidExpense {
+    const expense: KidExpense = {
+      id: uid("ke_"),
+      description: input.description.trim(),
+      amountCents: input.amountCents,
+      paidById: input.paidById,
+      split: input.split,
+      date: input.date ?? todayStr(),
+      createdAt: Date.now(),
+    };
+    this.publicDoc.transact(() => {
+      const pub = ensureTemplateBranch(this.publicDoc, COPARENT_TEMPLATE_ID);
+      const expenses = ensureNestedMap<KidExpense>(pub, "expenses");
+      expenses.set(expense.id, expense);
+    });
+    return expense;
+  }
+
+  removeExpense(id: string) {
+    this.publicDoc.transact(() => {
+      this.readExpensesMap()?.delete(id);
+    });
+  }
+
+  getSettlement(monthKey: string): MonthSettlement | null {
+    return this.readSettlementsMap()?.get(monthKey) ?? null;
+  }
+
+  settleMonth(input: {
+    monthKey: string;
+    amountCents: number;
+    fromId: string;
+    toId: string;
+    byId: string;
+  }) {
+    const settlement: MonthSettlement = {
+      monthKey: input.monthKey,
+      amountCents: input.amountCents,
+      fromId: input.fromId,
+      toId: input.toId,
+      at: Date.now(),
+      byId: input.byId,
+    };
+    this.publicDoc.transact(() => {
+      const pub = ensureTemplateBranch(this.publicDoc, COPARENT_TEMPLATE_ID);
+      const settlements = ensureNestedMap<MonthSettlement>(pub, "settlements");
+      settlements.set(settlement.monthKey, settlement);
+    });
+  }
+
+  unsettleMonth(monthKey: string) {
+    this.publicDoc.transact(() => {
+      this.readSettlementsMap()?.delete(monthKey);
     });
   }
 }

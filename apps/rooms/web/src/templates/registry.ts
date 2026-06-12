@@ -152,7 +152,7 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     kind: "builtin",
     id: "coparent",
     name: "Co-Parenting Hub",
-    description: "Two households, one calm place — who has the kids when, plus updates.",
+    description: "Two households, one calm place — schedule, updates, and the kid-expenses ledger.",
     emoji: "👨‍👩‍👧🗓️",
     accent: "#0369a1",
   },

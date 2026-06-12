@@ -16,8 +16,9 @@ import { overlappingStayIds, stayOn, staysOverlap } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useCoParentStore } from "../lib/useCoParentStore";
 import { Avatar } from "./ui";
+import { MoneyTab } from "./MoneyTab";
 
-type Tab = "schedule" | "updates";
+type Tab = "schedule" | "updates" | "money";
 
 function AddStay({ memberId, existing }: { memberId: string; existing: Stay[] }) {
   const store = useCoParentStore();
@@ -155,6 +156,15 @@ export function MainView({ memberId }: { memberId: string }) {
         >
           Updates
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "money"}
+          className={tab === "money" ? "active" : ""}
+          onClick={() => setTab("money")}
+        >
+          Money
+        </button>
       </AppTabBar>
 
       <div className="app-main stack">
@@ -197,6 +207,8 @@ export function MainView({ memberId }: { memberId: string }) {
             )}
           </>
         )}
+
+        {tab === "money" && <MoneyTab memberId={memberId} />}
 
         {tab === "updates" && (
           <>

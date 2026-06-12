@@ -31,6 +31,39 @@ export interface Update {
   byId: string;
 }
 
+/** ÷2 = shared (other parent owes half) · ÷1 = fronted (other parent owes all). */
+export type ExpenseSplit = "half" | "full";
+
+export interface KidExpense {
+  id: string;
+  description: string;
+  /** Integer cents to avoid float drift. */
+  amountCents: number;
+  paidById: string;
+  split: ExpenseSplit;
+  /** YYYY-MM-DD */
+  date: string;
+  createdAt: number;
+}
+
+export interface MonthSettlement {
+  /** Map key is the monthKey (YYYY-MM); one settlement per month. */
+  monthKey: string;
+  amountCents: number;
+  fromId: string;
+  toId: string;
+  at: number;
+  byId: string;
+}
+
+export interface MoneyConfig {
+  currency: string;
+  /** Fixed monthly support transfer; 0 = none configured. */
+  supportCents: number;
+  supportFromId: string;
+  supportToId: string;
+}
+
 export const PARENT_COLORS = [
   "#6366f1",
   "#ec4899",

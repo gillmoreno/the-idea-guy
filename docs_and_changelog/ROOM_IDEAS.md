@@ -48,8 +48,10 @@ _(empty)_
 - [x] **Shared Car Log** 🚙 — one shared car: one-tap "I've got the car" holder status, fill-ups with cost + odometer, service/repair notes with costs, day-grouped history, latest odometer at a glance · builtin · 2026-06-12.
 - [x] **Campaign Log** 🐉 — tabletop party HQ: adventure journal with maps/handout photos + party loot with "I'm carrying it" claims · declarative · 2026-06-12. Pure catalog entry (two collections + claim status).
 - [x] **Co-Parenting Hub** 👨‍👩‍👧 — two households, one calm place: "kids are with X today" banner, custody schedule via date-range stays (overlaps flagged ⚠️, not blocked — parents sort it out), shared updates feed · builtin · 2026-06-12. Composes cabincal date-ranges + carecircle notes.
+- [x] **Kid Expenses — Co-Parenting Hub "Money" tab** 💶 — **user-requested** (Gil's real Excel): per-line ÷2 (shared) / ÷1 (other owes all) splits, month navigation, per-parent counted totals → expenses net → fixed monthly support (amount + direction + currency in config) → one final "X pays Y €Z", one-tap month settled (+ reopen) · builtin upgrade · 2026-06-12. Close math verified against the original spreadsheet (223.75 / 539.86 → net 316.11).
 
 ## Candidates (pick the highest value ÷ effort)
+
 
 - [ ] **Team Snacks** ⚽ — kids' sports team parents: who brings snacks/washes kit each match, fairness rotation. Builtin (fairness brick) or declarative claim.
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
