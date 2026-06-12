@@ -869,6 +869,50 @@
           }
         ]
       }
+    },
+    {
+      "id": "setlist",
+      "name": "Setlist",
+      "description": "Your band's song pipeline — propose, vote, rehearse, performance-ready.",
+      "emoji": "🎵",
+      "accent": "#c026d3",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "setlist",
+        "name": "Setlist",
+        "description": "Every band argues about the setlist — propose songs, vote on what to play, and track what's actually rehearsed.",
+        "emoji": "🎵",
+        "accent": "#c026d3",
+        "collections": [
+          {
+            "id": "songs",
+            "label": "Songs",
+            "singular": "song",
+            "fields": [
+              { "key": "title", "label": "Song", "type": "text", "required": true },
+              { "key": "artist", "label": "Artist / composer", "type": "text" },
+              { "key": "key", "label": "Key / tempo / who sings", "type": "text" },
+              { "key": "notes", "label": "Notes (chords link, arrangement)", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          { "type": "votes", "collection": "songs", "onePerMember": true },
+          {
+            "type": "status",
+            "collection": "songs",
+            "values": [
+              { "id": "proposed", "label": "Proposed" },
+              { "id": "rehearsing", "label": "Rehearsing" },
+              { "id": "ready", "label": "Performance-ready ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }

@@ -49,6 +49,7 @@ _(empty)_
 - [x] **Campaign Log** 🐉 — tabletop party HQ: adventure journal with maps/handout photos + party loot with "I'm carrying it" claims · declarative · 2026-06-12. Pure catalog entry (two collections + claim status).
 - [x] **Co-Parenting Hub** 👨‍👩‍👧 — two households, one calm place: "kids are with X today" banner, custody schedule via date-range stays (overlaps flagged ⚠️, not blocked — parents sort it out), shared updates feed · builtin · 2026-06-12. Composes cabincal date-ranges + carecircle notes.
 - [x] **Kid Expenses — Co-Parenting Hub "Money" tab** 💶 — **user-requested** (Gil's real Excel): per-line ÷2 (shared) / ÷1 (other owes all) splits, month navigation, per-parent counted totals → expenses net → fixed monthly support (amount + direction + currency in config) → one final "X pays Y €Z", one-tap month settled (+ reopen) · builtin upgrade · 2026-06-12. Close math verified against the original spreadsheet (223.75 / 539.86 → net 316.11).
+- [x] **Setlist** 🎵 — band/choir song pipeline: propose, vote, track Proposed → Rehearsing → Performance-ready · declarative · 2026-06-12. Pure catalog entry (votes + member status).
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -59,7 +60,6 @@ _(empty)_
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 - [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).
 - [ ] **Study Crew** 📖 — exam prep group: topics list with "I'll summarize" claims, shared questions. Declarative (claim status).
-- [ ] **Setlist** 🎵 — band/choir: propose songs, vote, track rehearsed → performance-ready. Declarative (votes + status; Watch Club mechanics for music).
 
 ## Parked
 
