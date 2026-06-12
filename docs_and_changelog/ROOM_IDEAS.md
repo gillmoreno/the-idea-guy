@@ -34,10 +34,10 @@ _(empty)_
 - [x] **Babysitter Handoff** 👶 — house notes (bedtime, allergies, contacts) + photo day log between parents and sitter · declarative · 2026-06-12. New shared brick: **record author footer** — every record card now shows "Added by Anna · 2h ago" (createdById/createdAt were stored but never displayed; benefits all declarative rooms).
 - [x] **Dose Log** 💊 — one-tap dose logging across caregivers: "last given 2h ago by Anna", optional min-interval warning (⚠️ + red border when under the gap), day-grouped history; med names snapshotted into events so history survives med deletion · builtin · 2026-06-12.
 - [x] **Meal Week** 🍽️ — propose the week's dinners, vote, claim "I'll cook it", mark cooked · declarative · 2026-06-12. Pure catalog entry (votes + claim status + day tags).
+- [x] **Carpool Rota** 🚗 — whose turn to drive: one-tap drive logging, fairness counter; "next up" derives from fewest-drives (tie → longest since last drive), so swaps need no mechanics — log reality and the rota self-corrects · builtin · 2026-06-12.
 
 ## Candidates (pick the highest value ÷ effort)
 
-- [ ] **Carpool Rota** 🚗 — school-run / commute driving rotation: whose turn, swaps, fairness counter. Builtin (rotation logic).
 - [ ] **Secret Santa** 🎁 — draw names privately, wishlists, budget. Builtin (private assignment needs crypto/per-member secrets).
 - [ ] **Game Night** 🎲 — running scoreboard across game nights, win streaks, who hosts next. Builtin (scores/streak math, like Fit Crew).
 - [ ] **Care Circle** ❤️ — siblings coordinating care for a parent: visits, meds picked up, doctor notes, "who's on this week". Builtin (sensitive — lean on E2E story).

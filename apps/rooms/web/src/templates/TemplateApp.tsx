@@ -34,6 +34,9 @@ const WhosInApp = lazy(() =>
 const DoseLogApp = lazy(() =>
   import("./doselog/DoseLogApp").then((m) => ({ default: m.DoseLogApp })),
 );
+const CarpoolApp = lazy(() =>
+  import("./carpool/CarpoolApp").then((m) => ({ default: m.CarpoolApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -73,6 +76,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return WhosInApp;
       case "doselog":
         return DoseLogApp;
+      case "carpool":
+        return CarpoolApp;
       default:
         return null;
     }

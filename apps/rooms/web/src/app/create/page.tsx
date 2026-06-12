@@ -36,6 +36,7 @@ const PLACEHOLDERS: Record<string, string> = {
   roomledger: "Maple St flat",
   whosin: "Sunday football",
   doselog: "Max",
+  carpool: "School run",
 };
 
 export default function CreatePage() {
