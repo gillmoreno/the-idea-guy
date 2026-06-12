@@ -10,7 +10,8 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
-import type { DoseEvent, Med } from "../lib/types";
+import { AddPersonByName } from "@/shell/AddPersonByName";
+import { CARER_COLORS, type DoseEvent, type Med } from "../lib/types";
 import { useDoseLogStore } from "../lib/useDoseLogStore";
 import { Avatar } from "./ui";
 
@@ -252,6 +253,16 @@ export function MainView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <div className="stack-sm">
+            <div className="section-title">Add caregiver by name</div>
+            <AddPersonByName
+              placeholder="Caregiver's name"
+              hint="Add caregivers by name — they can claim it when they join."
+              existingNames={carers.map((c) => c.name)}
+              colors={CARER_COLORS}
+              onAdd={(p) => store.addCarer({ name: p.name, color: p.color })}
+            />
+          </div>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
           <RoomInviteSettings
             title="Invite caregivers"

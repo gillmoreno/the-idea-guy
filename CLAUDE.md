@@ -16,6 +16,7 @@ Shared local-first kit: `packages/room-kit` (Yjs CRDT sync, Argon2id/AES-256-GCM
 - **Yjs single instance:** templates import `Y` from `@the-idea-guy/room-kit`, never from `yjs` directly (duplicate Yjs corrupts CRDT state — see `docs_and_changelog/BACKLOG.md`).
 - The relay must stay dumb: it moves opaque encrypted blobs and never gains the ability to read room data.
 - Invite codes go in the URL **hash**, never in query strings or paths (keeps them out of CDN/server logs).
+- **Solo-first rooms:** every room must be useful at N=1 — the creator alone can reach the core action. People are named participants in room data (`AddPersonByName` brick), addable without invites and claimable on join; records *about* people (expenses, scores, drives) are proxy-attributable by anyone in the room, while acts of *agency* (votes, approvals, secrets) stay identity-bound.
 
 ## Documentation (keep in sync)
 

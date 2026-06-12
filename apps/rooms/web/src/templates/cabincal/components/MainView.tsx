@@ -10,18 +10,29 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
-import type { Booking } from "../lib/types";
-import { bookingNights, bookingsOverlap, nightsByOwner, overlappingIds } from "../lib/types";
+import { AddPersonByName } from "@/shell/AddPersonByName";
+import type { Booking, Owner } from "../lib/types";
+import { OWNER_COLORS, bookingNights, bookingsOverlap, nightsByOwner, overlappingIds } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useCabinCalStore } from "../lib/useCabinCalStore";
 import { Avatar } from "./ui";
 
 type Tab = "calendar" | "fairness";
 
-function AddBooking({ memberId, existing }: { memberId: string; existing: Booking[] }) {
+function AddBooking({
+  memberId,
+  owners,
+  existing,
+}: {
+  memberId: string;
+  owners: Owner[];
+  existing: Booking[];
+}) {
   const store = useCabinCalStore();
+  const isOwner = owners.some((o) => o.id === memberId);
   const [start, setStart] = useState(todayStr());
   const [end, setEnd] = useState(todayStr());
+  const [ownerId, setOwnerId] = useState(isOwner ? memberId : (owners[0]?.id ?? ""));
   const [note, setNote] = useState("");
 
   const rangeOk = !!start && !!end && start <= end;
@@ -29,15 +40,15 @@ function AddBooking({ memberId, existing }: { memberId: string; existing: Bookin
     id: "candidate",
     start,
     end,
-    ownerId: memberId,
+    ownerId,
     createdAt: 0,
   };
   const clash = rangeOk ? existing.find((b) => bookingsOverlap(b, candidate)) : undefined;
-  const canSave = !!store && rangeOk && !clash;
+  const canSave = !!store && rangeOk && !clash && !!ownerId;
 
   const save = () => {
     if (!store || !canSave) return;
-    store.addBooking({ start, end, ownerId: memberId, note });
+    store.addBooking({ start, end, ownerId, note });
     setNote("");
   };
 
@@ -53,6 +64,16 @@ function AddBooking({ memberId, existing }: { memberId: string; existing: Bookin
           <label>Last night</label>
           <input className="input" type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
         </div>
+      </div>
+      <div className="field">
+        <label>Who&apos;s staying</label>
+        <select className="select" value={ownerId} onChange={(e) => setOwnerId(e.target.value)}>
+          {owners.map((o) => (
+            <option key={o.id} value={o.id}>
+              {o.id === memberId ? `${o.name} (you)` : o.name}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="field">
         <label>Note (optional)</label>
@@ -165,7 +186,7 @@ export function MainView({ memberId }: { memberId: string }) {
       <div className="app-main stack">
         {tab === "calendar" && (
           <>
-            <AddBooking memberId={memberId} existing={upcoming} />
+            <AddBooking memberId={memberId} owners={owners} existing={upcoming} />
 
             <div className="section-title">Coming up</div>
             {upcoming.length === 0 ? (
@@ -203,6 +224,16 @@ export function MainView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <div className="stack-sm">
+            <div className="section-title">Add co-owner by name</div>
+            <AddPersonByName
+              placeholder="Co-owner's name"
+              hint="Add co-owners by name — you can claim dates for them, and they claim their name when they join."
+              existingNames={owners.map((o) => o.name)}
+              colors={OWNER_COLORS}
+              onAdd={(p) => store.addOwner({ name: p.name, color: p.color })}
+            />
+          </div>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
           <RoomInviteSettings
             title="Invite co-owners"

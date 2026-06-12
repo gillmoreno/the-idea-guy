@@ -11,8 +11,9 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
-import type { Stay } from "../lib/types";
-import { overlappingStayIds, stayOn, staysOverlap } from "../lib/types";
+import { AddPersonByName } from "@/shell/AddPersonByName";
+import type { Parent, Stay } from "../lib/types";
+import { PARENT_COLORS, overlappingStayIds, stayOn, staysOverlap } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useCoParentStore } from "../lib/useCoParentStore";
 import { Avatar } from "./ui";
@@ -20,26 +21,36 @@ import { MoneyTab } from "./MoneyTab";
 
 type Tab = "schedule" | "updates" | "money";
 
-function AddStay({ memberId, existing }: { memberId: string; existing: Stay[] }) {
+function AddStay({
+  memberId,
+  parents,
+  existing,
+}: {
+  memberId: string;
+  parents: Parent[];
+  existing: Stay[];
+}) {
   const store = useCoParentStore();
+  const isParent = parents.some((p) => p.id === memberId);
   const [start, setStart] = useState(todayStr());
   const [end, setEnd] = useState(todayStr());
+  const [parentId, setParentId] = useState(isParent ? memberId : (parents[0]?.id ?? ""));
   const [note, setNote] = useState("");
 
   const rangeOk = !!start && !!end && start <= end;
-  const candidate: Stay = { id: "candidate", start, end, parentId: memberId, createdAt: 0 };
+  const candidate: Stay = { id: "candidate", start, end, parentId, createdAt: 0 };
   const clash = rangeOk ? existing.find((s) => staysOverlap(s, candidate)) : undefined;
-  const canSave = !!store && rangeOk;
+  const canSave = !!store && rangeOk && !!parentId;
 
   const save = () => {
     if (!store || !canSave) return;
-    store.addStay({ start, end, parentId: memberId, note });
+    store.addStay({ start, end, parentId, note });
     setNote("");
   };
 
   return (
     <div className="card stack-sm">
-      <div className="section-title">Add days with you</div>
+      <div className="section-title">Add scheduled days</div>
       <div className="grid-2">
         <div className="field">
           <label>From</label>
@@ -49,6 +60,16 @@ function AddStay({ memberId, existing }: { memberId: string; existing: Stay[] })
           <label>To</label>
           <input className="input" type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
         </div>
+      </div>
+      <div className="field">
+        <label>Kids are with</label>
+        <select className="select" value={parentId} onChange={(e) => setParentId(e.target.value)}>
+          {parents.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.id === memberId ? `${p.name} (you)` : p.name}
+            </option>
+          ))}
+        </select>
       </div>
       <div className="field">
         <label>Note (optional)</label>
@@ -190,7 +211,7 @@ export function MainView({ memberId }: { memberId: string }) {
               )}
             </div>
 
-            <AddStay memberId={memberId} existing={upcoming} />
+            <AddStay memberId={memberId} parents={parents} existing={upcoming} />
 
             <div className="section-title">Coming up</div>
             {upcoming.length === 0 ? (
@@ -254,6 +275,16 @@ export function MainView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <div className="stack-sm">
+            <div className="section-title">Add the other parent by name</div>
+            <AddPersonByName
+              placeholder="Other parent's name"
+              hint="Add your co-parent by name to plan the schedule now — they can claim it when they join."
+              existingNames={parents.map((p) => p.name)}
+              colors={PARENT_COLORS}
+              onAdd={(p) => store.addParent({ name: p.name, color: p.color })}
+            />
+          </div>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
           <RoomInviteSettings
             title="Invite co-parents"

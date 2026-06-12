@@ -8,7 +8,7 @@ const SEEN_PREFIX = "rooms.howItWorksSeen.";
 /** Three lines per room: first action · what the room gives you · how others come in. */
 const HOW_IT_WORKS: Record<string, string[]> = {
   choreboard: [
-    "Set up chores and allowance values, and add each kid as a profile.",
+    "Set up chores and allowance values, and add each kid by name — kids don't need their own device.",
     "Kids tick chores off on any device in the room; parents approve them.",
     "Allowance totals add up automatically from approved chores.",
   ],
@@ -30,17 +30,17 @@ const HOW_IT_WORKS: Record<string, string[]> = {
   roomledger: [
     "Log bills and shared purchases — pick who paid.",
     "The ledger tracks who owes whom; settling up clears it.",
-    "Invite flatmates with the room code; the history syncs to their phones.",
+    "Add flatmates by name — no app needed — and pick who paid; they claim their name if they join later.",
   ],
   whosin: [
     "Set up the recurring event and its capacity.",
     "Everyone RSVPs per date; overflow lands on the waitlist.",
-    "Share the room code so the regulars can tap in from their own phones.",
+    "Add the regulars by name now — they claim their name when they join with the room code.",
   ],
   doselog: [
     "Log each dose right when it's given — who gave what, when.",
     "The latest dose is always visible, so no accidental double doses.",
-    "Anyone caring for the same person joins with the room code and sees the same log.",
+    "Add caregivers by name — they claim it when they join and see the same log.",
   ],
   carpool: [
     "Log each drive as it happens.",
@@ -50,17 +50,17 @@ const HOW_IT_WORKS: Record<string, string[]> = {
   gamenight: [
     "Record results after each game — wins, streaks, and the scoreboard update live.",
     "The board carries across nights, so rivalries accumulate.",
-    "Who hosts next is always visible.",
+    "Add players by name right from the log form — nobody needs the app to be on the scoreboard.",
   ],
   carecircle: [
-    "Log visits and updates so the family stays in sync.",
+    "Log visits — yours or on someone's behalf — and updates so the family stays in sync.",
     "See who's up next and what the doctor said.",
-    "Everyone in the circle joins with one invite link.",
+    "Add the circle by name; everyone claims their name when they join.",
   ],
   cabincal: [
     "Claim the dates you want — clashes are flagged immediately.",
     "Fair-nights tracking shows who's had the most time.",
-    "Co-owners join with the room code and claim dates from their own phones.",
+    "Add co-owners by name and claim dates for them — they claim their name when they join.",
   ],
   bracket: [
     "Add players by name — nobody needs the app to be in the bracket.",
@@ -73,24 +73,24 @@ const HOW_IT_WORKS: Record<string, string[]> = {
     "Invite the other drivers with the room code.",
   ],
   coparent: [
-    "The schedule shows whose house the kids are at — overlaps get flagged.",
+    "Add your co-parent by name and plan whose house the kids are at — overlaps get flagged.",
     "Share updates in the feed instead of scattered texts.",
     "The Money tab tracks kid expenses and closes each month to one transfer.",
   ],
   groupfund: [
     "Set the target — what you're saving for and how much it costs.",
-    "Everyone chips in; the bar fills and per-person totals stay visible.",
+    "Anyone chips in — log cash someone hands you under their name; the bar fills per person.",
     "The room tracks pledges — actual money moves wherever you normally move it.",
   ],
   sitcoop: [
     "Earn hours by sitting for other families; spend them going out.",
     "Every sit is logged, so balances stay fair.",
-    "Families join with the room code — one room per co-op.",
+    "Add the other families by name to start logging sits — they claim their family when they join.",
   ],
   supperclub: [
     "Plan the next dinner — fair hosting picks who's up.",
     "Propose themes and vote on them.",
-    "Dinner history keeps the club's record.",
+    "Add members by name — the hosting rotation works right away; dinner history keeps the record.",
   ],
   symptomdiary: [
     "Log symptoms as they happen — severity 1–5 and who noticed.",
@@ -101,6 +101,11 @@ const HOW_IT_WORKS: Record<string, string[]> = {
     "Log workouts as you do them — streaks and the weekly board update live.",
     "Silly prizes keep it competitive.",
     "Friends join with the room code and log from their own phones.",
+  ],
+  scorepad: [
+    "Add players by name and start a game — nobody else needs the app.",
+    "Score each round from one phone; totals and the leader update live.",
+    "Finished games land in History with their champions; joiners claim their name.",
   ],
 };
 

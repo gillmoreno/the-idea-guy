@@ -66,14 +66,6 @@
           </tr>
           <tr>
             <td>1</td>
-            <td><strong>N=1 solo-usability sweep</strong> — create every room alone and verify the core action is reachable with no other member; wire in the AddPersonByName participants brick (shipped with Bracket/Trip Split) or teaching empty states wherever a room assumes invitees</td>
-            <td>Rooms</td>
-            <td class="num">9</td><td class="num">2</td><td class="num">0.9</td><td class="num">1</td>
-            <td class="num"><span class="score">16.2</span></td>
-            <td><span class="tier tier-now">Now</span></td>
-          </tr>
-          <tr>
-            <td>2</td>
             <td><strong>Ship the website</strong> — deploy the marketing site (static export already builds; Cloudflare Pages playbook exists)</td>
             <td>Website</td>
             <td class="num">8</td><td class="num">2</td><td class="num">0.9</td><td class="num">1</td>
@@ -81,7 +73,7 @@
             <td><span class="tier tier-now">Now</span></td>
           </tr>
           <tr>
-            <td>3</td>
+            <td>2</td>
             <td><strong>Relay lazy-load + idle eviction + abuse caps</strong> — load rooms on connect, evict idle ones (self-healing via checkpoints), add per-IP rate limits and blob/room caps; the #1 cost lever and a launch gate before anything can go viral</td>
             <td>Rooms</td>
             <td class="num">9</td><td class="num">2</td><td class="num">0.9</td><td class="num">1.5</td>
@@ -89,7 +81,7 @@
             <td><span class="tier tier-now">Now</span></td>
           </tr>
           <tr>
-            <td>4</td>
+            <td>3</td>
             <td><strong>In-app "speak it into existence"</strong> — stateless AI generation proxy (platform key, no DB) + type-a-sentence → schema appears live → create → share; replaces copy-paste-to-ChatGPT as the front door and gates the public launch</td>
             <td>Rooms</td>
             <td class="num">8</td><td class="num">3</td><td class="num">0.8</td><td class="num">2</td>
@@ -97,7 +89,7 @@
             <td><span class="tier tier-now">Now</span></td>
           </tr>
           <tr>
-            <td>5</td>
+            <td>4</td>
             <td><strong>Threat model doc (published)</strong> — formal adversary profiles (relay operator, network observer, ex-member, device thief) + honest limitations, as a public HTML page; the main trust asset for the local-first/privacy launch audience</td>
             <td>Rooms</td>
             <td class="num">5</td><td class="num">1</td><td class="num">0.9</td><td class="num">0.5</td>
@@ -105,7 +97,7 @@
             <td><span class="tier tier-now">Now</span></td>
           </tr>
           <tr>
-            <td>6</td>
+            <td>5</td>
             <td><strong>Public showcase Backlog room</strong> — read-only room code on the website; public roadmap people can vote on</td>
             <td>Website + Rooms</td>
             <td class="num">6</td><td class="num">1</td><td class="num">0.7</td><td class="num">1</td>
@@ -113,11 +105,19 @@
             <td><span class="tier tier-next">Next</span></td>
           </tr>
           <tr>
-            <td>7</td>
+            <td>6</td>
             <td><strong>How-to guides section</strong> — teaching content on the website (roadmap item #4 in IDEA_LOG_AND_TOOLS)</td>
             <td>Website</td>
             <td class="num">5</td><td class="num">1</td><td class="num">0.8</td><td class="num">1</td>
             <td class="num"><span class="score">4.0</span></td>
+            <td><span class="tier tier-next">Next</span></td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><strong>Declarative "person" field</strong> — schema-engine field kind backed by named participants (AddPersonByName) so the 7 declarative rooms with free-text who-fields (lend-borrow, setlist, recipe-box, heirloom-box, meal-train, meal-week, visiting-hours) get real attribution + claim-on-join like the builtins</td>
+            <td>Rooms</td>
+            <td class="num">7</td><td class="num">1</td><td class="num">0.8</td><td class="num">1.5</td>
+            <td class="num"><span class="score">3.7</span></td>
             <td><span class="tier tier-next">Next</span></td>
           </tr>
           <tr>

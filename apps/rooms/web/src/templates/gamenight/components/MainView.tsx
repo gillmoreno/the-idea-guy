@@ -11,8 +11,9 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { AddPersonByName } from "@/shell/AddPersonByName";
 import type { Player } from "../lib/types";
-import { computeStandings } from "../lib/types";
+import { PLAYER_COLORS, computeStandings } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useGameNightStore } from "../lib/useGameNightStore";
 import { Avatar } from "./ui";
@@ -92,6 +93,13 @@ function LogNight({
           ))}
         </div>
       </div>
+      <AddPersonByName
+        placeholder="Player name"
+        hint="No app needed — you can log every night from this phone. They claim their name if they join later."
+        existingNames={players.map((p) => p.name)}
+        colors={PLAYER_COLORS}
+        onAdd={(p) => store?.addPlayer({ name: p.name, color: p.color })}
+      />
       <div className="grid-2">
         <div className="field">
           <label>Hosted by (optional)</label>

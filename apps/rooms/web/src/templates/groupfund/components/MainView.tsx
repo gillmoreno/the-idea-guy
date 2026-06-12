@@ -11,7 +11,8 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
-import { totalsBySaver } from "../lib/types";
+import { AddPersonByName } from "@/shell/AddPersonByName";
+import { SAVER_COLORS, totalsBySaver } from "../lib/types";
 import { useGroupFundStore } from "../lib/useGroupFundStore";
 import { Avatar } from "./ui";
 
@@ -31,6 +32,7 @@ export function MainView({ memberId }: { memberId: string }) {
   const [tab, setTab] = useState<Tab>("fund");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [fromId, setFromId] = useState(memberId);
 
   if (!store) return null;
 
@@ -48,7 +50,7 @@ export function MainView({ memberId }: { memberId: string }) {
 
   const contribute = () => {
     if (amountCents === null) return;
-    store.addContribution({ amountCents, byId: memberId, note });
+    store.addContribution({ amountCents, byId: byId.has(fromId) ? fromId : memberId, note });
     setAmount("");
     setNote("");
   };
@@ -145,6 +147,20 @@ export function MainView({ memberId }: { memberId: string }) {
                   />
                 </div>
               </div>
+              <div className="field">
+                <label>From</label>
+                <select
+                  className="select"
+                  value={byId.has(fromId) ? fromId : memberId}
+                  onChange={(e) => setFromId(e.target.value)}
+                >
+                  {savers.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.id === memberId ? `${s.name} (you)` : s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <button
                 className="btn btn-primary btn-block"
                 disabled={amountCents === null}
@@ -206,6 +222,16 @@ export function MainView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <div className="stack-sm">
+            <div className="section-title">Add saver by name</div>
+            <AddPersonByName
+              placeholder="Saver's name"
+              hint="Add savers by name — log cash they hand you, and they claim their name when they join."
+              existingNames={savers.map((s) => s.name)}
+              colors={SAVER_COLORS}
+              onAdd={(p) => store.addSaver({ name: p.name, color: p.color })}
+            />
+          </div>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
           <RoomInviteSettings
             title="Invite savers"

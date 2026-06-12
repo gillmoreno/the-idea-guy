@@ -11,7 +11,9 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { AddPersonByName } from "@/shell/AddPersonByName";
 import type { Member } from "../lib/types";
+import { MEMBER_COLORS } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useSupperClubStore } from "../lib/useSupperClubStore";
 import { Avatar } from "./ui";
@@ -248,6 +250,16 @@ export function MainView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <div className="stack-sm">
+            <div className="section-title">Add member by name</div>
+            <AddPersonByName
+              placeholder="Member name"
+              hint="Add the club by name — hosting rotation works right away; they claim their name when they join."
+              existingNames={members.map((m) => m.name)}
+              colors={MEMBER_COLORS}
+              onAdd={(p) => store.addMember({ name: p.name, color: p.color })}
+            />
+          </div>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
           <RoomInviteSettings
             title="Invite members"

@@ -10,7 +10,9 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { AddPersonByName } from "@/shell/AddPersonByName";
 import type { LedgerEntry } from "../lib/types";
+import { ROOMMATE_COLORS } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
@@ -98,7 +100,9 @@ export function LedgerView({ memberId }: { memberId: string }) {
 
             {entries.length === 0 ? (
               <div className="empty">
-                No expenses yet. Add the first one — rent, internet, the shared groceries run.
+                {roommates.length < 2
+                  ? "Add your flatmates by name below — they don't need the app — then log the first bill."
+                  : "No expenses yet. Add the first one — rent, internet, the shared groceries run."}
               </div>
             ) : (
               groupByMonth(entries).map(([label, monthEntries]) => (
@@ -162,6 +166,16 @@ export function LedgerView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <div className="stack-sm">
+            <div className="section-title">Add roommate by name</div>
+            <AddPersonByName
+              placeholder="Roommate name"
+              hint="For flatmates without the app — anyone here can log what they paid. If they join later, they tap their name to claim it."
+              existingNames={roommates.map((r) => r.name)}
+              colors={ROOMMATE_COLORS}
+              onAdd={(p) => store.addRoommate({ name: p.name, color: p.color })}
+            />
+          </div>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
           <RoomInviteSettings
             title="Invite roommates"

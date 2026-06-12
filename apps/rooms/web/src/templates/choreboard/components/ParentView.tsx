@@ -14,6 +14,7 @@ import { QRBlock } from "@/shell/QRBlock";
 import { PermissionsSettings } from "./PermissionsSettings";
 import { RelaySettings } from "@/shell/RelaySettings";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { AddPersonByName } from "@/shell/AddPersonByName";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { Completion } from "@/templates/choreboard/lib/types";
 import { weekRange } from "@/templates/choreboard/lib/store";
@@ -420,6 +421,17 @@ function SettingsTab() {
           }
         }}
       />
+
+      <div className="section-title">Add kid by name</div>
+      <div className="card stack-sm">
+        <AddPersonByName
+          placeholder="Kid's name"
+          hint="Kids don't need their own device — they can mark chores done from yours, or join later and tap their name."
+          existingNames={members.map((m) => m.name)}
+          colors={MEMBER_COLORS}
+          onAdd={(p) => store.addMember({ name: p.name, color: p.color, role: "kid" })}
+        />
+      </div>
 
       <div className="spread">
         <div className="section-title">Members</div>

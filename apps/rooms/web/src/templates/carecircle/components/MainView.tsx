@@ -11,7 +11,8 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
-import type { Visit } from "../lib/types";
+import { AddPersonByName } from "@/shell/AddPersonByName";
+import { CARER_COLORS, type Visit } from "../lib/types";
 import { useCareCircleStore } from "../lib/useCareCircleStore";
 import { Avatar } from "./ui";
 
@@ -34,6 +35,7 @@ export function MainView({ memberId }: { memberId: string }) {
   const store = useCareCircleStore();
   const [tab, setTab] = useState<Tab>("visits");
   const [visitNote, setVisitNote] = useState("");
+  const [visitorId, setVisitorId] = useState(memberId);
   const [noteText, setNoteText] = useState("");
 
   if (!store) return null;
@@ -58,7 +60,7 @@ export function MainView({ memberId }: { memberId: string }) {
   }
 
   const logVisit = () => {
-    store.logVisit({ carerId: memberId, note: visitNote });
+    store.logVisit({ carerId: byId.has(visitorId) ? visitorId : memberId, note: visitNote });
     setVisitNote("");
   };
 
@@ -123,6 +125,20 @@ export function MainView({ memberId }: { memberId: string }) {
 
             <div className="card stack-sm">
               <div className="section-title">Log a visit</div>
+              <div className="field">
+                <label>Who visited</label>
+                <select
+                  className="select"
+                  value={byId.has(visitorId) ? visitorId : memberId}
+                  onChange={(e) => setVisitorId(e.target.value)}
+                >
+                  {carers.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.id === memberId ? `${c.name} (you)` : c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <input
                 className="input"
                 placeholder="Optional note — mood, meals, anything to know"
@@ -130,7 +146,7 @@ export function MainView({ memberId }: { memberId: string }) {
                 onChange={(e) => setVisitNote(e.target.value)}
               />
               <button className="btn btn-primary btn-block" onClick={logVisit}>
-                I visited just now
+                Visited just now
               </button>
             </div>
 
@@ -201,6 +217,16 @@ export function MainView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <div className="stack-sm">
+            <div className="section-title">Add family member by name</div>
+            <AddPersonByName
+              placeholder="Family member's name"
+              hint="Add the circle by name — you can log a visit on their behalf, and they claim their name when they join."
+              existingNames={carers.map((c) => c.name)}
+              colors={CARER_COLORS}
+              onAdd={(p) => store.addCarer({ name: p.name, color: p.color })}
+            />
+          </div>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
           <RoomInviteSettings
             title="Invite family"

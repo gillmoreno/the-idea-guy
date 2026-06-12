@@ -11,7 +11,9 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { AddPersonByName } from "@/shell/AddPersonByName";
 import type { Occurrence, Player, Rsvp, RsvpStatus } from "../lib/types";
+import { PLAYER_COLORS } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useWhosInStore } from "../lib/useWhosInStore";
 import { Avatar } from "./ui";
@@ -304,6 +306,16 @@ export function MainView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <div className="stack-sm">
+            <div className="section-title">Add player by name</div>
+            <AddPersonByName
+              placeholder="Player name"
+              hint="They don't have the app yet? Add them by name — they can claim it when they join."
+              existingNames={players.map((p) => p.name)}
+              colors={PLAYER_COLORS}
+              onAdd={(p) => store.addPlayer({ name: p.name, color: p.color })}
+            />
+          </div>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
           <RoomInviteSettings
             title="Invite players"

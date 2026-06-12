@@ -21,7 +21,10 @@ recurring coordination problem** — trips, household, car, kids, health appoint
 work, hobbies, events, neighbors. Think "the spreadsheet/group-chat-pinned-message this
 group keeps reinventing", as an app. Qualities of a good room idea:
 
-- **A group, not a single user** — value comes from 2+ people seeing the same state.
+- **A group problem, solo-first** — the *problem* belongs to a group of 2+, but the room
+  must be useful at N=1 from the first session: the creator alone can set up, populate,
+  and reach the core action with nobody else on board. More people make it better, never
+  possible. (See the "Solo-first rule" in step 3.)
 - **One job** — explainable in one sentence; setup in under a minute.
 - **Privacy-friendly** — E2E encryption is a feature for it (money, family, health).
 - **No backend smarts needed** — works as CRDT state synced through a dumb relay. No
@@ -73,6 +76,24 @@ improving the library is as valuable as shipping the room.
 **Uniformity convention:** bottom nav for 3–5 sections, a Settings tab with
 `RoomInviteSettings` + `RoomDangerZone`, land on the useful screen. Deviate only when
 the room genuinely doesn't fit the shape.
+
+**Solo-first rule (hard requirement):** the creator alone must reach the core action —
+no screen may require a second member to proceed. Concretely:
+
+- If the room attributes records to people (who paid/drove/hosted/sat), people are
+  **named participants in room data**, not just invite slots: wire the shared
+  `AddPersonByName` brick (`src/shell/AddPersonByName.tsx`) so the creator can add
+  people by name, and entries about a person can be logged by anyone in the room
+  ("John paid 50" entered from Maria's phone). Joiners claim their name via the
+  ProfilePicker pattern (see `bracket`/`tripsplit` for the reference wiring).
+- **Exception — acts of agency:** votes, approvals, and secrets stay identity-bound;
+  never proxy those. If the room's *core* concept needs per-member secrecy (e.g.
+  Secret Santa), park it rather than fake it.
+- Empty states teach the first action ("Add at least 2 players — nobody else needs
+  the app"), never just state emptiness.
+- Add a `RoomExplainer` entry (3 bullets in `src/shell/RoomExplainer.tsx`) for every
+  new builtin — first action · what the room shows · how others come in — and keep
+  its claims truthful to what's implemented.
 
 ### 4. QA gate (do not deploy red)
 

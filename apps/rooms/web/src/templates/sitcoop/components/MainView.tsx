@@ -10,8 +10,9 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { AddPersonByName } from "@/shell/AddPersonByName";
 import type { Family } from "../lib/types";
-import { formatHours, minuteBalances, parseHoursToMinutes } from "../lib/types";
+import { FAMILY_COLORS, formatHours, minuteBalances, parseHoursToMinutes } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useSitCoopStore } from "../lib/useSitCoopStore";
 import { Avatar } from "./ui";
@@ -164,6 +165,11 @@ export function MainView({ memberId }: { memberId: string }) {
                 + Log a sit
               </button>
             )}
+            {families.length < 2 && (
+              <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+                A sit needs two families — add the others by name in settings below.
+              </p>
+            )}
 
             <div className="section-title">Hour balances</div>
             <p className="muted" style={{ fontSize: 13, margin: 0 }}>
@@ -229,6 +235,16 @@ export function MainView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <div className="stack-sm">
+            <div className="section-title">Add family by name</div>
+            <AddPersonByName
+              placeholder="Family name"
+              hint="Add the other families by name to start logging sits — they can claim their family when they join."
+              existingNames={families.map((f) => f.name)}
+              colors={FAMILY_COLORS}
+              onAdd={(p) => store.addFamily({ name: p.name, color: p.color })}
+            />
+          </div>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
           <RoomInviteSettings
             title="Invite families"
