@@ -1142,6 +1142,51 @@
           }
         ]
       }
+    },
+    {
+      "id": "guest-list",
+      "name": "Guest List",
+      "description": "The hosts' guest list — +1s, dietary needs, tables, and who's actually coming.",
+      "emoji": "💌",
+      "accent": "#be123c",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "guest-list",
+        "name": "Guest List",
+        "description": "For the people throwing the party — every guest, their +1s and dietary needs, table plans, and where each invite stands.",
+        "emoji": "💌",
+        "accent": "#be123c",
+        "collections": [
+          {
+            "id": "guests",
+            "label": "Guests",
+            "singular": "guest",
+            "fields": [
+              { "key": "title", "label": "Guest", "type": "text", "required": true },
+              { "key": "party", "label": "Their party / +1s", "type": "text" },
+              { "key": "dietary", "label": "Dietary", "type": "tags" },
+              { "key": "table", "label": "Table", "type": "text" },
+              { "key": "notes", "label": "Notes (side, relation, politics)", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "guests",
+            "values": [
+              { "id": "toinvite", "label": "To invite" },
+              { "id": "invited", "label": "Invited" },
+              { "id": "coming", "label": "Coming ✓" },
+              { "id": "declined", "label": "Can't come" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }

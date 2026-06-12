@@ -59,6 +59,7 @@ _(empty)_
 - [x] **Heirloom Box** 📦 — family memory archive: photo + story per heirloom, provenance ("who it came from"), who keeps it now; author footer records who told each story · declarative · 2026-06-12. Pure catalog entry.
 - [x] **House Hunt** 🏠 — finding a home together: listings with photos/price/link, pros & cons, votes, pipeline To view → Viewing booked → Offer made → Ours?!/Not this one · declarative · 2026-06-12. Pure catalog entry.
 - [x] **Symptom Diary** 🩺 — patient + partner log symptoms with color-coded severity 1–5, triggers/notes, day-grouped history showing who observed what · builtin · 2026-06-12. The doctor-prep record; E2E-maximal data.
+- [x] **Guest List** 💌 — hosts' guest list: +1s, dietary tags, tables, pipeline To invite → Invited → Coming/Can't come · declarative · 2026-06-12. Pure catalog entry; the hosts' counterpart to Who's In?.
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -70,7 +71,6 @@ _(empty)_
 - [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).
 - [ ] **Stage Crew** 🎭 — amateur theater production: props checklist with claims + costumes/scenes notes. Declarative (two collections).
 - [ ] **Garage Sale Crew** 🏷️ — neighbors run a joint yard sale: items with prices & photos, mark sold, whose-item attribution for payouts. Declarative (status + image).
-- [ ] **Guest List** 💌 — event hosts manage invites: who's invited, RSVP status, dietary/table tags. Declarative (status + tags); the hosts' side of Who's In?.
 
 ## Parked
 
