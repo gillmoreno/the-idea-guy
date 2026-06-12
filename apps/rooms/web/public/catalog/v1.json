@@ -578,6 +578,50 @@
           }
         ]
       }
+    },
+    {
+      "id": "freezer-stash",
+      "name": "Freezer Stash",
+      "description": "What's actually in the freezer — use it before it dies in there.",
+      "emoji": "🧊",
+      "accent": "#38bdf8",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "freezer-stash",
+        "name": "Freezer Stash",
+        "description": "A shared inventory of the freezer and pantry — what's in there, when to use it, and who's cooking it.",
+        "emoji": "🧊",
+        "accent": "#38bdf8",
+        "collections": [
+          {
+            "id": "items",
+            "label": "In the stash",
+            "singular": "item",
+            "fields": [
+              { "key": "title", "label": "What is it", "type": "text", "required": true },
+              { "key": "qty", "label": "How much", "type": "text" },
+              { "key": "useby", "label": "Use by", "type": "text" },
+              { "key": "where", "label": "Where", "type": "tags" },
+              { "key": "photo", "label": "Photo (mystery containers!)", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "items",
+            "values": [
+              { "id": "stocked", "label": "In the stash" },
+              { "id": "claimed", "label": "I'll use it" },
+              { "id": "used", "label": "Used up ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }

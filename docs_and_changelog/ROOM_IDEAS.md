@@ -38,13 +38,13 @@ _(empty)_
 - [x] **Game Night** 🎲 — running scoreboard across game nights: log game + winners, standings with 🔥 win streaks, "who hosts next" via fairness rotation · builtin · 2026-06-12. New shared brick: **`src/lib/fairness.ts`** — generic fewest-events rotation extracted from carpool (both templates now share it).
 - [x] **Shift Swap** 🔄 — post a shift you can't make, teammate claims "I'll cover it", mark covered; trade/sweetener field; author + claimer both visible via engine bricks · declarative · 2026-06-12. Pure catalog entry.
 - [x] **Care Circle** ❤️ — family caring for someone: one-tap visit log with "who's up next" (fairness brick), shared updates feed for doctor news; standing info in setup · builtin · 2026-06-12. Composes doselog event-log + carpool fairness + authored notes.
+- [x] **Freezer Stash** 🧊 — freezer/pantry inventory: what's in there, use-by, photo for mystery containers, claim "I'll use it" · declarative · 2026-06-12. Pure catalog entry; completes the household food loop with Grocery Run + Meal Week.
 
 ## Candidates (pick the highest value ÷ effort)
 
 - [ ] **Secret Santa** 🎁 — draw names privately, wishlists, budget. Builtin (private assignment needs crypto/per-member secrets).
 - [ ] **Cabin Calendar** 🏔️ — co-owned vacation home: claim weekends/weeks, see who's up next, no double-booking. Builtin (date-range claims).
 - [ ] **Emergency Vault** 🚨 — family's critical info in one E2E place: doctors, policy numbers, allergies, blood types. Declarative (records; E2E is the whole point).
-- [ ] **Freezer Stash** 🧊 — household freezer/pantry inventory: what's in there, use-by, claim "I'll cook it". Declarative (status).
 - [ ] **House Manual** 🏡 — Airbnb host + co-host/cleaner: turnover checklist, supplies running low, guest notes. Declarative (two collections).
 - [ ] **Team Snacks** ⚽ — kids' sports team parents: who brings snacks/washes kit each match, fairness rotation. Builtin (fairness brick) or declarative claim.
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
