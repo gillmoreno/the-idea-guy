@@ -814,6 +814,61 @@
           }
         ]
       }
+    },
+    {
+      "id": "campaign-log",
+      "name": "Campaign Log",
+      "description": "Your tabletop party's HQ — the adventure journal and who's carrying the loot.",
+      "emoji": "🐉",
+      "accent": "#7e22ce",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "campaign-log",
+        "name": "Campaign Log",
+        "description": "The campaign notebook that never gets lost — session recaps with maps and handouts, and the party loot with who's carrying what.",
+        "emoji": "🐉",
+        "accent": "#7e22ce",
+        "collections": [
+          {
+            "id": "journal",
+            "label": "Adventure log",
+            "singular": "entry",
+            "fields": [
+              { "key": "title", "label": "Session / event", "type": "text", "required": true },
+              { "key": "story", "label": "What happened", "type": "textarea", "required": true },
+              { "key": "tags", "label": "Tags (NPCs, places, quests)", "type": "tags" },
+              { "key": "handout", "label": "Map or handout", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          },
+          {
+            "id": "loot",
+            "label": "Party loot",
+            "singular": "item",
+            "fields": [
+              { "key": "title", "label": "Item", "type": "text", "required": true },
+              { "key": "qty", "label": "How many / value", "type": "text" },
+              { "key": "notes", "label": "What it does", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "loot",
+            "values": [
+              { "id": "stash", "label": "Party stash" },
+              { "id": "carried", "label": "I'm carrying it" },
+              { "id": "spent", "label": "Used / sold" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }

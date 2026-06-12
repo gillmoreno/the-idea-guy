@@ -46,6 +46,7 @@ _(empty)_
 - [x] **House Manual** 🏡 — host + co-host/cleaner HQ: supplies board (Stocked → Running low → I'll restock) + photo issue log (Open → I'm on it → Fixed) · declarative · 2026-06-12. Pure catalog entry (two collections, two status flows).
 - [x] **Emergency Vault** 🚨 — family's critical info: policies, doctors, allergies, document photos — no status flows, just E2E records with author footers · declarative · 2026-06-12. The platform's purest E2E showcase.
 - [x] **Shared Car Log** 🚙 — one shared car: one-tap "I've got the car" holder status, fill-ups with cost + odometer, service/repair notes with costs, day-grouped history, latest odometer at a glance · builtin · 2026-06-12.
+- [x] **Campaign Log** 🐉 — tabletop party HQ: adventure journal with maps/handout photos + party loot with "I'm carrying it" claims · declarative · 2026-06-12. Pure catalog entry (two collections + claim status).
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -54,6 +55,9 @@ _(empty)_
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
 - [ ] **Street Notice** 🏘️ — a street's noticeboard: heads-ups (water shutoff, lost cat), offers, asks. Declarative (records + tags + author footer).
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
+- [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).
+- [ ] **Study Crew** 📖 — exam prep group: topics list with "I'll summarize" claims, shared questions. Declarative (claim status).
+- [ ] **Setlist** 🎵 — band/choir: propose songs, vote, track rehearsed → performance-ready. Declarative (votes + status; Watch Club mechanics for music).
 
 ## Parked
 
