@@ -2108,3 +2108,25 @@ textarea.input {
     animation: none !important;
   }
 }
+
+/* ---------- Room explainer ("how this room works") ---------- */
+.room-help-fab {
+  position: fixed;
+  right: 14px;
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface, var(--bg));
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  z-index: 60;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+  cursor: pointer;
+}
+.room-help-fab:active {
+  transform: scale(0.94);
+}

@@ -10,6 +10,8 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
+import { AddPersonByName } from "@/shell/AddPersonByName";
+import { TRAVELER_COLORS } from "../lib/types";
 import { useTripSplitStore } from "../lib/useTripSplitStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
@@ -110,6 +112,16 @@ export function TripView({ memberId }: { memberId: string }) {
         )}
 
         <div className="card stack" style={{ marginTop: 8 }}>
+          <div className="stack-sm">
+            <div className="section-title">Add traveler by name</div>
+            <AddPersonByName
+              placeholder="Traveler name"
+              hint="For friends without the app — anyone here can log what they paid. If they join later, they tap their name to claim it."
+              existingNames={travelers.map((t) => t.name)}
+              colors={TRAVELER_COLORS}
+              onAdd={(p) => store.addTraveler({ name: p.name, color: p.color })}
+            />
+          </div>
           <RoomLocalStorage roomCode={roomCode} includeAdmin={hasAdminAccess} />
           <RoomInviteSettings
             title="Invite travelers"

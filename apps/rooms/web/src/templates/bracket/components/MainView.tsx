@@ -10,7 +10,8 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
-import type { Player, Tournament } from "../lib/types";
+import { AddPersonByName } from "@/shell/AddPersonByName";
+import { PLAYER_COLORS, type Player, type Tournament } from "../lib/types";
 import { bracketRounds, champion, roundLabel } from "../lib/bracket";
 import { useBracketStore } from "../lib/useBracketStore";
 import { Avatar } from "./ui";
@@ -49,6 +50,12 @@ function StartBracket({ players, memberId }: { players: Player[]; memberId: stri
     store.startTournament({ playerIds, startedById: memberId });
   };
 
+  const addByName = (input: { name: string; color: string }) => {
+    if (!store) return;
+    const player = store.addPlayer(input);
+    setSelected((prev) => new Set(prev).add(player.id));
+  };
+
   return (
     <div className="card stack-sm">
       <div className="section-title">Start a bracket</div>
@@ -64,6 +71,13 @@ function StartBracket({ players, memberId }: { players: Player[]; memberId: stri
           </label>
         ))}
       </div>
+      <AddPersonByName
+        placeholder="Add player by name"
+        hint="No app needed — you can report every result from this phone. If they join later, they tap their name to claim it."
+        existingNames={players.map((p) => p.name)}
+        colors={PLAYER_COLORS}
+        onAdd={addByName}
+      />
       <button className="btn btn-primary btn-block" disabled={!canStart} onClick={start}>
         Shuffle & start ({selected.size} player{selected.size === 1 ? "" : "s"})
       </button>
@@ -217,7 +231,11 @@ export function MainView({ memberId }: { memberId: string }) {
             {!current || startingNew ? (
               <>
                 {!current && (
-                  <div className="empty">No bracket yet — pick the players and start one.</div>
+                  <div className="empty">
+                    {players.length < 2
+                      ? "A bracket needs at least 2 players — add them by name below. Nobody else needs the app."
+                      : "No bracket yet — pick the players and start one."}
+                  </div>
                 )}
                 <StartBracket players={players} memberId={memberId} />
                 {startingNew && (

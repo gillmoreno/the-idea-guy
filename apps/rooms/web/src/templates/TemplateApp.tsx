@@ -8,6 +8,7 @@ import { RoomLoading } from "@/shell/RoomLoading";
 import { RoomTypePending } from "@/shell/RoomTypePending";
 import { inferTemplateFromDoc, resolveRoomType } from "@/shell/resolveRoomType";
 import { DeclarativeApp } from "@/schema/engine/DeclarativeApp";
+import { RoomExplainer } from "@/shell/RoomExplainer";
 import { getBuiltinTemplate, isBuiltinTemplateId } from "./registry";
 
 const ChoreBoardApp = lazy(() =>
@@ -172,7 +173,12 @@ export function TemplateApp() {
     resolved.templateKind === "declarative" ||
     resolved.templateId === "declarative"
   ) {
-    return <DeclarativeApp />;
+    return (
+      <>
+        <DeclarativeApp />
+        <RoomExplainer templateId={resolved.templateId} />
+      </>
+    );
   }
 
   if (resolved.isPending) {
@@ -183,5 +189,10 @@ export function TemplateApp() {
     return <UnknownTemplate templateId={resolved.templateId} />;
   }
 
-  return <BuiltinLoader templateId={resolved.templateId} />;
+  return (
+    <>
+      <BuiltinLoader templateId={resolved.templateId} />
+      <RoomExplainer templateId={resolved.templateId} />
+    </>
+  );
 }

@@ -5,6 +5,7 @@ import { SetupTopbar } from "@/shell/SetupTopbar";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { RoomMemberInviteField } from "@/components/RoomMemberInviteField";
+import { AddPersonByName } from "@/shell/AddPersonByName";
 import { finishRoomSetupWithInvites } from "@/lib/finishRoomSetup";
 import { useSetupFinishWithInviteReminder } from "@/lib/useSetupFinishWithInviteReminder";
 import { PLAYER_COLORS } from "../lib/types";
@@ -18,6 +19,7 @@ export function Setup() {
   const [name, setName] = useState("FIFA night");
   const [game, setGame] = useState("");
   const [invited, setInvited] = useState<typeof mutual>([]);
+  const [namedPlayers, setNamedPlayers] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
 
   const canFinish = !!store && !!persona && !!roomCode && !!name.trim() && !busy;
@@ -40,13 +42,20 @@ export function Setup() {
         addOrganizer: (m) => store.addPlayer(m),
         addInvitee: (m) => store.addPlayer(m),
       });
+      // Organizer takes color 0, invitees the next ones — offset past both.
+      namedPlayers.forEach((playerName, i) =>
+        store.addPlayer({
+          name: playerName,
+          color: PLAYER_COLORS[(1 + invited.length + i) % PLAYER_COLORS.length],
+        }),
+      );
     } finally {
       setBusy(false);
     }
   };
 
   const { requestFinish, reminderModal } = useSetupFinishWithInviteReminder({
-    invitedCount: invited.length,
+    invitedCount: invited.length + namedPlayers.length,
     suggestedMinContacts: 1,
     canFinish,
     onFinish: finish,
@@ -82,6 +91,31 @@ export function Setup() {
             </div>
           )}
           <RoomMemberInviteField mutual={mutual} selected={invited} onChange={setInvited} minContacts={1} />
+
+          <div className="section-title">Or add players by name</div>
+          {namedPlayers.length > 0 && (
+            <div className="stack-sm">
+              {namedPlayers.map((playerName) => (
+                <div key={playerName} className="row gap-sm" style={{ alignItems: "center", fontSize: 14 }}>
+                  <span style={{ flex: 1, minWidth: 0 }}>{playerName}</span>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setNamedPlayers((prev) => prev.filter((n) => n !== playerName))}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <AddPersonByName
+            placeholder="Player name"
+            hint="No app needed — you can run the whole bracket from this phone. If they join later, they tap their name to claim it."
+            existingNames={[persona?.displayName ?? "", ...namedPlayers]}
+            colors={PLAYER_COLORS}
+            onAdd={(p) => setNamedPlayers((prev) => [...prev, p.name])}
+          />
         </div>
 
         <button

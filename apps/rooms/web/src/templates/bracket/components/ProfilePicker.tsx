@@ -29,8 +29,12 @@ export function ProfilePicker() {
             </button>
           ))}
         </div>
-        {players.length === 0 && (
-          <div className="empty">No players yet. Whoever set up the room can add them during setup.</div>
+        {players.length === 0 ? (
+          <div className="empty">No players yet. Anyone already in the room can add players from the Bracket tab.</div>
+        ) : (
+          <p className="muted" style={{ fontSize: 13, textAlign: "center" }}>
+            Not listed? Anyone already in the room can add you from the Bracket tab.
+          </p>
         )}
       </div>
     </div>
