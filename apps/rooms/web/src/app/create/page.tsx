@@ -38,6 +38,7 @@ const PLACEHOLDERS: Record<string, string> = {
   doselog: "Max",
   carpool: "School run",
   gamenight: "Friday game night",
+  carecircle: "Mum",
 };
 
 export default function CreatePage() {

@@ -40,6 +40,9 @@ const CarpoolApp = lazy(() =>
 const GameNightApp = lazy(() =>
   import("./gamenight/GameNightApp").then((m) => ({ default: m.GameNightApp })),
 );
+const CareCircleApp = lazy(() =>
+  import("./carecircle/CareCircleApp").then((m) => ({ default: m.CareCircleApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -83,6 +86,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return CarpoolApp;
       case "gamenight":
         return GameNightApp;
+      case "carecircle":
+        return CareCircleApp;
       default:
         return null;
     }
