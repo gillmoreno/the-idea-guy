@@ -57,6 +57,7 @@ _(empty)_
 - [x] **Visiting Hours** 🏥 — hospital/rehab visits coordinated: post slots, claim "I'll go", mark visited with notes for the next visitor · declarative · 2026-06-12. Completes the care suite (Care Circle, Meal Train, Dose Log).
 - [x] **Supper Club** 🍷 — rotating dinner parties: "who hosts next" (fairness brick), theme ideas with ♥ votes, dinner history with themes & notes · builtin · 2026-06-12.
 - [x] **Heirloom Box** 📦 — family memory archive: photo + story per heirloom, provenance ("who it came from"), who keeps it now; author footer records who told each story · declarative · 2026-06-12. Pure catalog entry.
+- [x] **House Hunt** 🏠 — finding a home together: listings with photos/price/link, pros & cons, votes, pipeline To view → Viewing booked → Offer made → Ours?!/Not this one · declarative · 2026-06-12. Pure catalog entry.
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -67,6 +68,9 @@ _(empty)_
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 - [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).
 - [ ] **Stage Crew** 🎭 — amateur theater production: props checklist with claims + costumes/scenes notes. Declarative (two collections).
+- [ ] **Symptom Diary** 🩺 — shared with a partner/family for doctor prep: log symptoms & triggers, day-grouped, who observed what. Builtin-lite (event log); E2E maximal.
+- [ ] **Garage Sale Crew** 🏷️ — neighbors run a joint yard sale: items with prices & photos, mark sold, whose-item attribution for payouts. Declarative (status + image).
+- [ ] **Guest List** 💌 — event hosts manage invites: who's invited, RSVP status, dietary/table tags. Declarative (status + tags); the hosts' side of Who's In?.
 
 ## Parked
 

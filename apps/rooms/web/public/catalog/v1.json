@@ -1094,6 +1094,54 @@
           }
         ]
       }
+    },
+    {
+      "id": "house-hunt",
+      "name": "House Hunt",
+      "description": "Finding your place together — listings, votes, and the viewing-to-offer pipeline.",
+      "emoji": "🏠",
+      "accent": "#059669",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "house-hunt",
+        "name": "House Hunt",
+        "description": "Every listing in one place — photos, the real pros and cons, everyone's vote, and where each one stands from first viewing to offer.",
+        "emoji": "🏠",
+        "accent": "#059669",
+        "collections": [
+          {
+            "id": "listings",
+            "label": "Listings",
+            "singular": "listing",
+            "fields": [
+              { "key": "title", "label": "Address / nickname", "type": "text", "required": true },
+              { "key": "price", "label": "Price", "type": "text" },
+              { "key": "link", "label": "Listing link", "type": "text" },
+              { "key": "proscons", "label": "Pros & cons", "type": "textarea" },
+              { "key": "tags", "label": "Tags (garden, near school, fixer-upper)", "type": "tags" },
+              { "key": "photo", "label": "Photo", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          { "type": "votes", "collection": "listings", "onePerMember": true },
+          {
+            "type": "status",
+            "collection": "listings",
+            "values": [
+              { "id": "toview", "label": "To view" },
+              { "id": "booked", "label": "Viewing booked" },
+              { "id": "offer", "label": "Offer made" },
+              { "id": "won", "label": "Ours?! 🎉" },
+              { "id": "rejected", "label": "Not this one" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
