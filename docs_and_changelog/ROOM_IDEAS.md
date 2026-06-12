@@ -60,13 +60,13 @@ _(empty)_
 - [x] **House Hunt** 🏠 — finding a home together: listings with photos/price/link, pros & cons, votes, pipeline To view → Viewing booked → Offer made → Ours?!/Not this one · declarative · 2026-06-12. Pure catalog entry.
 - [x] **Symptom Diary** 🩺 — patient + partner log symptoms with color-coded severity 1–5, triggers/notes, day-grouped history showing who observed what · builtin · 2026-06-12. The doctor-prep record; E2E-maximal data.
 - [x] **Guest List** 💌 — hosts' guest list: +1s, dietary tags, tables, pipeline To invite → Invited → Coming/Can't come · declarative · 2026-06-12. Pure catalog entry; the hosts' counterpart to Who's In?.
+- [x] **Street Notice** 🏘️ — a street's noticeboard: heads-ups, offers, asks, lost & found with photos; Active → Sorted ✓ · declarative · 2026-06-12. Pure catalog entry.
 
 ## Candidates (pick the highest value ÷ effort)
 
 
 - [ ] **Team Snacks** ⚽ — kids' sports team parents: who brings snacks/washes kit each match, fairness rotation. Builtin (fairness brick) or declarative claim.
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
-- [ ] **Street Notice** 🏘️ — a street's noticeboard: heads-ups (water shutoff, lost cat), offers, asks. Declarative (records + tags + author footer).
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 - [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).
 - [ ] **Stage Crew** 🎭 — amateur theater production: props checklist with claims + costumes/scenes notes. Declarative (two collections).

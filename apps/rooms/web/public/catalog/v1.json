@@ -1187,6 +1187,48 @@
           }
         ]
       }
+    },
+    {
+      "id": "street-notice",
+      "name": "Street Notice",
+      "description": "Your street's noticeboard — heads-ups, offers, asks, lost & found.",
+      "emoji": "🏘️",
+      "accent": "#b45309",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "street-notice",
+        "name": "Street Notice",
+        "description": "The noticeboard your street never had — water's off Tuesday, free moving boxes, has anyone seen the orange cat?",
+        "emoji": "🏘️",
+        "accent": "#b45309",
+        "collections": [
+          {
+            "id": "notices",
+            "label": "Notices",
+            "singular": "notice",
+            "fields": [
+              { "key": "title", "label": "Notice", "type": "text", "required": true },
+              { "key": "details", "label": "Details", "type": "textarea" },
+              { "key": "kind", "label": "Type (heads-up, offer, ask, lost & found)", "type": "tags" },
+              { "key": "photo", "label": "Photo", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "notices",
+            "values": [
+              { "id": "active", "label": "Active" },
+              { "id": "sorted", "label": "Sorted ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
