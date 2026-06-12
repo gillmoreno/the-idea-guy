@@ -719,6 +719,70 @@
           }
         ]
       }
+    },
+    {
+      "id": "house-manual",
+      "name": "House Manual",
+      "description": "Host + cleaner HQ for a rental — supplies running low, issues with photos.",
+      "emoji": "🏡",
+      "accent": "#65a30d",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "house-manual",
+        "name": "House Manual",
+        "description": "Run a rental together — flag supplies before they run out and log issues with a photo, so nothing gets lost between turnovers.",
+        "emoji": "🏡",
+        "accent": "#65a30d",
+        "collections": [
+          {
+            "id": "supplies",
+            "label": "Supplies",
+            "singular": "supply",
+            "fields": [
+              { "key": "title", "label": "Supply", "type": "text", "required": true },
+              { "key": "where", "label": "Where it lives", "type": "text" },
+              { "key": "notes", "label": "Notes (brand, how many)", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          },
+          {
+            "id": "issues",
+            "label": "Issues & notes",
+            "singular": "issue",
+            "fields": [
+              { "key": "title", "label": "What happened", "type": "text", "required": true },
+              { "key": "details", "label": "Details", "type": "textarea" },
+              { "key": "photo", "label": "Photo", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "supplies",
+            "values": [
+              { "id": "stocked", "label": "Stocked" },
+              { "id": "low", "label": "Running low" },
+              { "id": "restocking", "label": "I'll restock" }
+            ],
+            "setBy": "member"
+          },
+          {
+            "type": "status",
+            "collection": "issues",
+            "values": [
+              { "id": "open", "label": "Open" },
+              { "id": "handling", "label": "I'm on it" },
+              { "id": "fixed", "label": "Fixed ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }

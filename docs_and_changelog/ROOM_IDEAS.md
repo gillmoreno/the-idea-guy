@@ -43,12 +43,12 @@ _(empty)_
 - [x] **Wedding Crew** 💍 — wedding-party HQ: claimable tasks ("I've got it") + shared day-of timeline · declarative · 2026-06-12. Pure catalog entry (two collections + claim status).
 - [x] **Meal Train** 🍲 — post the nights a family needs dinner, friends claim "I'm bringing dinner", mark delivered · declarative · 2026-06-12. Pure catalog entry (claim status + attribution).
 - [x] **Tournament Bracket** 🏆 — knockout night: shuffle-seed a bracket from selected players, tap winners (tap again to undo), byes auto-advance, champion banner + hall of champions · builtin · 2026-06-12. Bracket math is pure functions over a CRDT results map (`templates/bracket/lib/bracket.ts`) — unit-sanity-checked with byes.
+- [x] **House Manual** 🏡 — host + co-host/cleaner HQ: supplies board (Stocked → Running low → I'll restock) + photo issue log (Open → I'm on it → Fixed) · declarative · 2026-06-12. Pure catalog entry (two collections, two status flows).
 
 ## Candidates (pick the highest value ÷ effort)
 
 - [ ] **Secret Santa** 🎁 — draw names privately, wishlists, budget. Builtin (private assignment needs crypto/per-member secrets).
 - [ ] **Emergency Vault** 🚨 — family's critical info in one E2E place: doctors, policy numbers, allergies, blood types. Declarative (records; E2E is the whole point).
-- [ ] **House Manual** 🏡 — Airbnb host + co-host/cleaner: turnover checklist, supplies running low, guest notes. Declarative (two collections).
 - [ ] **Team Snacks** ⚽ — kids' sports team parents: who brings snacks/washes kit each match, fairness rotation. Builtin (fairness brick) or declarative claim.
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
 - [ ] **Street Notice** 🏘️ — a street's noticeboard: heads-ups (water shutoff, lost cat), offers, asks. Declarative (records + tags + author footer).
