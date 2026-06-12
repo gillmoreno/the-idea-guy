@@ -68,6 +68,9 @@ const SupperClubApp = lazy(() =>
 const SymptomDiaryApp = lazy(() =>
   import("./symptomdiary/SymptomDiaryApp").then((m) => ({ default: m.SymptomDiaryApp })),
 );
+const ScorePadApp = lazy(() =>
+  import("./scorepad/ScorePadApp").then((m) => ({ default: m.ScorePadApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -129,6 +132,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return SupperClubApp;
       case "symptomdiary":
         return SymptomDiaryApp;
+      case "scorepad":
+        return ScorePadApp;
       default:
         return null;
     }

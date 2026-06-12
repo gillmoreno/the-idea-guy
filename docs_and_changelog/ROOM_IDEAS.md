@@ -61,6 +61,7 @@ _(empty)_
 - [x] **Symptom Diary** 🩺 — patient + partner log symptoms with color-coded severity 1–5, triggers/notes, day-grouped history showing who observed what · builtin · 2026-06-12. The doctor-prep record; E2E-maximal data.
 - [x] **Guest List** 💌 — hosts' guest list: +1s, dietary tags, tables, pipeline To invite → Invited → Coming/Can't come · declarative · 2026-06-12. Pure catalog entry; the hosts' counterpart to Who's In?.
 - [x] **Street Notice** 🏘️ — a street's noticeboard: heads-ups, offers, asks, lost & found with photos; Active → Sorted ✓ · declarative · 2026-06-12. Pure catalog entry.
+- [x] **Score Pad** 🃏 — one phone scores the whole table: named players (AddPersonByName), round-by-round scoring, live totals with 👑 leader, lowest-wins support, hall of champions · builtin · 2026-06-12. First room built solo-first from scratch (named players + RoomExplainer + teaching empty states).
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -70,6 +71,8 @@ _(empty)_
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 - [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).
 - [ ] **Stage Crew** 🎭 — amateur theater production: props checklist with claims + costumes/scenes notes. Declarative (two collections).
+- [ ] **Reading Log** 📚 — school reading log for a kid: either parent logs minutes/books, streaks, ready for the teacher. Builtin-lite (event log + named kid).
+- [ ] **Practice Log** 🎻 — instrument/sport practice: log sessions & minutes, streaks, parent + kid + teacher all see the same record. Builtin-lite (event log).
 - [ ] **Garage Sale Crew** 🏷️ — neighbors run a joint yard sale: items with prices & photos, mark sold, whose-item attribution for payouts. Declarative (status + image).
 
 ## Parked

@@ -47,6 +47,7 @@ const PLACEHOLDERS: Record<string, string> = {
   sitcoop: "Elm St sitting co-op",
   supperclub: "First Saturday club",
   symptomdiary: "Gil",
+  scorepad: "Friday cards",
 };
 
 export default function CreatePage() {

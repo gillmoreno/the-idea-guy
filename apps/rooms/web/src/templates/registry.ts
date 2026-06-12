@@ -21,7 +21,8 @@ export type BuiltinTemplateId =
   | "groupfund"
   | "sitcoop"
   | "supperclub"
-  | "symptomdiary";
+  | "symptomdiary"
+  | "scorepad";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -191,6 +192,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "The record the doctor asks for — symptoms, severity, who noticed what.",
     emoji: "🩺📓",
     accent: "#0f766e",
+  },
+  {
+    kind: "builtin",
+    id: "scorepad",
+    name: "Score Pad",
+    description: "The games table's score sheet — one phone scores everyone, round by round.",
+    emoji: "🃏✏️",
+    accent: "#7c2d12",
   },
   {
     kind: "builtin",
