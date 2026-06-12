@@ -69,6 +69,7 @@ export function RecordCard({
   statusValues,
   status,
   statusBy,
+  createdBy,
   onStatusChange,
 }: {
   record: SchemaRecord;
@@ -81,6 +82,7 @@ export function RecordCard({
   statusValues: { id: string; label: string }[];
   status?: string;
   statusBy?: SchemaMember | null;
+  createdBy?: SchemaMember | null;
   onStatusChange: (status: string) => void;
 }) {
   const titleKey = titleField(collection)?.key ?? "title";
@@ -150,6 +152,17 @@ export function RecordCard({
           />
           {statusBy.name}
           {record.statusAt ? ` · ${formatRelativeTime(record.statusAt)}` : null}
+        </p>
+      )}
+
+      {createdBy && (
+        <p className="schema-record__created-by">
+          <span
+            className="schema-record__status-by-dot"
+            style={{ background: createdBy.color }}
+            aria-hidden
+          />
+          Added by {createdBy.name} · {formatRelativeTime(record.createdAt)}
         </p>
       )}
     </article>

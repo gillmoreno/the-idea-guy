@@ -1370,6 +1370,14 @@ textarea.input {
   border-radius: 50%;
   flex-shrink: 0;
 }
+.schema-record__created-by {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
 /* ---------- emoji picker (shared) ---------- */
 .emoji-picker {
   position: relative;

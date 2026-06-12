@@ -450,6 +450,48 @@
           }
         ]
       }
+    },
+    {
+      "id": "babysitter-handoff",
+      "name": "Babysitter Handoff",
+      "description": "Instructions and a day log between parents and sitter — private to your circle.",
+      "emoji": "👶",
+      "accent": "#7c3aed",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "babysitter-handoff",
+        "name": "Babysitter Handoff",
+        "description": "Everything the sitter needs in one place — bedtime, allergies, emergency contacts — plus a running log of how the day went.",
+        "emoji": "👶",
+        "accent": "#7c3aed",
+        "collections": [
+          {
+            "id": "instructions",
+            "label": "House notes",
+            "singular": "note",
+            "fields": [
+              { "key": "title", "label": "Topic", "type": "text", "required": true },
+              { "key": "details", "label": "Details", "type": "textarea", "required": true },
+              { "key": "tags", "label": "Tags", "type": "tags" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          },
+          {
+            "id": "log",
+            "label": "Day log",
+            "singular": "entry",
+            "fields": [
+              { "key": "title", "label": "What happened", "type": "text", "required": true },
+              { "key": "notes", "label": "Details", "type": "textarea" },
+              { "key": "photo", "label": "Photo", "type": "image" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ]
+      }
     }
   ]
 }
