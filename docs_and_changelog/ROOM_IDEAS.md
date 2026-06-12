@@ -47,10 +47,10 @@ _(empty)_
 - [x] **Emergency Vault** 🚨 — family's critical info: policies, doctors, allergies, document photos — no status flows, just E2E records with author footers · declarative · 2026-06-12. The platform's purest E2E showcase.
 - [x] **Shared Car Log** 🚙 — one shared car: one-tap "I've got the car" holder status, fill-ups with cost + odometer, service/repair notes with costs, day-grouped history, latest odometer at a glance · builtin · 2026-06-12.
 - [x] **Campaign Log** 🐉 — tabletop party HQ: adventure journal with maps/handout photos + party loot with "I'm carrying it" claims · declarative · 2026-06-12. Pure catalog entry (two collections + claim status).
+- [x] **Co-Parenting Hub** 👨‍👩‍👧 — two households, one calm place: "kids are with X today" banner, custody schedule via date-range stays (overlaps flagged ⚠️, not blocked — parents sort it out), shared updates feed · builtin · 2026-06-12. Composes cabincal date-ranges + carecircle notes.
 
 ## Candidates (pick the highest value ÷ effort)
 
-- [ ] **Secret Santa** 🎁 — draw names privately, wishlists, budget. Builtin (private assignment needs crypto/per-member secrets).
 - [ ] **Team Snacks** ⚽ — kids' sports team parents: who brings snacks/washes kit each match, fairness rotation. Builtin (fairness brick) or declarative claim.
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
 - [ ] **Street Notice** 🏘️ — a street's noticeboard: heads-ups (water shutoff, lost cat), offers, asks. Declarative (records + tags + author footer).
@@ -61,4 +61,4 @@ _(empty)_
 
 ## Parked
 
-_(none yet — when an idea is rejected, move it here with one line on why)_
+- **Secret Santa** 🎁 — parked 2026-06-12: rooms share one encryption key, so every member can read all room data; truly private assignments need per-member encryption channels that room-kit doesn't have. Revisit if/when room-kit grows per-member secrets.

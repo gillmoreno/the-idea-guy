@@ -16,7 +16,8 @@ export type BuiltinTemplateId =
   | "carecircle"
   | "cabincal"
   | "bracket"
-  | "carlog";
+  | "carlog"
+  | "coparent";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -146,6 +147,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "One shared car — who has it, fill-ups, odometer, service history.",
     emoji: "🚙🔑",
     accent: "#475569",
+  },
+  {
+    kind: "builtin",
+    id: "coparent",
+    name: "Co-Parenting Hub",
+    description: "Two households, one calm place — who has the kids when, plus updates.",
+    emoji: "👨‍👩‍👧🗓️",
+    accent: "#0369a1",
   },
   {
     kind: "builtin",

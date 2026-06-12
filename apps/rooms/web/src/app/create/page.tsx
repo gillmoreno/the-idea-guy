@@ -42,6 +42,7 @@ const PLACEHOLDERS: Record<string, string> = {
   cabincal: "The cabin",
   bracket: "FIFA night",
   carlog: "The Corolla",
+  coparent: "Emma & Noah",
 };
 
 export default function CreatePage() {

@@ -52,6 +52,9 @@ const BracketApp = lazy(() =>
 const CarLogApp = lazy(() =>
   import("./carlog/CarLogApp").then((m) => ({ default: m.CarLogApp })),
 );
+const CoParentApp = lazy(() =>
+  import("./coparent/CoParentApp").then((m) => ({ default: m.CoParentApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -103,6 +106,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return BracketApp;
       case "carlog":
         return CarLogApp;
+      case "coparent":
+        return CoParentApp;
       default:
         return null;
     }
