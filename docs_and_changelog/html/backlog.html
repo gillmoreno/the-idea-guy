@@ -53,8 +53,9 @@
         </table>
         <div class="card">
           <strong>House rule: ship beats features</strong>
-          None of the three apps is online. Until something is deployed, every feature's real-world
-          Reach is zero — so deploys dominate the Now tier even where a feature has a juicier score on paper.
+          Rooms is live at rooms.the-idea-guy.com; the website and Second Brain are not. For the
+          undeployed apps every feature's real-world Reach is still zero — so their deploys dominate
+          the Now tier even where a feature has a juicier score on paper.
         </div>
 
         <h2>Scored backlog</h2>
@@ -65,6 +66,14 @@
           </tr>
           <tr>
             <td>1</td>
+            <td><strong>N=1 solo-usability sweep</strong> — create every room alone and verify the core action is reachable with no other member; wire in the AddPersonByName participants brick (shipped with Bracket/Trip Split) or teaching empty states wherever a room assumes invitees</td>
+            <td>Rooms</td>
+            <td class="num">9</td><td class="num">2</td><td class="num">0.9</td><td class="num">1</td>
+            <td class="num"><span class="score">16.2</span></td>
+            <td><span class="tier tier-now">Now</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
             <td><strong>Ship the website</strong> — deploy the marketing site (static export already builds; Cloudflare Pages playbook exists)</td>
             <td>Website</td>
             <td class="num">8</td><td class="num">2</td><td class="num">0.9</td><td class="num">1</td>
@@ -72,23 +81,7 @@
             <td><span class="tier tier-now">Now</span></td>
           </tr>
           <tr>
-            <td>2</td>
-            <td><strong>Onboarding &amp; PWA install polish</strong> — install prompt, first-run hints, empty states in Rooms</td>
-            <td>Rooms</td>
-            <td class="num">8</td><td class="num">1</td><td class="num">0.8</td><td class="num">0.5</td>
-            <td class="num"><span class="score">12.8</span></td>
-            <td><span class="tier tier-now">Now</span></td>
-          </tr>
-          <tr>
             <td>3</td>
-            <td><strong>Ship Rooms</strong> — PWA on a real domain + relay in production (compaction on, backups), invite links that work outside localhost</td>
-            <td>Rooms</td>
-            <td class="num">9</td><td class="num">3</td><td class="num">0.8</td><td class="num">2</td>
-            <td class="num"><span class="score">10.8</span></td>
-            <td><span class="tier tier-now">Now</span></td>
-          </tr>
-          <tr>
-            <td>4</td>
             <td><strong>Relay lazy-load + idle eviction + abuse caps</strong> — load rooms on connect, evict idle ones (self-healing via checkpoints), add per-IP rate limits and blob/room caps; the #1 cost lever and a launch gate before anything can go viral</td>
             <td>Rooms</td>
             <td class="num">9</td><td class="num">2</td><td class="num">0.9</td><td class="num">1.5</td>
@@ -96,7 +89,7 @@
             <td><span class="tier tier-now">Now</span></td>
           </tr>
           <tr>
-            <td>5</td>
+            <td>4</td>
             <td><strong>In-app "speak it into existence"</strong> — stateless AI generation proxy (platform key, no DB) + type-a-sentence → schema appears live → create → share; replaces copy-paste-to-ChatGPT as the front door and gates the public launch</td>
             <td>Rooms</td>
             <td class="num">8</td><td class="num">3</td><td class="num">0.8</td><td class="num">2</td>
@@ -104,7 +97,7 @@
             <td><span class="tier tier-now">Now</span></td>
           </tr>
           <tr>
-            <td>6</td>
+            <td>5</td>
             <td><strong>Threat model doc (published)</strong> — formal adversary profiles (relay operator, network observer, ex-member, device thief) + honest limitations, as a public HTML page; the main trust asset for the local-first/privacy launch audience</td>
             <td>Rooms</td>
             <td class="num">5</td><td class="num">1</td><td class="num">0.9</td><td class="num">0.5</td>
@@ -112,15 +105,7 @@
             <td><span class="tier tier-now">Now</span></td>
           </tr>
           <tr>
-            <td>7</td>
-            <td><strong>Roommate Ledger template</strong> — household bills, the most-voted seeded idea; reuses Trip Split math</td>
-            <td>Rooms</td>
-            <td class="num">6</td><td class="num">2</td><td class="num">0.8</td><td class="num">2</td>
-            <td class="num"><span class="score">4.8</span></td>
-            <td><span class="tier tier-next">Next</span></td>
-          </tr>
-          <tr>
-            <td>8</td>
+            <td>6</td>
             <td><strong>Public showcase Backlog room</strong> — read-only room code on the website; public roadmap people can vote on</td>
             <td>Website + Rooms</td>
             <td class="num">6</td><td class="num">1</td><td class="num">0.7</td><td class="num">1</td>
@@ -128,7 +113,7 @@
             <td><span class="tier tier-next">Next</span></td>
           </tr>
           <tr>
-            <td>9</td>
+            <td>7</td>
             <td><strong>How-to guides section</strong> — teaching content on the website (roadmap item #4 in IDEA_LOG_AND_TOOLS)</td>
             <td>Website</td>
             <td class="num">5</td><td class="num">1</td><td class="num">0.8</td><td class="num">1</td>
@@ -136,7 +121,7 @@
             <td><span class="tier tier-next">Next</span></td>
           </tr>
           <tr>
-            <td>10</td>
+            <td>8</td>
             <td><strong>Ship Second Brain</strong> — deploy as a personal instance + public demo vault (relay :4501 hosted)</td>
             <td>Second Brain</td>
             <td class="num">5</td><td class="num">2</td><td class="num">0.7</td><td class="num">2</td>
@@ -144,7 +129,7 @@
             <td><span class="tier tier-next">Next</span></td>
           </tr>
           <tr>
-            <td>11</td>
+            <td>9</td>
             <td><strong>Push notifications</strong> — replace pull-only "Updated" badges with real push for room changes (service worker + push relay endpoint)</td>
             <td>Rooms</td>
             <td class="num">7</td><td class="num">2</td><td class="num">0.5</td><td class="num">3</td>
@@ -152,23 +137,7 @@
             <td><span class="tier tier-later">Later</span></td>
           </tr>
           <tr>
-            <td>12</td>
-            <td><strong>Potluck template</strong> — who brings what, dietary tags, headcount (seeded idea)</td>
-            <td>Rooms</td>
-            <td class="num">4</td><td class="num">1</td><td class="num">0.8</td><td class="num">1.5</td>
-            <td class="num"><span class="score">2.1</span></td>
-            <td><span class="tier tier-later">Later</span></td>
-          </tr>
-          <tr>
-            <td>13</td>
-            <td><strong>Watch Club template</strong> — Book Club for TV: series, episodes, queue (seeded idea)</td>
-            <td>Rooms</td>
-            <td class="num">5</td><td class="num">1</td><td class="num">0.8</td><td class="num">2</td>
-            <td class="num"><span class="score">2.0</span></td>
-            <td><span class="tier tier-later">Later</span></td>
-          </tr>
-          <tr>
-            <td>14</td>
+            <td>10</td>
             <td><strong>Idea Validator demo</strong> — interactive widget on the website (roadmap item #5 in IDEA_LOG_AND_TOOLS)</td>
             <td>Website</td>
             <td class="num">4</td><td class="num">1</td><td class="num">0.6</td><td class="num">2</td>
@@ -197,7 +166,7 @@
           <li>When an idea ships, remove its row and note it in the matching doc page instead.</li>
         </ul>
 
-        <p class="footer">Sources: <code>docs_and_changelog/BACKLOG.md, docs_and_changelog/IDEA_LOG_AND_TOOLS.md, docs_and_changelog/business-plan-and-next-steps.html</code> · Last synced 2026-06-10</p>
+        <p class="footer">Sources: <code>docs_and_changelog/BACKLOG.md, docs_and_changelog/IDEA_LOG_AND_TOOLS.md, docs_and_changelog/business-plan-and-next-steps.html</code> · Last synced 2026-06-12</p>
       </article>
     </main>
   </div>
