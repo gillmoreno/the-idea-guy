@@ -5,6 +5,7 @@ import { PersonaContactsProvider } from "@/shell/PersonaContactsProvider";
 import { ThemeProvider } from "@/shell/ThemeProvider";
 import { VaultLockProvider } from "@/shell/VaultLockProvider";
 import { ServiceWorker } from "@/templates/choreboard/components/ServiceWorker";
+import { SplashScreen } from "@/shell/SplashScreen";
 
 export const metadata: Metadata = {
   title: "Rooms — local-first for small groups",
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </DeviceProvider>
           </VaultLockProvider>
         </ThemeProvider>
+        <SplashScreen />
         <ServiceWorker />
       </body>
     </html>

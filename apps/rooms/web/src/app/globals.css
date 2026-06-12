@@ -2033,3 +2033,78 @@ textarea.input {
     transform: none;
   }
 }
+
+/* ---------- Installed-app launch splash ---------- */
+/* Hidden in browser tabs; standalone (home-screen) launches get the branded
+   cover. Base state is fully visible so a disabled animation still shows the
+   logo, never a blank indigo screen. */
+.app-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: #4f46e5;
+  pointer-events: none;
+}
+
+@media (display-mode: standalone) {
+  .app-splash {
+    display: flex;
+  }
+}
+
+.app-splash.app-splash-out {
+  opacity: 0;
+  transition: opacity 0.38s ease;
+}
+
+.app-splash .splash-tile {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: splash-tile-in 0.5s cubic-bezier(0.34, 1.45, 0.64, 1) backwards;
+}
+
+.app-splash .splash-tile:nth-child(2) {
+  animation-delay: 0.09s;
+}
+.app-splash .splash-tile:nth-child(3) {
+  animation-delay: 0.18s;
+}
+.app-splash .splash-tile:nth-child(4) {
+  animation-delay: 0.27s;
+}
+
+.app-splash .splash-name {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-indent: 0.32em; /* recenter: tracking adds space after the last glyph */
+  text-transform: uppercase;
+  animation: splash-name-in 0.6s ease 0.5s backwards;
+}
+
+@keyframes splash-tile-in {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes splash-name-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-splash .splash-tile,
+  .app-splash .splash-name {
+    animation: none !important;
+  }
+}
