@@ -62,11 +62,11 @@ _(empty)_
 - [x] **Guest List** 💌 — hosts' guest list: +1s, dietary tags, tables, pipeline To invite → Invited → Coming/Can't come · declarative · 2026-06-12. Pure catalog entry; the hosts' counterpart to Who's In?.
 - [x] **Street Notice** 🏘️ — a street's noticeboard: heads-ups, offers, asks, lost & found with photos; Active → Sorted ✓ · declarative · 2026-06-12. Pure catalog entry.
 - [x] **Score Pad** 🃏 — one phone scores the whole table: named players (AddPersonByName), round-by-round scoring, live totals with 👑 leader, lowest-wins support, hall of champions · builtin · 2026-06-12. First room built solo-first from scratch (named players + RoomExplainer + teaching empty states).
+- [x] **Team Snacks** ⚽ — team-parents duty board: per match, who brings snacks and who washes the kit, assignable by name · declarative · 2026-06-12. New engine brick: **`person` field type** — member picker + inline AddPersonByName in forms, name-chip rendering on cards (graceful raw-text fallback for old engines/preview); Lend & Borrow's "Who has it" converted from free text (clears one of the 7 backlogged who-fields).
 
 ## Candidates (pick the highest value ÷ effort)
 
 
-- [ ] **Team Snacks** ⚽ — kids' sports team parents: who brings snacks/washes kit each match, fairness rotation. Builtin (fairness brick) or declarative claim.
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 - [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).

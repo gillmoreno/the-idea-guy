@@ -12,8 +12,37 @@ function fieldValue(record: SchemaRecord, key: string): string {
   return typeof v === "string" ? v : "";
 }
 
-function FieldBody({ field, value }: { field: FieldDef; value: string }) {
+function FieldBody({
+  field,
+  value,
+  members,
+}: {
+  field: FieldDef;
+  value: string;
+  members?: SchemaMember[];
+}) {
   if (!value) return null;
+
+  if (field.type === "person") {
+    const member = members?.find((m) => m.id === value);
+    return (
+      <p className="schema-record__meta schema-record__person">
+        <span className="schema-record__meta-label">{field.label}</span>{" "}
+        {member ? (
+          <>
+            <span
+              className="schema-record__status-by-dot"
+              style={{ background: member.color }}
+              aria-hidden
+            />{" "}
+            {member.name}
+          </>
+        ) : (
+          value
+        )}
+      </p>
+    );
+  }
 
   if (field.type === "textarea") {
     return <p className="schema-record__body schema-record__pitch">{value}</p>;
@@ -70,6 +99,7 @@ export function RecordCard({
   status,
   statusBy,
   createdBy,
+  members,
   onStatusChange,
 }: {
   record: SchemaRecord;
@@ -83,6 +113,8 @@ export function RecordCard({
   status?: string;
   statusBy?: SchemaMember | null;
   createdBy?: SchemaMember | null;
+  /** Room members for resolving person fields; optional (preview renders without). */
+  members?: SchemaMember[];
   onStatusChange: (status: string) => void;
 }) {
   const titleKey = titleField(collection)?.key ?? "title";
@@ -117,7 +149,7 @@ export function RecordCard({
       </header>
 
       {bodies.map((f) => (
-        <FieldBody key={f.key} field={f} value={fieldValue(record, f.key)} />
+        <FieldBody key={f.key} field={f} value={fieldValue(record, f.key)} members={members} />
       ))}
 
       {canSetStatus && statusValues.length > 0 && (

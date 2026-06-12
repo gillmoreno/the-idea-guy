@@ -160,6 +160,7 @@ export function CollectionView({
           status={rec.status}
           statusBy={rec.statusById ? store.getMember(rec.statusById) : null}
           createdBy={store.getMember(rec.createdById)}
+          members={store.listMembers()}
           onStatusChange={(s) => store.setRecordStatus(collectionId, rec.id, s, memberId)}
         />
       ))}

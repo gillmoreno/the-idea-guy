@@ -237,7 +237,7 @@
             "singular": "item",
             "fields": [
               { "key": "title", "label": "Item", "type": "text", "required": true },
-              { "key": "who", "label": "Who has it", "type": "text", "required": true },
+              { "key": "who", "label": "Who has it", "type": "person", "required": true },
               { "key": "due", "label": "Due back", "type": "text" },
               { "key": "notes", "label": "Notes", "type": "textarea" }
             ],
@@ -1224,6 +1224,48 @@
             "values": [
               { "id": "active", "label": "Active" },
               { "id": "sorted", "label": "Sorted ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
+    },
+    {
+      "id": "team-snacks",
+      "name": "Team Snacks",
+      "description": "The team-parents duty board — who brings snacks, who washes the kit.",
+      "emoji": "⚽",
+      "accent": "#16a34a",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "team-snacks",
+        "name": "Team Snacks",
+        "description": "One board for the season — every match with who's on oranges and who takes the kit home, assignable by name before anyone else installs anything.",
+        "emoji": "⚽",
+        "accent": "#16a34a",
+        "collections": [
+          {
+            "id": "matches",
+            "label": "Matches",
+            "singular": "match",
+            "fields": [
+              { "key": "title", "label": "Match / day", "type": "text", "required": true },
+              { "key": "snacks", "label": "Snacks", "type": "person" },
+              { "key": "kit", "label": "Kit wash", "type": "person" },
+              { "key": "notes", "label": "Notes", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "matches",
+            "values": [
+              { "id": "upcoming", "label": "Upcoming" },
+              { "id": "played", "label": "Played ✓" }
             ],
             "setBy": "member"
           }

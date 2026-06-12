@@ -10,7 +10,7 @@ export const CURRENT_SCHEMA_VERSION = 1;
 export const CURRENT_ENGINE_VERSION = 1;
 
 /** Built-in field bricks — extend over time; unknown types render as read-only text. */
-export type KnownFieldType = "text" | "textarea" | "tags" | "emoji" | "image";
+export type KnownFieldType = "text" | "textarea" | "tags" | "emoji" | "image" | "person";
 
 export interface FieldDef {
   key: string;
