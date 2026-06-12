@@ -913,6 +913,69 @@
           }
         ]
       }
+    },
+    {
+      "id": "study-crew",
+      "name": "Study Crew",
+      "description": "Exam prep together — vote on the scary topics, claim summaries, track open questions.",
+      "emoji": "📖",
+      "accent": "#4338ca",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "study-crew",
+        "name": "Study Crew",
+        "description": "Divide and conquer the syllabus — vote on what needs covering most, claim \"I'll summarize it\", and keep a list of questions to chase down.",
+        "emoji": "📖",
+        "accent": "#4338ca",
+        "collections": [
+          {
+            "id": "topics",
+            "label": "Topics",
+            "singular": "topic",
+            "fields": [
+              { "key": "title", "label": "Topic", "type": "text", "required": true },
+              { "key": "source", "label": "Where it's covered (chapter, lecture)", "type": "text" },
+              { "key": "notes", "label": "Notes / link to summary", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          },
+          {
+            "id": "questions",
+            "label": "Open questions",
+            "singular": "question",
+            "fields": [
+              { "key": "title", "label": "Question", "type": "text", "required": true },
+              { "key": "details", "label": "Context / where the answer ended up", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          { "type": "votes", "collection": "topics", "onePerMember": true },
+          {
+            "type": "status",
+            "collection": "topics",
+            "values": [
+              { "id": "todo", "label": "Needs a summary" },
+              { "id": "claimed", "label": "I'll summarize it" },
+              { "id": "done", "label": "Summarized ✓" }
+            ],
+            "setBy": "member"
+          },
+          {
+            "type": "status",
+            "collection": "questions",
+            "values": [
+              { "id": "open", "label": "Open" },
+              { "id": "answered", "label": "Got the answer ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }

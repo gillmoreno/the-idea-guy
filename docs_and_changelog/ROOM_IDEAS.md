@@ -51,6 +51,7 @@ _(empty)_
 - [x] **Kid Expenses — Co-Parenting Hub "Money" tab** 💶 — **user-requested** (Gil's real Excel): per-line ÷2 (shared) / ÷1 (other owes all) splits, month navigation, per-parent counted totals → expenses net → fixed monthly support (amount + direction + currency in config) → one final "X pays Y €Z", one-tap month settled (+ reopen) · builtin upgrade · 2026-06-12. Close math verified against the original spreadsheet (223.75 / 539.86 → net 316.11).
 - [x] **Setlist** 🎵 — band/choir song pipeline: propose, vote, track Proposed → Rehearsing → Performance-ready · declarative · 2026-06-12. Pure catalog entry (votes + member status).
 - [x] **Group Fund** 💰 — pool money toward a shared target: chip in with a note, animated progress bar (open-ended funds supported), per-saver leaderboard, history with self-correction · builtin · 2026-06-12. First *pooling* money room (vs splitting).
+- [x] **Study Crew** 📖 — exam prep: vote on the scariest topics, claim "I'll summarize it", open-questions tracker (Open → Got the answer) · declarative · 2026-06-12. Pure catalog entry (two collections, votes + dual status).
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -60,7 +61,6 @@ _(empty)_
 - [ ] **Street Notice** 🏘️ — a street's noticeboard: heads-ups (water shutoff, lost cat), offers, asks. Declarative (records + tags + author footer).
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 - [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).
-- [ ] **Study Crew** 📖 — exam prep group: topics list with "I'll summarize" claims, shared questions. Declarative (claim status).
 - [ ] **Supper Club** 🍷 — rotating dinner party: theme proposals + votes, who hosts next (fairness brick), past dinners log. Builtin composing existing bricks.
 - [ ] **Babysitting Co-op** 👶 — neighborhood parents trade sitting hours: log hours given/received, running balances. Builtin (hours economy, like a ledger in time).
 
