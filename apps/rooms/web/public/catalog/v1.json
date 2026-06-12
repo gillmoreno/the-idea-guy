@@ -622,6 +622,61 @@
           }
         ]
       }
+    },
+    {
+      "id": "wedding-crew",
+      "name": "Wedding Crew",
+      "description": "The wedding party's HQ — claim tasks, share the day-of timeline.",
+      "emoji": "💍",
+      "accent": "#f472b6",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "wedding-crew",
+        "name": "Wedding Crew",
+        "description": "Everything the wedding party owns in one place — who's got the rings, who picks up the flowers, and the timeline for the big day.",
+        "emoji": "💍",
+        "accent": "#f472b6",
+        "collections": [
+          {
+            "id": "tasks",
+            "label": "Crew tasks",
+            "singular": "task",
+            "fields": [
+              { "key": "title", "label": "Task", "type": "text", "required": true },
+              { "key": "due", "label": "Needed by", "type": "text" },
+              { "key": "notes", "label": "Details", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          },
+          {
+            "id": "timeline",
+            "label": "Day-of timeline",
+            "singular": "moment",
+            "fields": [
+              { "key": "title", "label": "Moment", "type": "text", "required": true },
+              { "key": "time", "label": "Time", "type": "text" },
+              { "key": "where", "label": "Where", "type": "text" },
+              { "key": "notes", "label": "Notes", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "tasks",
+            "values": [
+              { "id": "open", "label": "Up for grabs" },
+              { "id": "claimed", "label": "I've got it" },
+              { "id": "done", "label": "Done ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
