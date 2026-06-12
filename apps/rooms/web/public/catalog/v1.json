@@ -492,6 +492,49 @@
           }
         ]
       }
+    },
+    {
+      "id": "meal-week",
+      "name": "Meal Week",
+      "description": "Plan the week's dinners together — propose, vote, claim the cooking.",
+      "emoji": "🍽️",
+      "accent": "#ea580c",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "meal-week",
+        "name": "Meal Week",
+        "description": "Propose dinners for the week, vote on what sounds good, and claim who cooks each one.",
+        "emoji": "🍽️",
+        "accent": "#ea580c",
+        "collections": [
+          {
+            "id": "meals",
+            "label": "This week's dinners",
+            "singular": "meal",
+            "fields": [
+              { "key": "title", "label": "Meal", "type": "text", "required": true },
+              { "key": "day", "label": "Day", "type": "tags" },
+              { "key": "shopping", "label": "Shopping notes", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          { "type": "votes", "collection": "meals", "onePerMember": true },
+          {
+            "type": "status",
+            "collection": "meals",
+            "values": [
+              { "id": "proposed", "label": "Proposed" },
+              { "id": "cooking", "label": "I'll cook it" },
+              { "id": "cooked", "label": "Cooked ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
