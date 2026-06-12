@@ -36,6 +36,7 @@ _(empty)_
 - [x] **Meal Week** 🍽️ — propose the week's dinners, vote, claim "I'll cook it", mark cooked · declarative · 2026-06-12. Pure catalog entry (votes + claim status + day tags).
 - [x] **Carpool Rota** 🚗 — whose turn to drive: one-tap drive logging, fairness counter; "next up" derives from fewest-drives (tie → longest since last drive), so swaps need no mechanics — log reality and the rota self-corrects · builtin · 2026-06-12.
 - [x] **Game Night** 🎲 — running scoreboard across game nights: log game + winners, standings with 🔥 win streaks, "who hosts next" via fairness rotation · builtin · 2026-06-12. New shared brick: **`src/lib/fairness.ts`** — generic fewest-events rotation extracted from carpool (both templates now share it).
+- [x] **Shift Swap** 🔄 — post a shift you can't make, teammate claims "I'll cover it", mark covered; trade/sweetener field; author + claimer both visible via engine bricks · declarative · 2026-06-12. Pure catalog entry.
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -44,6 +45,10 @@ _(empty)_
 - [ ] **Cabin Calendar** 🏔️ — co-owned vacation home: claim weekends/weeks, see who's up next, no double-booking. Builtin (date-range claims).
 - [ ] **Emergency Vault** 🚨 — family's critical info in one E2E place: doctors, policy numbers, allergies, blood types. Declarative (records; E2E is the whole point).
 - [ ] **Freezer Stash** 🧊 — household freezer/pantry inventory: what's in there, use-by, claim "I'll cook it". Declarative (status).
+- [ ] **House Manual** 🏡 — Airbnb host + co-host/cleaner: turnover checklist, supplies running low, guest notes. Declarative (two collections).
+- [ ] **Team Snacks** ⚽ — kids' sports team parents: who brings snacks/washes kit each match, fairness rotation. Builtin (fairness brick) or declarative claim.
+- [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
+- [ ] **Wedding Crew** 💍 — wedding party coordination: tasks, who-brings, day-of timeline. Declarative (two collections + claim status).
 
 ## Parked
 

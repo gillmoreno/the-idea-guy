@@ -535,6 +535,49 @@
           }
         ]
       }
+    },
+    {
+      "id": "shift-swap",
+      "name": "Shift Swap",
+      "description": "Can't make your shift? Post it — a teammate claims it. No group-chat chaos.",
+      "emoji": "🔄",
+      "accent": "#0891b2",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "shift-swap",
+        "name": "Shift Swap",
+        "description": "Post shifts you need covered and claim ones you can take — who posted, who's covering, all in one place.",
+        "emoji": "🔄",
+        "accent": "#0891b2",
+        "collections": [
+          {
+            "id": "shifts",
+            "label": "Shifts needing cover",
+            "singular": "shift",
+            "fields": [
+              { "key": "title", "label": "Shift", "type": "text", "required": true },
+              { "key": "role", "label": "Role / station", "type": "text" },
+              { "key": "reward", "label": "Trade / sweetener", "type": "text" },
+              { "key": "notes", "label": "Notes", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "shifts",
+            "values": [
+              { "id": "open", "label": "Needs cover" },
+              { "id": "claimed", "label": "I'll cover it" },
+              { "id": "covered", "label": "Covered ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
