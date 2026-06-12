@@ -35,6 +35,7 @@ const PLACEHOLDERS: Record<string, string> = {
   fitcrew: "Saturday Run Club",
   roomledger: "Maple St flat",
   whosin: "Sunday football",
+  doselog: "Max",
 };
 
 export default function CreatePage() {

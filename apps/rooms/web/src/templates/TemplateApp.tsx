@@ -31,6 +31,9 @@ const RoomLedgerApp = lazy(() =>
 const WhosInApp = lazy(() =>
   import("./whosin/WhosInApp").then((m) => ({ default: m.WhosInApp })),
 );
+const DoseLogApp = lazy(() =>
+  import("./doselog/DoseLogApp").then((m) => ({ default: m.DoseLogApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -68,6 +71,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return RoomLedgerApp;
       case "whosin":
         return WhosInApp;
+      case "doselog":
+        return DoseLogApp;
       default:
         return null;
     }

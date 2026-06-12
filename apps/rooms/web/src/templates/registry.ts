@@ -9,7 +9,8 @@ export type BuiltinTemplateId =
   | "backlog"
   | "fitcrew"
   | "roomledger"
-  | "whosin";
+  | "whosin"
+  | "doselog";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -83,6 +84,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "Recurring event headcount — RSVP per date, capacity, waitlist.",
     emoji: "🙋📅",
     accent: "#0284c7",
+  },
+  {
+    kind: "builtin",
+    id: "doselog",
+    name: "Dose Log",
+    description: "Shared medication log — who gave what, when. No double doses.",
+    emoji: "💊🕐",
+    accent: "#dc2626",
   },
   {
     kind: "builtin",
