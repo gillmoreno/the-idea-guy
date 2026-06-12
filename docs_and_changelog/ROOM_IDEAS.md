@@ -42,6 +42,7 @@ _(empty)_
 - [x] **Cabin Calendar** 🏔️ — co-owned place: claim date ranges, clash blocking on add + ⚠️ red border on double-booked entries (offline CRDT races surface visibly), per-owner nights tally, "Free up" own bookings · builtin · 2026-06-12.
 - [x] **Wedding Crew** 💍 — wedding-party HQ: claimable tasks ("I've got it") + shared day-of timeline · declarative · 2026-06-12. Pure catalog entry (two collections + claim status).
 - [x] **Meal Train** 🍲 — post the nights a family needs dinner, friends claim "I'm bringing dinner", mark delivered · declarative · 2026-06-12. Pure catalog entry (claim status + attribution).
+- [x] **Tournament Bracket** 🏆 — knockout night: shuffle-seed a bracket from selected players, tap winners (tap again to undo), byes auto-advance, champion banner + hall of champions · builtin · 2026-06-12. Bracket math is pure functions over a CRDT results map (`templates/bracket/lib/bracket.ts`) — unit-sanity-checked with byes.
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -52,7 +53,6 @@ _(empty)_
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
 - [ ] **Street Notice** 🏘️ — a street's noticeboard: heads-ups (water shutoff, lost cat), offers, asks. Declarative (records + tags + author footer).
 - [ ] **Shared Car Log** 🚙 — household shared car: fuel fill-ups, odometer, maintenance due, who's got it today. Builtin (event log + reminders-by-eyeball).
-- [ ] **Tournament Bracket** 🏆 — one-off knockout among friends (FIFA night, ping-pong): seed players, report results, bracket advances. Builtin (bracket logic).
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 
 ## Parked

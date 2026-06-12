@@ -46,6 +46,9 @@ const CareCircleApp = lazy(() =>
 const CabinCalApp = lazy(() =>
   import("./cabincal/CabinCalApp").then((m) => ({ default: m.CabinCalApp })),
 );
+const BracketApp = lazy(() =>
+  import("./bracket/BracketApp").then((m) => ({ default: m.BracketApp })),
+);
 
 function UnknownTemplate({ templateId }: { templateId: string }) {
   return (
@@ -93,6 +96,8 @@ function BuiltinLoader({ templateId }: { templateId: string }) {
         return CareCircleApp;
       case "cabincal":
         return CabinCalApp;
+      case "bracket":
+        return BracketApp;
       default:
         return null;
     }

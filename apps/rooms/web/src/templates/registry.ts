@@ -14,7 +14,8 @@ export type BuiltinTemplateId =
   | "carpool"
   | "gamenight"
   | "carecircle"
-  | "cabincal";
+  | "cabincal"
+  | "bracket";
 
 export interface BuiltinTemplateDef {
   kind: "builtin";
@@ -128,6 +129,14 @@ export const BUILTIN_TEMPLATES: BuiltinTemplateDef[] = [
     description: "Shared cabin, boat, or caravan — claim dates, no clashes, fair nights.",
     emoji: "🏔️🗓️",
     accent: "#0e7490",
+  },
+  {
+    kind: "builtin",
+    id: "bracket",
+    name: "Tournament Bracket",
+    description: "Knockout night — seed a bracket, tap winners, crown a champion.",
+    emoji: "🏆🎮",
+    accent: "#ca8a04",
   },
   {
     kind: "builtin",

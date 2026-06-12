@@ -40,6 +40,7 @@ const PLACEHOLDERS: Record<string, string> = {
   gamenight: "Friday game night",
   carecircle: "Mum",
   cabincal: "The cabin",
+  bracket: "FIFA night",
 };
 
 export default function CreatePage() {
