@@ -39,6 +39,7 @@ const PLACEHOLDERS: Record<string, string> = {
   carpool: "School run",
   gamenight: "Friday game night",
   carecircle: "Mum",
+  cabincal: "The cabin",
 };
 
 export default function CreatePage() {
