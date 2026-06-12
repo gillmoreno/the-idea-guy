@@ -41,6 +41,7 @@ _(empty)_
 - [x] **Freezer Stash** 🧊 — freezer/pantry inventory: what's in there, use-by, photo for mystery containers, claim "I'll use it" · declarative · 2026-06-12. Pure catalog entry; completes the household food loop with Grocery Run + Meal Week.
 - [x] **Cabin Calendar** 🏔️ — co-owned place: claim date ranges, clash blocking on add + ⚠️ red border on double-booked entries (offline CRDT races surface visibly), per-owner nights tally, "Free up" own bookings · builtin · 2026-06-12.
 - [x] **Wedding Crew** 💍 — wedding-party HQ: claimable tasks ("I've got it") + shared day-of timeline · declarative · 2026-06-12. Pure catalog entry (two collections + claim status).
+- [x] **Meal Train** 🍲 — post the nights a family needs dinner, friends claim "I'm bringing dinner", mark delivered · declarative · 2026-06-12. Pure catalog entry (claim status + attribution).
 
 ## Candidates (pick the highest value ÷ effort)
 
@@ -49,6 +50,10 @@ _(empty)_
 - [ ] **House Manual** 🏡 — Airbnb host + co-host/cleaner: turnover checklist, supplies running low, guest notes. Declarative (two collections).
 - [ ] **Team Snacks** ⚽ — kids' sports team parents: who brings snacks/washes kit each match, fairness rotation. Builtin (fairness brick) or declarative claim.
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
+- [ ] **Street Notice** 🏘️ — a street's noticeboard: heads-ups (water shutoff, lost cat), offers, asks. Declarative (records + tags + author footer).
+- [ ] **Shared Car Log** 🚙 — household shared car: fuel fill-ups, odometer, maintenance due, who's got it today. Builtin (event log + reminders-by-eyeball).
+- [ ] **Tournament Bracket** 🏆 — one-off knockout among friends (FIFA night, ping-pong): seed players, report results, bracket advances. Builtin (bracket logic).
+- [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
 
 ## Parked
 

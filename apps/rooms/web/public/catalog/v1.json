@@ -677,6 +677,48 @@
           }
         ]
       }
+    },
+    {
+      "id": "meal-train",
+      "name": "Meal Train",
+      "description": "Friends bringing meals to a family — claim a night, no doubled lasagnas.",
+      "emoji": "🍲",
+      "accent": "#d97706",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 1,
+        "id": "meal-train",
+        "name": "Meal Train",
+        "description": "New baby, illness, or a hard season — post the nights a family needs dinner and let friends claim them. Private to the circle.",
+        "emoji": "🍲",
+        "accent": "#d97706",
+        "collections": [
+          {
+            "id": "nights",
+            "label": "Dinner nights",
+            "singular": "night",
+            "fields": [
+              { "key": "title", "label": "Date", "type": "text", "required": true },
+              { "key": "meal", "label": "What you're bringing", "type": "text" },
+              { "key": "notes", "label": "Drop-off & dietary notes", "type": "textarea" }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "status",
+            "collection": "nights",
+            "values": [
+              { "id": "open", "label": "Needs a meal" },
+              { "id": "claimed", "label": "I'm bringing dinner" },
+              { "id": "delivered", "label": "Delivered ✓" }
+            ],
+            "setBy": "member"
+          }
+        ]
+      }
     }
   ]
 }
