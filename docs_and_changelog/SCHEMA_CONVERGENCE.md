@@ -29,10 +29,16 @@ makes the two-worlds problem worse, not better.
 
 ## Ground rules (decided 2026-06-13)
 
+- **Parallel-run, never kill-on-faith (strangler-fig).** A port does **not** replace the
+  built-in in the same run. The new declarative version ships **alongside** the bespoke one
+  as a separate creatable template (distinct id), so both are live at once and can be
+  compared side by side. **Flip only after you confirm parity** — repointing the canonical
+  id / retiring the bespoke is a separate, deliberate step (batched into the final removal
+  pass, or done per-app once signed off). So per-run the work is purely **additive**: new
+  engine types + a new catalog entry, zero risk to the live bespoke room.
 - **All existing rooms are disposable** (pre-release; one real room — the trip — with
-  ~5 data points). **No on-device CRDT migration adapters.** A port = author schema →
-  verify parity → flip the registry to the engine → (dead bespoke code removed in the
-  final cleanup pass).
+  ~5 data points). **No on-device CRDT migration adapters** — but the **Export brick (E0)
+  is the safety net**, and parallel-run means you never lose the old app while testing the new.
 - **Prerequisite before deleting *any* built-in: the Export brick must ship.** A
   room-data **Export to JSON/CSV** so the few real data points survive. Export only —
   an import/recreate mechanism is **not** required. (See queue item E0.)
@@ -64,14 +70,19 @@ Pick **one** app from the queue and carry it to "live on the engine".
    guard in `schema/migrate.ts`; **reuse the kit** (`MoneyAmount`, `SplitView`,
    `PersonChip`, `RecordRow`, `allocateShares`, …) for rendering. Add a `/schema/preview`
    gallery fixture for every new type.
-5. **Author the schema.** Write the `RoomSchema` (collections, fields, features) and add
-   it to the catalog (`public/catalog/v1.json`). Validate (`validateRoomSchema`).
-6. **Parity check.** Render via the engine and walk the parity checklist row by row vs
-   the built-in. Anything the schema can't do → either grow the engine or note the
-   intentional difference. The app is portable only when parity holds.
-7. **Flip.** Point the template id at the declarative engine (registry / `TemplateApp.tsx`).
-   Leave the now-dead bespoke code on disk (removed in the final pass) — keeps each run
-   small and the live app on exactly one implementation.
+5. **Author the schema — alongside, not instead.** Write the `RoomSchema` and add it to
+   the catalog (`public/catalog/v1.json`) under a **distinct id** so it coexists with the
+   bespoke builtin (e.g. bespoke keeps `tripsplit`; the schema entry is `tripsplit-x` /
+   name "Trip Split (new engine)"). Validate (`validateRoomSchema`). Do **not** touch the
+   registry/`TemplateApp` switch — the old app stays untouched and live.
+6. **Parity check (parallel run).** Create **one of each** — the bespoke room and the new
+   schema room — and walk the parity checklist row by row, side by side. Anything the
+   schema can't do → grow the engine or note the accepted difference. Mark the app
+   **Awaiting sign-off** in the queue.
+7. **Flip — deferred, on confirmation only.** Do **not** flip in this run. Once parity is
+   signed off, a separate step repoints the canonical id to the schema and drops the
+   bespoke entry from the picker; the dead bespoke code is deleted in the final removal
+   pass. Until then, both apps stay live.
 8. **QA gate.** From `apps/rooms/web`: `npx tsc --noEmit`, `npm run build`,
    `npm run qa:schema-ui` (schema touched). Eyeball via `/run`: the ported room + one
    other declarative room. Fix until green.
@@ -96,7 +107,8 @@ An app is "ported" only when:
       `AddPersonByName`; records proxy-attributable, agency identity-bound
 - [ ] Empty/loading/unknown states present (engine defaults or schema-provided)
 - [ ] New engine types have `/schema/preview` fixtures + pass `qa:schema-ui` ×3 themes
-- [ ] Registry flipped to the engine; live app renders the schema version
+- [ ] Schema version live **alongside** the bespoke (distinct catalog id); registry untouched
+- [ ] Verified side-by-side; marked **Awaiting sign-off** (flip deferred to confirmed cutover)
 - [ ] `tsc` + `build` clean; committed, deployed
 - [ ] Ledger updated
 

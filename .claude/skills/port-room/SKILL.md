@@ -26,9 +26,13 @@ template makes the two-worlds problem worse.
 ## Ground rules
 
 - **master only** — no branches/worktrees. One app per run. Never leave the tree red.
-- **All rooms disposable** (pre-release) → **no CRDT migration adapters**: port = author
-  schema → verify parity → flip registry. Dead bespoke code is removed in the final pass,
-  not per-run.
+- **Parallel-run (strangler-fig), never kill-on-faith.** Ship the declarative version
+  **alongside** the bespoke one (distinct catalog id) so both are live and comparable.
+  **Flip only after the user signs off on parity** — repointing the canonical id / retiring
+  the bespoke is a separate deliberate step. Per-run work is therefore purely **additive**
+  (new engine types + new catalog entry); the live built-in is never touched.
+- **All rooms disposable** (pre-release) → **no CRDT migration adapters**; the Export brick
+  (E0) + parallel-run are the safety net. Dead bespoke code is removed in the final pass.
 - **Export brick (item E0) must ship before *any* built-in is deleted** — the data safety
   net. Don't start the final removal pass without it.
 - **Additive & forward-compat:** new engine types must be ignorable by old rooms
@@ -60,19 +64,23 @@ For each field/feature the app needs that the engine lacks: add the type to
 `schema/migrate.ts`. **Compose kit bricks** for the visuals. Add a `/schema/preview`
 gallery fixture for every new type so `qa:schema-ui` covers it.
 
-### 4. Author the schema
-Write the `RoomSchema` (collections / fields / features), add it to `public/catalog/v1.json`,
-and confirm `validateRoomSchema` accepts it (invalid schemas are dropped silently).
+### 4. Author the schema — alongside, not instead
+Write the `RoomSchema` and add it to `public/catalog/v1.json` under a **distinct id** so it
+coexists with the bespoke builtin (e.g. bespoke keeps `tripsplit`; schema entry is
+`tripsplit-x` / "Trip Split (new engine)"). Confirm `validateRoomSchema` accepts it (invalid
+schemas are dropped silently). **Do not touch the registry/`TemplateApp` switch** — the old
+app stays live and untouched.
 
-### 5. Parity check
-Render via the engine; walk the checklist row by row against the built-in. Solo-first must
-hold (creator reaches the core action alone; `AddPersonByName`; proxy records, agency
-identity-bound). Any gap → grow the engine or record an accepted difference.
+### 5. Parity check (parallel run)
+Create **one of each** (bespoke + new schema room) and walk the checklist side by side.
+Solo-first must hold (creator reaches the core action alone; `AddPersonByName`; proxy
+records, agency identity-bound). Any gap → grow the engine or record an accepted difference.
+Mark the app **Awaiting sign-off** in the ledger.
 
-### 6. Flip the registry
-Point the template id at the declarative engine (`templates/registry.ts` /
-`TemplateApp.tsx`) so the live room renders the schema. **Leave the bespoke code on disk**
-— it's removed in the final pass. The live app must be on exactly one implementation.
+### 6. Do NOT flip — defer the cutover
+The flip (repoint the canonical id, drop the bespoke from the picker) happens in a separate
+step **only after the user confirms parity**; the bespoke code is deleted in the final pass.
+A port run ends with both apps live. Never replace the built-in on the same run.
 
 ### 7. QA gate (do not deploy red)
 From `apps/rooms/web`: `npx tsc --noEmit`, `npm run build`, and `npm run qa:schema-ui`
@@ -81,7 +89,7 @@ room. Fix until green.
 
 ### 8. Record, commit, deploy
 1. Update `SCHEMA_CONVERGENCE.md`: mark the app ported, fill the engine-capability ledger.
-2. Commit: `[port-room] <App>: ported to schema · +<engine types> · flipped registry`.
+2. Commit: `[port-room] <App>: schema version alongside builtin · +<engine types>`.
 3. Deploy `./deploy/rooms/redeploy.sh` from repo root; verify the healthz line.
 4. Docs: `html-docs` for the schema-engine/affected pages if budget; else leave the
    reminder — never skip deploy to write docs.
