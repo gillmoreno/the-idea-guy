@@ -4,7 +4,7 @@ import { formatMoney } from "@/templates/choreboard/lib/format";
 import { computeBalances, simplifyDebts } from "@/lib/splitMath";
 import type { LedgerEntry, Roommate } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";
-import { Avatar, EmptyState, MoneyAmount } from "@/components/kit";
+import { Avatar, EmptyState, MoneyAmount, RecordRow, StatCard } from "@/components/kit";
 
 export function BalancesPanel({
   roommates,
@@ -29,15 +29,11 @@ export function BalancesPanel({
 
   return (
     <div className="stack">
-      <div className="card stack">
-        <div className="section-title">Household total</div>
-        <div style={{ fontSize: 28, fontWeight: 700 }}>
-          {formatMoney(totalSpentCents / 100, currency)}
-        </div>
-        <p className="meta-line">
-          Shared spending so far — settle-ups not counted.
-        </p>
-      </div>
+      <StatCard
+        label="Household total"
+        value={formatMoney(totalSpentCents / 100, currency)}
+        sub="Shared spending so far — settle-ups not counted."
+      />
 
       <div className="section-title">Balances</div>
       {balances.every((b) => b.netCents === 0) ? (
@@ -50,16 +46,13 @@ export function BalancesPanel({
               const r = byId.get(b.memberId);
               if (!r) return null;
               return (
-                <div key={b.memberId} className="card row gap-sm">
-                  <Avatar person={r} />
-                  <div style={{ flex: 1 }}>
-                    <strong>{r.name}</strong>
-                    <div className="meta-line">
-                      {b.netCents > 0 ? "gets back" : "owes"}
-                    </div>
-                  </div>
-                  <MoneyAmount cents={Math.abs(b.netCents)} currency={currency} />
-                </div>
+                <RecordRow
+                  key={b.memberId}
+                  leading={<Avatar person={r} />}
+                  title={r.name}
+                  meta={b.netCents > 0 ? "gets back" : "owes"}
+                  trailing={<MoneyAmount cents={b.netCents} currency={currency} />}
+                />
               );
             })}
         </div>

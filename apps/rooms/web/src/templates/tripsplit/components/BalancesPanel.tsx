@@ -3,7 +3,7 @@
 import { formatMoney } from "@/templates/choreboard/lib/format";
 import { computeBalances, simplifyDebts } from "../lib/balances";
 import type { Expense, Traveler } from "../lib/types";
-import { EmptyState, Avatar, MoneyAmount } from "@/components/kit";
+import { Avatar, EmptyState, MoneyAmount, RecordRow, StatCard } from "@/components/kit";
 
 export function BalancesPanel({
   travelers,
@@ -23,15 +23,11 @@ export function BalancesPanel({
 
   return (
     <div className="stack">
-      <div className="card stack">
-        <div className="section-title">Trip total</div>
-        <div style={{ fontSize: 28, fontWeight: 700 }}>
-          {formatMoney(totalSpentCents / 100, currency)}
-        </div>
-        <p className="meta-line">
-          Across {expenses.length} expense{expenses.length === 1 ? "" : "s"}
-        </p>
-      </div>
+      <StatCard
+        label="Trip total"
+        value={formatMoney(totalSpentCents / 100, currency)}
+        sub={`Across ${expenses.length} expense${expenses.length === 1 ? "" : "s"}`}
+      />
 
       <div className="section-title">Balances</div>
       {balances.every((b) => b.netCents === 0) ? (
@@ -44,16 +40,13 @@ export function BalancesPanel({
               const t = byId.get(b.memberId);
               if (!t) return null;
               return (
-                <div key={b.memberId} className="card row gap-sm">
-                  <Avatar person={t} />
-                  <div style={{ flex: 1 }}>
-                    <strong>{t.name}</strong>
-                    <div className="meta-line">
-                      {b.netCents > 0 ? "gets back" : "owes"}
-                    </div>
-                  </div>
-                  <MoneyAmount cents={Math.abs(b.netCents)} currency={currency} />
-                </div>
+                <RecordRow
+                  key={b.memberId}
+                  leading={<Avatar person={t} />}
+                  title={t.name}
+                  meta={b.netCents > 0 ? "gets back" : "owes"}
+                  trailing={<MoneyAmount cents={b.netCents} currency={currency} />}
+                />
               );
             })}
         </div>

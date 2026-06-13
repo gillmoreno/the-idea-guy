@@ -12,3 +12,4 @@ export { PersonChip } from "./PersonChip";
 export { RecordRow } from "./RecordRow";
 export { MetaLine } from "./MetaLine";
 export { SplitView } from "./SplitView";
+export { StatCard } from "./StatCard";

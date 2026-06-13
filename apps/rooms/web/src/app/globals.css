@@ -363,6 +363,14 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
+/* StatCard — headline summary stat (kit/StatCard.tsx) */
+.stat-card__value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
