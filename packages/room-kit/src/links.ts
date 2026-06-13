@@ -21,9 +21,17 @@ export function contactAddUrl(contactCard: string): string {
   return `${appOrigin()}/contacts#${contactCard.trim()}`;
 }
 
-/** Open an existing room — room code in hash only. */
+/** Open an existing room — internal navigation only, room code in hash.
+ *  Returns a RELATIVE path so Next.js does a soft client-side navigation that keeps the
+ *  hash intact; an absolute same-origin URL can be treated as external and hard-reload,
+ *  which both flashes the page and risks dropping the hash mid-navigation. For a
+ *  shareable/QR link use memberJoinUrl/adminJoinUrl (those are absolute by design). */
 export function roomUrl(roomCode: string): string {
-  return hashLink("/room", { c: roomCode.trim() });
+  const c = roomCode.trim();
+  if (!c) return "/room";
+  const sp = new URLSearchParams();
+  sp.set("c", c);
+  return `/room#${sp.toString()}`;
 }
 
 export interface JoinUrlOptions {

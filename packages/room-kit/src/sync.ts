@@ -13,6 +13,8 @@ import { encodeCompactedState } from "./compactDoc";
 
 const REMOTE_ORIGIN = "remote";
 const SYNC_END_FALLBACK_MS = 1500;
+const RECONNECT_BASE_MS = 1000;
+const RECONNECT_MAX_MS = 30000;
 
 export interface CompactResult {
   before: number;
@@ -56,6 +58,8 @@ export class LocalFirstDoc {
   private key: CryptoKey | null = null;
   private room: string | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private reconnectAttempts = 0;
+  private networkBound = false;
   private syncEndFallbackTimer: ReturnType<typeof setTimeout> | null = null;
   private destroyed = false;
   private checkpointSent = false;
@@ -103,7 +107,47 @@ export class LocalFirstDoc {
 
     await this.initPersistence(`${this.appId}:${this.scope}:${this.room}`);
     if (this.destroyed) return;
+    this.bindNetworkListeners();
     this.connect();
+  }
+
+  /** Wake a reconnect the instant the tab regains connectivity / visibility, instead of
+   *  waiting out the backoff timer. No-op if a live socket already exists. */
+  private reconnectNow = () => {
+    if (this.destroyed || !this.room) return;
+    if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+    if (
+      this.ws &&
+      (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
+    }
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.reconnectAttempts = 0;
+    this.connect();
+  };
+
+  private handleVisibility = () => {
+    if (typeof document !== "undefined" && document.visibilityState === "visible") {
+      this.reconnectNow();
+    }
+  };
+
+  private bindNetworkListeners() {
+    if (this.networkBound || typeof window === "undefined") return;
+    this.networkBound = true;
+    window.addEventListener("online", this.reconnectNow);
+    window.addEventListener("visibilitychange", this.handleVisibility);
+  }
+
+  private unbindNetworkListeners() {
+    if (!this.networkBound || typeof window === "undefined") return;
+    this.networkBound = false;
+    window.removeEventListener("online", this.reconnectNow);
+    window.removeEventListener("visibilitychange", this.handleVisibility);
   }
 
   private async initPersistence(dbName: string, attempt = 0): Promise<void> {
@@ -149,6 +193,7 @@ export class LocalFirstDoc {
     this.checkpointSent = false;
 
     ws.onopen = () => {
+      this.reconnectAttempts = 0;
       this.setState({ connected: true });
       if (this.syncEndFallbackTimer) clearTimeout(this.syncEndFallbackTimer);
       this.syncEndFallbackTimer = setTimeout(() => {
@@ -170,10 +215,19 @@ export class LocalFirstDoc {
 
   private scheduleReconnect() {
     if (this.destroyed || this.reconnectTimer) return;
+    // Offline: don't burn doomed connects on a fixed timer — the "online" listener wakes
+    // us the instant connectivity returns.
+    if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+    // Exponential backoff with full jitter: a relay restart that drops every client at
+    // once must not trigger a synchronized reconnect storm 2s later. Capped so a long
+    // outage still retries promptly once.
+    const ceiling = Math.min(RECONNECT_MAX_MS, RECONNECT_BASE_MS * 2 ** this.reconnectAttempts);
+    const delay = Math.round(ceiling / 2 + Math.random() * (ceiling / 2));
+    this.reconnectAttempts++;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       this.connect();
-    }, 2000);
+    }, delay);
   }
 
   private handleLocalUpdate = (update: Uint8Array, origin: unknown) => {
@@ -274,6 +328,7 @@ export class LocalFirstDoc {
 
   destroy() {
     this.destroyed = true;
+    this.unbindNetworkListeners();
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
     if (this.syncEndFallbackTimer) clearTimeout(this.syncEndFallbackTimer);
     this.unbindDoc(this._doc);
