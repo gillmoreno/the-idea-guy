@@ -14,7 +14,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import { AddPersonByName } from "@/shell/AddPersonByName";
 import { CARER_COLORS, type DoseEvent, type Med } from "../lib/types";
 import { useDoseLogStore } from "../lib/useDoseLogStore";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 type Tab = "meds" | "history";
 
@@ -175,9 +175,9 @@ export function MainView({ memberId }: { memberId: string }) {
             )}
 
             {meds.length === 0 && !adding ? (
-              <div className="empty">
+              <EmptyState>
                 No medications yet. Add one — then logging a dose is a single tap.
-              </div>
+              </EmptyState>
             ) : (
               meds.map((med) => {
                 const last = store.lastEventForMed(med.id);
@@ -228,7 +228,7 @@ export function MainView({ memberId }: { memberId: string }) {
         {tab === "history" && (
           <>
             {events.length === 0 ? (
-              <div className="empty">No doses logged yet.</div>
+              <EmptyState>No doses logged yet.</EmptyState>
             ) : (
               eventsByDay.map(([label, dayEvents]) => (
                 <div key={label} className="stack-sm">

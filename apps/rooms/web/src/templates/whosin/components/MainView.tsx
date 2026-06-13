@@ -17,7 +17,7 @@ import type { Occurrence, Player, Rsvp, RsvpStatus } from "../lib/types";
 import { PLAYER_COLORS } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useWhosInStore } from "../lib/useWhosInStore";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 type Tab = "next" | "history";
 
@@ -269,9 +269,9 @@ export function MainView({ memberId }: { memberId: string }) {
               </>
             ) : (
               <>
-                <div className="empty">
+                <EmptyState>
                   No date planned. Add the next one — everyone gets to RSVP.
-                </div>
+                </EmptyState>
                 <AddOccurrence memberId={memberId} />
               </>
             )}
@@ -281,7 +281,7 @@ export function MainView({ memberId }: { memberId: string }) {
         {tab === "history" && (
           <>
             {past.length === 0 ? (
-              <div className="empty">No past dates yet.</div>
+              <EmptyState>No past dates yet.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {past.map((o) => {

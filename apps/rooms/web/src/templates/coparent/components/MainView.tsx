@@ -17,7 +17,7 @@ import type { Parent, Stay } from "../lib/types";
 import { PARENT_COLORS, overlappingStayIds, stayOn, staysOverlap } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useCoParentStore } from "../lib/useCoParentStore";
-import { Avatar, RecordRow } from "@/components/kit";
+import { EmptyState, Avatar, RecordRow } from "@/components/kit";
 import { MoneyTab } from "./MoneyTab";
 
 type Tab = "schedule" | "updates" | "money";
@@ -211,7 +211,7 @@ export function MainView({ memberId }: { memberId: string }) {
 
             <div className="section-title">Coming up</div>
             {upcoming.length === 0 ? (
-              <div className="empty">No days scheduled — each parent adds the days the kids are with them.</div>
+              <EmptyState>No days scheduled — each parent adds the days the kids are with them.</EmptyState>
             ) : (
               <div className="stack-sm">{upcoming.map(renderStay)}</div>
             )}
@@ -248,7 +248,7 @@ export function MainView({ memberId }: { memberId: string }) {
             </div>
 
             {updates.length === 0 ? (
-              <div className="empty">No updates yet — school news, health notes, handoff details.</div>
+              <EmptyState>No updates yet — school news, health notes, handoff details.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {updates.map((u) => {

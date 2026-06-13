@@ -14,7 +14,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { Book } from "../lib/types";
 import { useBookClubStore } from "../lib/useBookClubStore";
 import { AddBook } from "./AddBook";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 type Tab = "reading" | "queue" | "archive";
 
@@ -119,7 +119,7 @@ export function ClubView({ memberId }: { memberId: string }) {
               <AddBook memberId={memberId} startAsCurrent onDone={() => setAdding(null)} />
             ) : !current ? (
               <div className="stack">
-                <div className="empty">No book picked yet. Start one or promote from the queue.</div>
+                <EmptyState>No book picked yet. Start one or promote from the queue.</EmptyState>
                 <button className="btn btn-primary btn-block" onClick={() => setAdding("current")}>
                   + Pick a book to read
                 </button>
@@ -202,7 +202,7 @@ export function ClubView({ memberId }: { memberId: string }) {
               </button>
             )}
             {queue.length === 0 ? (
-              <div className="empty">Queue is empty. Anyone can suggest the next read.</div>
+              <EmptyState>Queue is empty. Anyone can suggest the next read.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {queue.map((book) => (
@@ -228,7 +228,7 @@ export function ClubView({ memberId }: { memberId: string }) {
         {tab === "archive" && (
           <>
             {archive.length === 0 ? (
-              <div className="empty">Finished books will show up here.</div>
+              <EmptyState>Finished books will show up here.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {archive.map((book) => (

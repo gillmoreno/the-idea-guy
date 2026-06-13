@@ -13,7 +13,7 @@ import { ACTIVITY_META } from "../lib/types";
 import { useFitCrewStore } from "../lib/useFitCrewStore";
 import { AddPrize } from "./AddPrize";
 import { LogWorkout } from "./LogWorkout";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 export function FitCrewView({ memberId }: { memberId: string }) {
   const { sync, leaveRoom, roomCode, version } = useRoomSession();
@@ -146,7 +146,7 @@ export function FitCrewView({ memberId }: { memberId: string }) {
         <div className="stack-sm">
           <div className="section-title">Recent activity</div>
           {logs.length === 0 ? (
-            <div className="empty">No workouts logged yet. Be the first.</div>
+            <EmptyState>No workouts logged yet. Be the first.</EmptyState>
           ) : (
             logs.map((log) => {
               const member = byId.get(log.memberId);

@@ -15,7 +15,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import { AddPersonByName } from "@/shell/AddPersonByName";
 import { CARER_COLORS, type Visit } from "../lib/types";
 import { useCareCircleStore } from "../lib/useCareCircleStore";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 type Tab = "visits" | "notes";
 
@@ -195,7 +195,7 @@ export function MainView({ memberId }: { memberId: string }) {
             </div>
 
             {notes.length === 0 ? (
-              <div className="empty">No updates yet — doctor visits, prescriptions, how they're doing.</div>
+              <EmptyState>No updates yet — doctor visits, prescriptions, how they're doing.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {notes.map((note) => {

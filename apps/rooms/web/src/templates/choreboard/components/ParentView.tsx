@@ -24,7 +24,7 @@ import { formatMoney, formatDate, weekdayName } from "@/templates/choreboard/lib
 import { TopbarPersona } from "@/shell/TopbarPersona";
 import { BottomNav, BottomNavItem } from "@/shell/BottomNav";
 import { CadencePill, DiffPill, SyncBadge } from "./ui";
-import { Avatar, MoneyAmount } from "@/components/kit";
+import { EmptyState, Avatar, MoneyAmount } from "@/components/kit";
 import { ChoreForm } from "./ChoreForm";
 import { ConfirmModal } from "@/components/ConfirmModal";
 
@@ -115,7 +115,7 @@ function HomeTab() {
             </div>
           </div>
         ))}
-        {kids.length === 0 && <div className="empty">Add kids in Settings to get started.</div>}
+        {kids.length === 0 && <EmptyState>Add kids in Settings to get started.</EmptyState>}
       </div>
     </>
   );
@@ -186,7 +186,7 @@ function ApprovalsTab({ byId }: { byId: string }) {
             </div>
           );
         })}
-        {pending.length === 0 && <div className="empty">Nothing waiting. All caught up! 🎉</div>}
+        {pending.length === 0 && <EmptyState>Nothing waiting. All caught up! 🎉</EmptyState>}
       </div>
 
       {proposed.length > 0 && (
@@ -290,7 +290,7 @@ function ChoresTab() {
             </div>
           ),
         )}
-        {chores.length === 0 && <div className="empty">No chores yet — add your first one.</div>}
+        {chores.length === 0 && <EmptyState>No chores yet — add your first one.</EmptyState>}
       </div>
     </>
   );
@@ -328,7 +328,7 @@ function PaydayTab({ byId }: { byId: string }) {
             </div>
           );
         })}
-        {kids.length === 0 && <div className="empty">No kids yet.</div>}
+        {kids.length === 0 && <EmptyState>No kids yet.</EmptyState>}
       </div>
 
       <div className="section-title">Payment history</div>
@@ -345,7 +345,7 @@ function PaydayTab({ byId }: { byId: string }) {
             </div>
           );
         })}
-        {payments.length === 0 && <div className="empty">No payments yet.</div>}
+        {payments.length === 0 && <EmptyState>No payments yet.</EmptyState>}
       </div>
     </>
   );

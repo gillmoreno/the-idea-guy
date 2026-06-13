@@ -11,7 +11,7 @@ import { CATEGORY_META, Category, Difficulty } from "@/templates/choreboard/lib/
 import { formatMoney, formatDate } from "@/templates/choreboard/lib/format";
 import { TopbarPersona } from "@/shell/TopbarPersona";
 import { CadencePill, DiffPill, SyncBadge } from "./ui";
-import { MoneyAmount } from "@/components/kit";
+import { EmptyState, MoneyAmount } from "@/components/kit";
 
 export function KidView({ memberId }: { memberId: string }) {
   const { sync, version } = useRoomSession();
@@ -121,7 +121,7 @@ export function KidView({ memberId }: { memberId: string }) {
             );
           })}
           {chores.length === 0 && (
-            <div className="empty">No chores yet — ask a parent to add some.</div>
+            <EmptyState>No chores yet — ask a parent to add some.</EmptyState>
           )}
         </div>
 
@@ -144,7 +144,7 @@ export function KidView({ memberId }: { memberId: string }) {
                 </div>
               ))}
               {myRecent.length === 0 && (
-                <div className="empty">Nothing yet. Tap ✓ on a chore!</div>
+                <EmptyState>Nothing yet. Tap ✓ on a chore!</EmptyState>
               )}
             </div>
           </>

@@ -14,7 +14,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { Drive } from "../lib/types";
 import { driveCounts, nextDriver } from "../lib/types";
 import { useCarpoolStore } from "../lib/useCarpoolStore";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 type Tab = "rota" | "history";
 
@@ -141,7 +141,7 @@ export function MainView({ memberId }: { memberId: string }) {
         {tab === "history" && (
           <>
             {drives.length === 0 ? (
-              <div className="empty">No drives logged yet.</div>
+              <EmptyState>No drives logged yet.</EmptyState>
             ) : (
               drivesByDay.map(([label, dayDrives]) => (
                 <div key={label} className="stack-sm">

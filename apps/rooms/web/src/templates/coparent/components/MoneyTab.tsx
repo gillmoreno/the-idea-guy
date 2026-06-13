@@ -13,7 +13,7 @@ import {
 } from "../lib/money";
 import { todayStr } from "../lib/store";
 import { useCoParentStore } from "../lib/useCoParentStore";
-import { Avatar, RecordRow } from "@/components/kit";
+import { EmptyState, Avatar, RecordRow } from "@/components/kit";
 
 function parseAmountToCents(raw: string): number | null {
   const trimmed = raw.trim().replace(/,/g, ".");
@@ -303,7 +303,7 @@ export function MoneyTab({ memberId }: { memberId: string }) {
       )}
 
       {monthExpenses.length === 0 ? (
-        <div className="empty">No expenses logged for {monthLabelOf(monthKey)} yet.</div>
+        <EmptyState>No expenses logged for {monthLabelOf(monthKey)} yet.</EmptyState>
       ) : (
         <div className="stack-sm">
           {monthExpenses.map((e) => {

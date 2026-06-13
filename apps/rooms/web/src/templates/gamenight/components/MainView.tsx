@@ -17,7 +17,7 @@ import type { Player } from "../lib/types";
 import { PLAYER_COLORS, computeStandings } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useGameNightStore } from "../lib/useGameNightStore";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 type Tab = "board" | "nights";
 
@@ -202,9 +202,9 @@ export function MainView({ memberId }: { memberId: string }) {
             )}
 
             {sessions.length === 0 ? (
-              <div className="empty">
+              <EmptyState>
                 No nights logged yet. Play something, then log it under Nights.
-              </div>
+              </EmptyState>
             ) : (
               <div className="stack-sm">
                 {standings.map((s, i) => (
@@ -242,7 +242,7 @@ export function MainView({ memberId }: { memberId: string }) {
             )}
 
             {sessions.length === 0 && !logging ? (
-              <div className="empty">No nights yet — log the first one.</div>
+              <EmptyState>No nights yet — log the first one.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {sessions.map((s) => {

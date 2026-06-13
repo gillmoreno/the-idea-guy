@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { useChoreStore } from "@/templates/choreboard/lib/useChoreStore";
 import { parseAppSearchParams, stripInviteParamsFromUrl } from "@the-idea-guy/room-kit";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 import {
   getMemberSecret,
   parseMemberLink,
@@ -111,7 +111,7 @@ export function ProfilePicker() {
           ))}
         </div>
         {members.length === 0 && (
-          <div className="empty">No members yet. A parent can add kids by name in Settings.</div>
+          <EmptyState>No members yet. A parent can add kids by name in Settings.</EmptyState>
         )}
       </div>
     </div>

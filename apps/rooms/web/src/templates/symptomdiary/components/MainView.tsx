@@ -12,6 +12,7 @@ import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
 import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { Entry } from "../lib/types";
+import { EmptyState } from "@/components/kit";
 import { SEVERITY_LABELS, severityColor } from "../lib/types";
 import { useSymptomDiaryStore } from "../lib/useSymptomDiaryStore";
 
@@ -180,7 +181,7 @@ export function MainView({ memberId }: { memberId: string }) {
         {tab === "history" && (
           <>
             {entries.length === 0 ? (
-              <div className="empty">Nothing logged yet — entries appear here, newest first.</div>
+              <EmptyState>Nothing logged yet — entries appear here, newest first.</EmptyState>
             ) : (
               entriesByDay.map(([label, dayEntries]) => (
                 <div key={label} className="stack-sm">

@@ -15,7 +15,7 @@ import { AddPersonByName } from "@/shell/AddPersonByName";
 import { PLAYER_COLORS, type Player, type Tournament } from "../lib/types";
 import { bracketRounds, champion, roundLabel } from "../lib/bracket";
 import { useBracketStore } from "../lib/useBracketStore";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 type Tab = "bracket" | "history";
 
@@ -232,11 +232,11 @@ export function MainView({ memberId }: { memberId: string }) {
             {!current || startingNew ? (
               <>
                 {!current && (
-                  <div className="empty">
+                  <EmptyState>
                     {players.length < 2
                       ? "A bracket needs at least 2 players — add them by name below. Nobody else needs the app."
                       : "No bracket yet — pick the players and start one."}
-                  </div>
+                  </EmptyState>
                 )}
                 <StartBracket players={players} memberId={memberId} />
                 {startingNew && (
@@ -272,7 +272,7 @@ export function MainView({ memberId }: { memberId: string }) {
         {tab === "history" && (
           <>
             {past.length === 0 && !currentChamp ? (
-              <div className="empty">No champions yet — finish a bracket first.</div>
+              <EmptyState>No champions yet — finish a bracket first.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {tournaments.map((t) => {

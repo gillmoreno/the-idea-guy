@@ -17,7 +17,7 @@ import type { Member } from "../lib/types";
 import { MEMBER_COLORS } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useSupperClubStore } from "../lib/useSupperClubStore";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 type Tab = "club" | "dinners";
 
@@ -183,7 +183,7 @@ export function MainView({ memberId }: { memberId: string }) {
             </div>
 
             {themes.length === 0 ? (
-              <div className="empty">No theme ideas yet — pitch the first one.</div>
+              <EmptyState>No theme ideas yet — pitch the first one.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {themes.map((t) => {
@@ -225,7 +225,7 @@ export function MainView({ memberId }: { memberId: string }) {
             )}
 
             {dinners.length === 0 && !logging ? (
-              <div className="empty">No dinners yet — host the first one and log it here.</div>
+              <EmptyState>No dinners yet — host the first one and log it here.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {dinners.map((d) => {

@@ -15,7 +15,7 @@ import { AddPersonByName } from "@/shell/AddPersonByName";
 import type { Game, Player } from "../lib/types";
 import { PLAYER_COLORS, gameLeaders, gameTotals } from "../lib/types";
 import { useScorePadStore } from "../lib/useScorePadStore";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 type Tab = "game" | "history";
 
@@ -293,9 +293,9 @@ export function MainView({ memberId }: { memberId: string }) {
                 )}
 
                 {store.listRounds(current.id).length === 0 && !scoring && (
-                  <div className="empty">
+                  <EmptyState>
                     No rounds yet — tap &quot;Score round 1&quot; when the first hand is done.
-                  </div>
+                  </EmptyState>
                 )}
               </>
             )}
@@ -305,7 +305,7 @@ export function MainView({ memberId }: { memberId: string }) {
         {tab === "history" && (
           <>
             {finished.length === 0 ? (
-              <div className="empty">Finished games land here with their champions.</div>
+              <EmptyState>Finished games land here with their champions.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {finished.map((game) => {

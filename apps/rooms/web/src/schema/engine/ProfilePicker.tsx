@@ -2,6 +2,7 @@
 
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { useSchemaStore } from "@/schema/useSchemaStore";
+import { EmptyState } from "@/components/kit";
 
 export function DeclarativeProfilePicker() {
   const { roomSchema, setCurrentMember } = useRoomSession();
@@ -19,7 +20,7 @@ export function DeclarativeProfilePicker() {
       <div className="app-main stack">
         <div className="section-title">Who are you?</div>
         {members.length === 0 ? (
-          <div className="empty">No members yet. The organizer can add them during setup.</div>
+          <EmptyState>No members yet. The organizer can add them during setup.</EmptyState>
         ) : (
           members.map((m) => (
             <button

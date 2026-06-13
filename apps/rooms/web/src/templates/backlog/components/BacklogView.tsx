@@ -12,6 +12,7 @@ import type { IdeaStatus } from "../lib/types";
 import { useBacklogStore } from "../lib/useBacklogStore";
 import { AddIdea } from "./AddIdea";
 import { StatusPill } from "./ui";
+import { EmptyState } from "@/components/kit";
 
 const STATUS_OPTIONS: IdeaStatus[] = ["proposed", "building", "shipped", "parked"];
 
@@ -54,7 +55,7 @@ export function BacklogView({ memberId }: { memberId: string }) {
         )}
 
         {ideas.length === 0 ? (
-          <div className="empty">No ideas yet. Be the first to propose one.</div>
+          <EmptyState>No ideas yet. Be the first to propose one.</EmptyState>
         ) : (
           <div className="stack-sm">
             {ideas.map((idea, index) => {

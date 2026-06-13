@@ -16,7 +16,7 @@ import type { Booking, Owner } from "../lib/types";
 import { OWNER_COLORS, bookingNights, bookingsOverlap, nightsByOwner, overlappingIds } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useCabinCalStore } from "../lib/useCabinCalStore";
-import { Avatar } from "@/components/kit";
+import { EmptyState, Avatar } from "@/components/kit";
 
 type Tab = "calendar" | "fairness";
 
@@ -191,7 +191,7 @@ export function MainView({ memberId }: { memberId: string }) {
 
             <div className="section-title">Coming up</div>
             {upcoming.length === 0 ? (
-              <div className="empty">Nothing booked — the place is free. Claim some dates.</div>
+              <EmptyState>Nothing booked — the place is free. Claim some dates.</EmptyState>
             ) : (
               <div className="stack-sm">{upcoming.map(renderBooking)}</div>
             )}

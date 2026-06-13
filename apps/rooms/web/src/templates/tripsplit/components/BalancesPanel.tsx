@@ -3,7 +3,7 @@
 import { formatMoney } from "@/templates/choreboard/lib/format";
 import { computeBalances, simplifyDebts } from "../lib/balances";
 import type { Expense, Traveler } from "../lib/types";
-import { Avatar, MoneyAmount } from "@/components/kit";
+import { EmptyState, Avatar, MoneyAmount } from "@/components/kit";
 
 export function BalancesPanel({
   travelers,
@@ -35,7 +35,7 @@ export function BalancesPanel({
 
       <div className="section-title">Balances</div>
       {balances.every((b) => b.netCents === 0) ? (
-        <div className="empty">Everyone is settled up.</div>
+        <EmptyState>Everyone is settled up.</EmptyState>
       ) : (
         <div className="stack-sm">
           {balances

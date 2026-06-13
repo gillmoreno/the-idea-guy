@@ -15,7 +15,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { CarEvent } from "../lib/types";
 import { latestOdometer } from "../lib/types";
 import { useCarLogStore } from "../lib/useCarLogStore";
-import { Avatar, MetaLine } from "@/components/kit";
+import { EmptyState, Avatar, MetaLine } from "@/components/kit";
 
 type Tab = "car" | "log";
 
@@ -283,7 +283,7 @@ export function MainView({ memberId }: { memberId: string }) {
         {tab === "log" && (
           <>
             {events.length === 0 ? (
-              <div className="empty">Nothing logged yet — fill-ups and services will show here.</div>
+              <EmptyState>Nothing logged yet — fill-ups and services will show here.</EmptyState>
             ) : (
               eventsByDay.map(([label, dayEvents]) => (
                 <div key={label} className="stack-sm">
