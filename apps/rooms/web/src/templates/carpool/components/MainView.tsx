@@ -14,7 +14,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { Drive } from "../lib/types";
 import { driveCounts, nextDriver } from "../lib/types";
 import { useCarpoolStore } from "../lib/useCarpoolStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "rota" | "history";
 
@@ -91,7 +91,7 @@ export function MainView({ memberId }: { memberId: string }) {
                   Next up
                 </div>
                 <div className="row gap-sm" style={{ justifyContent: "center", alignItems: "center" }}>
-                  <Avatar driver={next} large />
+                  <Avatar person={next} large />
                   <div style={{ fontSize: 24, fontWeight: 700 }}>
                     {next.id === memberId ? "Your turn" : `${next.name}'s turn`}
                   </div>
@@ -113,7 +113,7 @@ export function MainView({ memberId }: { memberId: string }) {
             <div className="stack-sm">
               {drivers.map((d) => (
                 <div key={d.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                  <Avatar driver={d} />
+                  <Avatar person={d} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <strong>{d.name}</strong>
                     {next?.id === d.id && (
@@ -150,7 +150,7 @@ export function MainView({ memberId }: { memberId: string }) {
                     const driver = byId.get(drive.driverId);
                     return (
                       <div key={drive.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                        {driver && <Avatar driver={driver} />}
+                        {driver && <Avatar person={driver} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <strong>{driver?.name ?? "Someone"} drove</strong>
                           <div className="muted" style={{ fontSize: 13 }}>

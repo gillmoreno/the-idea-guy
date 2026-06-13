@@ -4,7 +4,8 @@ import { formatMoney } from "@/templates/choreboard/lib/format";
 import { computeBalances, simplifyDebts } from "@/lib/splitMath";
 import type { LedgerEntry, Roommate } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";
-import { Avatar, MoneyCents } from "./ui";
+import { MoneyCents } from "./ui";
+import { Avatar } from "@/components/kit";
 
 export function BalancesPanel({
   roommates,
@@ -51,7 +52,7 @@ export function BalancesPanel({
               if (!r) return null;
               return (
                 <div key={b.memberId} className="card row gap-sm">
-                  <Avatar roommate={r} />
+                  <Avatar person={r} />
                   <div style={{ flex: 1 }}>
                     <strong>{r.name}</strong>
                     <div className="muted" style={{ fontSize: 13 }}>

@@ -15,7 +15,7 @@ import { AddPersonByName } from "@/shell/AddPersonByName";
 import { PLAYER_COLORS, type Player, type Tournament } from "../lib/types";
 import { bracketRounds, champion, roundLabel } from "../lib/bracket";
 import { useBracketStore } from "../lib/useBracketStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "bracket" | "history";
 
@@ -67,7 +67,7 @@ function StartBracket({ players, memberId }: { players: Player[]; memberId: stri
         {players.map((p) => (
           <label key={p.id} className="row gap-sm" style={{ cursor: "pointer", alignItems: "center" }}>
             <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggle(p.id)} />
-            <Avatar player={p} />
+            <Avatar person={p} />
             <span>{p.name}</span>
           </label>
         ))}
@@ -136,7 +136,7 @@ function BracketView({
           else if (isWinner) store.reportResult(tournament.id, match.key, null);
         }}
       >
-        {player && <Avatar player={player} />}
+        {player && <Avatar person={player} />}
         <span style={{ flex: 1, minWidth: 0, fontWeight: isWinner ? 700 : 400 }}>
           {player?.name ?? "?"}
         </span>

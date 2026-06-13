@@ -16,7 +16,7 @@ import type { Family } from "../lib/types";
 import { FAMILY_COLORS, formatHours, minuteBalances, parseHoursToMinutes } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useSitCoopStore } from "../lib/useSitCoopStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "balances" | "history";
 
@@ -183,7 +183,7 @@ export function MainView({ memberId }: { memberId: string }) {
                   const bal = balances.get(f.id) ?? 0;
                   return (
                     <div key={f.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                      <Avatar family={f} />
+                      <Avatar person={f} />
                       <strong style={{ flex: 1, minWidth: 0 }}>{f.name}</strong>
                       <strong className={bal < 0 ? "amount-neg" : "amount-pos"}>
                         {formatHours(bal)}
@@ -206,7 +206,7 @@ export function MainView({ memberId }: { memberId: string }) {
                   const family = byId.get(sit.forId);
                   return (
                     <div key={sit.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                      {sitter && <Avatar family={sitter} />}
+                      {sitter && <Avatar person={sitter} />}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong>
                           {sitter?.name ?? "?"} sat for {family?.name ?? "?"} ·{" "}

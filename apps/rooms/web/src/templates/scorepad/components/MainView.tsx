@@ -15,7 +15,7 @@ import { AddPersonByName } from "@/shell/AddPersonByName";
 import type { Game, Player } from "../lib/types";
 import { PLAYER_COLORS, gameLeaders, gameTotals } from "../lib/types";
 import { useScorePadStore } from "../lib/useScorePadStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "game" | "history";
 
@@ -83,7 +83,7 @@ function StartGame({ players, memberId }: { players: Player[]; memberId: string 
         {players.map((p) => (
           <label key={p.id} className="row gap-sm" style={{ cursor: "pointer", alignItems: "center" }}>
             <input type="checkbox" checked={selected.has(p.id)} onChange={() => toggle(p.id)} />
-            <Avatar player={p} />
+            <Avatar person={p} />
             <span>{p.name}</span>
           </label>
         ))}
@@ -149,7 +149,7 @@ function AddRound({
         if (!player) return null;
         return (
           <div key={playerId} className="row gap-sm" style={{ alignItems: "center" }}>
-            <Avatar player={player} />
+            <Avatar person={player} />
             <span style={{ flex: 1, minWidth: 0 }}>{player.name}</span>
             <input
               className="input"
@@ -214,7 +214,7 @@ export function MainView({ memberId }: { memberId: string }) {
               <span className="muted" style={{ width: 22, textAlign: "right", fontWeight: 700 }}>
                 {i + 1}
               </span>
-              <Avatar player={player} />
+              <Avatar person={player} />
               <strong style={{ flex: 1, minWidth: 0 }}>
                 {player.name}
                 {leaders.has(playerId) && <span aria-hidden> 👑</span>}

@@ -11,7 +11,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { IdeaStatus } from "../lib/types";
 import { useBacklogStore } from "../lib/useBacklogStore";
 import { AddIdea } from "./AddIdea";
-import { Avatar, StatusPill } from "./ui";
+import { StatusPill } from "./ui";
 
 const STATUS_OPTIONS: IdeaStatus[] = ["proposed", "building", "shipped", "parked"];
 

@@ -15,7 +15,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import { AddPersonByName } from "@/shell/AddPersonByName";
 import { CARER_COLORS, type Visit } from "../lib/types";
 import { useCareCircleStore } from "../lib/useCareCircleStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "visits" | "notes";
 
@@ -116,7 +116,7 @@ export function MainView({ memberId }: { memberId: string }) {
               )}
               {next && (
                 <div className="row gap-sm" style={{ alignItems: "center" }}>
-                  <Avatar carer={next} />
+                  <Avatar person={next} />
                   <strong>
                     {next.id === memberId ? "You're up next" : `${next.name} is up next`}
                   </strong>
@@ -158,7 +158,7 @@ export function MainView({ memberId }: { memberId: string }) {
                   const carer = byId.get(visit.carerId);
                   return (
                     <div key={visit.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                      {carer && <Avatar carer={carer} />}
+                      {carer && <Avatar person={carer} />}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong>{carer?.name ?? "Someone"} visited</strong>
                         <div className="muted" style={{ fontSize: 13 }}>
@@ -204,7 +204,7 @@ export function MainView({ memberId }: { memberId: string }) {
                     <div key={note.id} className="card stack-sm">
                       <p style={{ margin: 0, fontSize: 14, whiteSpace: "pre-wrap" }}>{note.text}</p>
                       <div className="row gap-sm" style={{ alignItems: "center" }}>
-                        {author && <Avatar carer={author} />}
+                        {author && <Avatar person={author} />}
                         <span className="muted" style={{ fontSize: 12 }}>
                           {author?.name ?? "Someone"} · {formatRelativeTime(note.at)}
                         </span>

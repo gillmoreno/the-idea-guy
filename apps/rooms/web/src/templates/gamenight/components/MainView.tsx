@@ -17,7 +17,7 @@ import type { Player } from "../lib/types";
 import { PLAYER_COLORS, computeStandings } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useGameNightStore } from "../lib/useGameNightStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "board" | "nights";
 
@@ -189,7 +189,7 @@ export function MainView({ memberId }: { memberId: string }) {
           <>
             {nextHost && sessions.length > 0 && (
               <div className="card row gap-sm" style={{ alignItems: "center" }}>
-                <Avatar player={nextHost} />
+                <Avatar person={nextHost} />
                 <div style={{ flex: 1 }}>
                   <strong>
                     {nextHost.id === memberId ? "You host next" : `${nextHost.name} hosts next`}
@@ -212,7 +212,7 @@ export function MainView({ memberId }: { memberId: string }) {
                     <span className="muted" style={{ width: 22, textAlign: "right", fontWeight: 700 }}>
                       {i + 1}
                     </span>
-                    <Avatar player={s.player} />
+                    <Avatar person={s.player} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <strong>{s.player.name}</strong>
                       {s.streak >= 2 && (

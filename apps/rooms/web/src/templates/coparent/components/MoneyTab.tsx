@@ -13,7 +13,7 @@ import {
 } from "../lib/money";
 import { todayStr } from "../lib/store";
 import { useCoParentStore } from "../lib/useCoParentStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 function parseAmountToCents(raw: string): number | null {
   const trimmed = raw.trim().replace(/,/g, ".");
@@ -310,7 +310,7 @@ export function MoneyTab({ memberId }: { memberId: string }) {
             const payer = byId.get(e.paidById);
             return (
               <div key={e.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                {payer && <Avatar parent={payer} />}
+                {payer && <Avatar person={payer} />}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <strong>{e.description}</strong>
                   <div className="muted" style={{ fontSize: 13 }}>

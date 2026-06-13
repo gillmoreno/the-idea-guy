@@ -1,7 +1,7 @@
 "use client";
 
 import { formatFrequencyCadence } from "@/templates/choreboard/lib/frequency";
-import { ChoreFrequencyLimit, DIFFICULTY_META, Difficulty, Member } from "@/templates/choreboard/lib/types";
+import { ChoreFrequencyLimit, DIFFICULTY_META, Difficulty } from "@/templates/choreboard/lib/types";
 import { formatMoney } from "@/templates/choreboard/lib/format";
 
 export function Money({ amount, currency }: { amount: number; currency: string }) {
@@ -29,16 +29,3 @@ export function SyncBadge({ connected, localLoaded }: { connected: boolean; loca
   );
 }
 
-export function Avatar({ member, large }: { member: Member; large?: boolean }) {
-  const initials = member.name
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-  return (
-    <span className={`avatar ${large ? "lg" : ""}`} style={{ background: member.color }}>
-      {initials || "?"}
-    </span>
-  );
-}

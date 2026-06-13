@@ -17,7 +17,8 @@ import { ROOMMATE_COLORS } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
-import { Avatar, MoneyCents } from "./ui";
+import { MoneyCents } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "expenses" | "balances";
 
@@ -116,7 +117,7 @@ export function LedgerView({ memberId }: { memberId: string }) {
                       return (
                         <div key={entry.id} className="card row gap-sm">
                           <Avatar
-                            roommate={payer ?? { id: entry.paidById, name: "?", color: "#ccc", joinedAt: 0 }}
+                            person={payer ?? { id: entry.paidById, name: "?", color: "#ccc", joinedAt: 0 }}
                           />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <strong>
@@ -137,7 +138,7 @@ export function LedgerView({ memberId }: { memberId: string }) {
                     return (
                       <div key={entry.id} className="card row gap-sm">
                         <Avatar
-                          roommate={payer ?? { id: entry.paidById, name: "?", color: "#ccc", joinedAt: 0 }}
+                          person={payer ?? { id: entry.paidById, name: "?", color: "#ccc", joinedAt: 0 }}
                         />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <strong>{entry.description}</strong>

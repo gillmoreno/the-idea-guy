@@ -14,7 +14,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { Book } from "../lib/types";
 import { useBookClubStore } from "../lib/useBookClubStore";
 import { AddBook } from "./AddBook";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "reading" | "queue" | "archive";
 
@@ -175,7 +175,7 @@ export function ClubView({ memberId }: { memberId: string }) {
                       const author = byId.get(n.authorId);
                       return (
                         <div key={n.id} className="card row gap-sm">
-                          {author && <Avatar member={author} />}
+                          {author && <Avatar person={author} />}
                           <div style={{ flex: 1 }}>
                             <strong style={{ fontSize: 13 }}>{author?.name ?? "Someone"}</strong>
                             <p style={{ margin: "4px 0 0", fontSize: 14, whiteSpace: "pre-wrap" }}>

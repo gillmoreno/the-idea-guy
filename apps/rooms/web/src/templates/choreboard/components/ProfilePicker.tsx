@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { useChoreStore } from "@/templates/choreboard/lib/useChoreStore";
 import { parseAppSearchParams, stripInviteParamsFromUrl } from "@the-idea-guy/room-kit";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 import {
   getMemberSecret,
   parseMemberLink,
@@ -102,7 +102,7 @@ export function ProfilePicker() {
         <div className="profile-grid">
           {members.map((m) => (
             <button key={m.id} className="profile-card" onClick={() => pick(m.id, m.role)}>
-              <Avatar member={m} large />
+              <Avatar person={m} large />
               <div>
                 <div className="name">{m.name}</div>
                 <div className="role">{m.role === "parent" ? "Parent" : "Kid"}</div>

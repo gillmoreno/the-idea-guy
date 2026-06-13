@@ -14,7 +14,6 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { Entry } from "../lib/types";
 import { SEVERITY_LABELS, severityColor } from "../lib/types";
 import { useSymptomDiaryStore } from "../lib/useSymptomDiaryStore";
-import { Avatar } from "./ui";
 
 type Tab = "log" | "history";
 

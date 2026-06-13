@@ -23,7 +23,8 @@ import { CATEGORY_META, MEMBER_COLORS, Role } from "@/templates/choreboard/lib/t
 import { formatMoney, formatDate, weekdayName } from "@/templates/choreboard/lib/format";
 import { TopbarPersona } from "@/shell/TopbarPersona";
 import { BottomNav, BottomNavItem } from "@/shell/BottomNav";
-import { Avatar, CadencePill, DiffPill, Money, SyncBadge } from "./ui";
+import { CadencePill, DiffPill, Money, SyncBadge } from "./ui";
+import { Avatar } from "@/components/kit";
 import { ChoreForm } from "./ChoreForm";
 import { ConfirmModal } from "@/components/ConfirmModal";
 
@@ -100,7 +101,7 @@ function HomeTab() {
         {kids.map((k) => (
           <div key={k.id} className="card card-row">
             <div className="card-row" style={{ gap: 10 }}>
-              <Avatar member={k} />
+              <Avatar person={k} />
               <div>
                 <div className="title" style={{ fontWeight: 600 }}>{k.name}</div>
                 <div className="desc muted" style={{ fontSize: 12 }}>
@@ -311,7 +312,7 @@ function PaydayTab({ byId }: { byId: string }) {
           return (
             <div key={k.id} className="card spread">
               <div className="card-row" style={{ gap: 10 }}>
-                <Avatar member={k} />
+                <Avatar person={k} />
                 <div className="title" style={{ fontWeight: 600 }}>{k.name}</div>
               </div>
               <div className="card-row" style={{ gap: 12 }}>
@@ -443,7 +444,7 @@ function SettingsTab() {
       <div className="card list-divided">
         {members.map((m) => (
           <div key={m.id} className="row-item">
-            <Avatar member={m} />
+            <Avatar person={m} />
             <div className="body" style={{ flex: 1 }}>
               <div className="title" style={{ fontSize: 14, fontWeight: 600 }}>{m.name}</div>
               <div className="desc">{m.role === "parent" ? "Parent" : "Kid"}</div>

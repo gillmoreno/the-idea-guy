@@ -17,7 +17,7 @@ import type { Member } from "../lib/types";
 import { MEMBER_COLORS } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useSupperClubStore } from "../lib/useSupperClubStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "club" | "dinners";
 
@@ -154,7 +154,7 @@ export function MainView({ memberId }: { memberId: string }) {
           <>
             {nextHost && (
               <div className="card row gap-sm" style={{ alignItems: "center" }}>
-                <Avatar member={nextHost} />
+                <Avatar person={nextHost} />
                 <div style={{ flex: 1 }}>
                   <strong>
                     {nextHost.id === memberId ? "You host next" : `${nextHost.name} hosts next`}
@@ -232,7 +232,7 @@ export function MainView({ memberId }: { memberId: string }) {
                   const host = byId.get(d.hostId);
                   return (
                     <div key={d.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                      {host && <Avatar member={host} />}
+                      {host && <Avatar person={host} />}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong>
                           {d.theme ? d.theme : "Dinner"} · {host?.name ?? "?"} hosted

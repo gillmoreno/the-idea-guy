@@ -14,7 +14,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import { AddPersonByName } from "@/shell/AddPersonByName";
 import { CARER_COLORS, type DoseEvent, type Med } from "../lib/types";
 import { useDoseLogStore } from "../lib/useDoseLogStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "meds" | "history";
 
@@ -237,7 +237,7 @@ export function MainView({ memberId }: { memberId: string }) {
                     const carer = byId.get(event.byId);
                     return (
                       <div key={event.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                        {carer && <Avatar carer={carer} />}
+                        {carer && <Avatar person={carer} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <strong>{event.medName}</strong>
                           <div className="muted" style={{ fontSize: 13 }}>

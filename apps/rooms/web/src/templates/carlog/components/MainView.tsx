@@ -15,7 +15,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { CarEvent } from "../lib/types";
 import { latestOdometer } from "../lib/types";
 import { useCarLogStore } from "../lib/useCarLogStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "car" | "log";
 
@@ -238,7 +238,7 @@ export function MainView({ memberId }: { memberId: string }) {
             <div className="card stack-sm">
               {holderDriver ? (
                 <div className="row gap-sm" style={{ alignItems: "center" }}>
-                  <Avatar driver={holderDriver} />
+                  <Avatar person={holderDriver} />
                   <div style={{ flex: 1 }}>
                     <strong>
                       {holderDriver.id === memberId ? "You have the car" : `${holderDriver.name} has the car`}

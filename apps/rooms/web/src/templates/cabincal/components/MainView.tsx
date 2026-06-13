@@ -16,7 +16,7 @@ import type { Booking, Owner } from "../lib/types";
 import { OWNER_COLORS, bookingNights, bookingsOverlap, nightsByOwner, overlappingIds } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useCabinCalStore } from "../lib/useCabinCalStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "calendar" | "fairness";
 
@@ -131,7 +131,7 @@ export function MainView({ memberId }: { memberId: string }) {
           ...(clashes.has(b.id) ? { borderColor: "var(--danger, #dc2626)" } : {}),
         }}
       >
-        {owner && <Avatar owner={owner} />}
+        {owner && <Avatar person={owner} />}
         <div style={{ flex: 1, minWidth: 0 }}>
           <strong>
             {formatDate(b.start)} – {formatDate(b.end)}
@@ -213,7 +213,7 @@ export function MainView({ memberId }: { memberId: string }) {
             <div className="stack-sm">
               {owners.map((o) => (
                 <div key={o.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                  <Avatar owner={o} />
+                  <Avatar person={o} />
                   <strong style={{ flex: 1, minWidth: 0 }}>{o.name}</strong>
                   <span>
                     {nights.get(o.id) ?? 0} night{(nights.get(o.id) ?? 0) === 1 ? "" : "s"}

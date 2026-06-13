@@ -15,7 +15,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import { AddPersonByName } from "@/shell/AddPersonByName";
 import { SAVER_COLORS, totalsBySaver } from "../lib/types";
 import { useGroupFundStore } from "../lib/useGroupFundStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "fund" | "history";
 
@@ -177,7 +177,7 @@ export function MainView({ memberId }: { memberId: string }) {
                 .sort((a, b) => (totals.get(b.id) ?? 0) - (totals.get(a.id) ?? 0))
                 .map((s) => (
                   <div key={s.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                    <Avatar saver={s} />
+                    <Avatar person={s} />
                     <strong style={{ flex: 1, minWidth: 0 }}>{s.name}</strong>
                     <span>{money(totals.get(s.id) ?? 0)}</span>
                   </div>
@@ -196,7 +196,7 @@ export function MainView({ memberId }: { memberId: string }) {
                   const saver = byId.get(c.byId);
                   return (
                     <div key={c.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                      {saver && <Avatar saver={saver} />}
+                      {saver && <Avatar person={saver} />}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong>{saver?.name ?? "Someone"} added {money(c.amountCents)}</strong>
                         <div className="muted" style={{ fontSize: 13 }}>

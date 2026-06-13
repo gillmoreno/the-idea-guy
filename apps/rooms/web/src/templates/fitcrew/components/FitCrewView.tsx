@@ -13,7 +13,7 @@ import { ACTIVITY_META } from "../lib/types";
 import { useFitCrewStore } from "../lib/useFitCrewStore";
 import { AddPrize } from "./AddPrize";
 import { LogWorkout } from "./LogWorkout";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 export function FitCrewView({ memberId }: { memberId: string }) {
   const { sync, leaveRoom, roomCode, version } = useRoomSession();
@@ -73,7 +73,7 @@ export function FitCrewView({ memberId }: { memberId: string }) {
             return (
               <div key={row.memberId} className="fitcrew-board-row">
                 <span className="fitcrew-board-rank">{index === 0 ? "👑" : `#${index + 1}`}</span>
-                <Avatar member={member} />
+                <Avatar person={member} />
                 <div className="fitcrew-board-meta">
                   <strong>{member.name}</strong>
                   <span className="muted" style={{ fontSize: 12 }}>
@@ -155,7 +155,7 @@ export function FitCrewView({ memberId }: { memberId: string }) {
               return (
                 <div key={log.id} className="card stack-sm fitcrew-log">
                   <div className="row gap-sm">
-                    {member && <Avatar member={member} />}
+                    {member && <Avatar person={member} />}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <strong>
                         {meta.emoji} {member?.name ?? "Someone"} — {meta.label}

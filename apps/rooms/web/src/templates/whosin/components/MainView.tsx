@@ -17,7 +17,7 @@ import type { Occurrence, Player, Rsvp, RsvpStatus } from "../lib/types";
 import { PLAYER_COLORS } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useWhosInStore } from "../lib/useWhosInStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "next" | "history";
 
@@ -56,7 +56,7 @@ function RosterSection({
           const rsvp = rsvps.get(p.id);
           return (
             <div key={p.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-              <Avatar player={p} />
+              <Avatar person={p} />
               <strong style={{ flex: 1, minWidth: 0 }}>{p.name}</strong>
               {rsvp && (
                 <span className="muted" style={{ fontSize: 12 }}>

@@ -17,7 +17,7 @@ import type { Parent, Stay } from "../lib/types";
 import { PARENT_COLORS, overlappingStayIds, stayOn, staysOverlap } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useCoParentStore } from "../lib/useCoParentStore";
-import { Avatar } from "./ui";
+import { Avatar } from "@/components/kit";
 import { MoneyTab } from "./MoneyTab";
 
 type Tab = "schedule" | "updates" | "money";
@@ -131,7 +131,7 @@ export function MainView({ memberId }: { memberId: string }) {
           ...(clashes.has(s.id) ? { borderColor: "var(--danger, #dc2626)" } : {}),
         }}
       >
-        {parent && <Avatar parent={parent} />}
+        {parent && <Avatar person={parent} />}
         <div style={{ flex: 1, minWidth: 0 }}>
           <strong>
             {formatDate(s.start)} – {formatDate(s.end)}
@@ -195,7 +195,7 @@ export function MainView({ memberId }: { memberId: string }) {
             <div className="card row gap-sm" style={{ alignItems: "center" }}>
               {todayParent ? (
                 <>
-                  <Avatar parent={todayParent} />
+                  <Avatar person={todayParent} />
                   <div style={{ flex: 1 }}>
                     <strong>
                       Today: {todayParent.id === memberId ? "kids are with you" : `kids are with ${todayParent.name}`}
@@ -262,7 +262,7 @@ export function MainView({ memberId }: { memberId: string }) {
                     <div key={u.id} className="card stack-sm">
                       <p style={{ margin: 0, fontSize: 14, whiteSpace: "pre-wrap" }}>{u.text}</p>
                       <div className="row gap-sm" style={{ alignItems: "center" }}>
-                        {author && <Avatar parent={author} />}
+                        {author && <Avatar person={author} />}
                         <span className="muted" style={{ fontSize: 12 }}>
                           {author?.name ?? "Someone"} · {formatRelativeTime(u.at)}
                         </span>
