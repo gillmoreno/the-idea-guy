@@ -194,7 +194,7 @@ export function MainView({ memberId }: { memberId: string }) {
                   <strong>
                     {nextHost.id === memberId ? "You host next" : `${nextHost.name} hosts next`}
                   </strong>
-                  <div className="muted" style={{ fontSize: 13 }}>
+                  <div className="meta-line">
                     Fewest hostings so far — keep it fair.
                   </div>
                 </div>
@@ -255,11 +255,11 @@ export function MainView({ memberId }: { memberId: string }) {
                     <div key={s.id} className="card">
                       <div className="row gap-sm" style={{ alignItems: "baseline" }}>
                         <strong style={{ flex: 1, minWidth: 0 }}>{s.game}</strong>
-                        <span className="muted" style={{ fontSize: 13 }}>
+                        <span className="meta-line">
                           {formatDate(s.date)}
                         </span>
                       </div>
-                      <div className="muted" style={{ fontSize: 13 }}>
+                      <div className="meta-line">
                         🏆 {winnerNames || "—"}
                         {host ? ` · hosted by ${host.name}` : ""}
                         {s.note ? ` · ${s.note}` : ""}

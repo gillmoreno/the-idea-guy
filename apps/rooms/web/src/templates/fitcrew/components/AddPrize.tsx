@@ -26,7 +26,7 @@ export function AddPrize({ memberId, onDone }: { memberId: string; onDone: () =>
   return (
     <div className="card stack">
       <div className="section-title">Add a prize</div>
-      <p className="muted" style={{ fontSize: 13 }}>
+      <p className="meta-line">
         Stupid stakes make streaks stick — loser buys coffee, winner picks movie night…
       </p>
       <div className="field">

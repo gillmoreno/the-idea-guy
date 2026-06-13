@@ -39,7 +39,7 @@ export function PermissionsSettings() {
   return (
     <div className="stack">
       <div className="section-title">Kid permissions</div>
-      <p className="muted" style={{ fontSize: 13, padding: "0 2px" }}>
+      <p className="meta-line" style={{ padding: "0 2px" }}>
         Defaults apply to all kids. Override one child for special rules. Syncs to their
         devices automatically. (Hiding a balance only affects the app UI — see docs.)
       </p>

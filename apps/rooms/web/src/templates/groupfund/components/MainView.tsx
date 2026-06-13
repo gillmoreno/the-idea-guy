@@ -113,13 +113,13 @@ export function MainView({ memberId }: { memberId: string }) {
                       }}
                     />
                   </div>
-                  <div className="muted" style={{ fontSize: 13 }}>
+                  <div className="meta-line">
                     {pct}% of {money(fund.targetCents)}
                     {totalCents >= fund.targetCents ? " — target reached! 🎉" : ""}
                   </div>
                 </>
               ) : (
-                <div className="muted" style={{ fontSize: 13 }}>
+                <div className="meta-line">
                   Open-ended fund — every bit counts.
                 </div>
               )}

@@ -28,7 +28,7 @@ export function BalancesPanel({
         <div style={{ fontSize: 28, fontWeight: 700 }}>
           {formatMoney(totalSpentCents / 100, currency)}
         </div>
-        <p className="muted" style={{ fontSize: 13 }}>
+        <p className="meta-line">
           Across {expenses.length} expense{expenses.length === 1 ? "" : "s"}
         </p>
       </div>
@@ -48,7 +48,7 @@ export function BalancesPanel({
                   <Avatar person={t} />
                   <div style={{ flex: 1 }}>
                     <strong>{t.name}</strong>
-                    <div className="muted" style={{ fontSize: 13 }}>
+                    <div className="meta-line">
                       {b.netCents > 0 ? "gets back" : "owes"}
                     </div>
                   </div>
@@ -62,7 +62,7 @@ export function BalancesPanel({
       {debts.length > 0 && (
         <>
           <div className="section-title">Settle up</div>
-          <p className="muted" style={{ fontSize: 13 }}>
+          <p className="meta-line">
             Minimum transfers to balance the group. Pay outside the app (Venmo, cash, etc.).
           </p>
           <div className="stack-sm">

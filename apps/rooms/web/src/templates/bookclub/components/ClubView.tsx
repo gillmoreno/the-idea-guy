@@ -33,12 +33,12 @@ function BookRow({
         <div style={{ fontSize: 28 }}>📖</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <strong>{book.title}</strong>
-          <div className="muted" style={{ fontSize: 13 }}>
+          <div className="meta-line">
             {book.author}
             {addedByName ? ` · suggested by ${addedByName}` : ""}
           </div>
           {book.meetingDate && (
-            <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>
+            <div className="meta-line" style={{ marginTop: 4 }}>
               Meeting {formatDate(book.meetingDate)}
             </div>
           )}
@@ -166,7 +166,7 @@ export function ClubView({ memberId }: { memberId: string }) {
                   </button>
                 </div>
                 {notes.length === 0 ? (
-                  <p className="muted" style={{ fontSize: 13 }}>
+                  <p className="meta-line">
                     No notes yet — drop spoilers, favorite lines, or debate topics.
                   </p>
                 ) : (

@@ -72,7 +72,7 @@ function LogSit({
         </div>
       </div>
       {sitterId === forId && (
-        <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+        <p className="meta-line" style={{ margin: 0 }}>
           Pick two different families — sitting for yourself is just parenting.
         </p>
       )}
@@ -167,13 +167,13 @@ export function MainView({ memberId }: { memberId: string }) {
               </button>
             )}
             {families.length < 2 && (
-              <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+              <p className="meta-line" style={{ margin: 0 }}>
                 A sit needs two families — add the others by name in settings below.
               </p>
             )}
 
             <div className="section-title">Hour balances</div>
-            <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+            <p className="meta-line" style={{ margin: 0 }}>
               Earn hours by sitting, spend them by going out. Everyone starts at zero.
             </p>
             <div className="stack-sm">
@@ -212,7 +212,7 @@ export function MainView({ memberId }: { memberId: string }) {
                           {sitter?.name ?? "?"} sat for {family?.name ?? "?"} ·{" "}
                           {formatHours(sit.minutes)}
                         </strong>
-                        <div className="muted" style={{ fontSize: 13 }}>
+                        <div className="meta-line">
                           {formatDate(sit.date)}
                           {sit.note ? ` · ${sit.note}` : ""}
                         </div>

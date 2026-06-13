@@ -86,7 +86,7 @@ function AddBooking({
         />
       </div>
       {!rangeOk && (start || end) && (
-        <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+        <p className="meta-line" style={{ margin: 0 }}>
           Last night must be on or after the first night.
         </p>
       )}
@@ -136,7 +136,7 @@ export function MainView({ memberId }: { memberId: string }) {
           <strong>
             {formatDate(b.start)} – {formatDate(b.end)}
           </strong>
-          <div className="muted" style={{ fontSize: 13 }}>
+          <div className="meta-line">
             {owner?.name ?? "Someone"} · {bookingNights(b)} night{bookingNights(b) === 1 ? "" : "s"}
             {b.note ? ` · ${b.note}` : ""}
             {clashes.has(b.id) ? " · ⚠️ double-booked" : ""}
@@ -207,7 +207,7 @@ export function MainView({ memberId }: { memberId: string }) {
 
         {tab === "fairness" && (
           <>
-            <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+            <p className="meta-line" style={{ margin: 0 }}>
               Total nights claimed per co-owner, past and upcoming — keeps the sharing honest.
             </p>
             <div className="stack-sm">

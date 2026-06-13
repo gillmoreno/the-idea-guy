@@ -99,7 +99,7 @@ function StartGame({ players, memberId }: { players: Player[]; memberId: string 
         Start ({selected.size} player{selected.size === 1 ? "" : "s"})
       </button>
       {selected.size < 2 && (
-        <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+        <p className="meta-line" style={{ margin: 0 }}>
           Add at least 2 players — by name is fine, nobody else needs the app.
         </p>
       )}
@@ -165,7 +165,7 @@ function AddRound({
         );
       })}
       {!valid && (
-        <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+        <p className="meta-line" style={{ margin: 0 }}>
           Whole numbers only (negatives are fine).
         </p>
       )}
@@ -321,7 +321,7 @@ export function MainView({ memberId }: { memberId: string }) {
                         <strong>
                           {leaders || "Nobody"} won {game.title}
                         </strong>
-                        <div className="muted" style={{ fontSize: 13 }}>
+                        <div className="meta-line">
                           {rounds.length} round{rounds.length === 1 ? "" : "s"} ·{" "}
                           {game.playerIds.length} players ·{" "}
                           {formatRelativeTime(game.endedAt ?? game.startedAt)}

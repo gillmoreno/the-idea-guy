@@ -400,6 +400,15 @@ a {
   color: var(--muted);
 }
 
+/* MetaLine — shared muted secondary line (kit/MetaLine.tsx) */
+.meta-line {
+  font-size: 13px;
+  color: var(--muted);
+}
+.meta-line__sep {
+  opacity: 0.6;
+}
+
 .empty {
   text-align: center;
   color: var(--muted);

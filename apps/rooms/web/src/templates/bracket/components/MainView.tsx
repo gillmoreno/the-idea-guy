@@ -60,7 +60,7 @@ function StartBracket({ players, memberId }: { players: Player[]; memberId: stri
   return (
     <div className="card stack-sm">
       <div className="section-title">Start a bracket</div>
-      <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+      <p className="meta-line" style={{ margin: 0 }}>
         Pick who&apos;s playing — seeding is a fresh shuffle every time.
       </p>
       <div className="stack-sm">
@@ -107,7 +107,7 @@ function BracketView({
   ) => {
     if (!pid) {
       return (
-        <div className="muted" style={{ fontSize: 13, padding: "4px 0" }}>
+        <div className="meta-line" style={{ padding: "4px 0" }}>
           — bye —
         </div>
       );
@@ -153,7 +153,7 @@ function BracketView({
             🏆
           </div>
           <div style={{ fontSize: 22, fontWeight: 700 }}>{champPlayer.name} wins!</div>
-          <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+          <p className="meta-line" style={{ margin: 0 }}>
             Start a new bracket below for the rematch.
           </p>
         </div>
@@ -283,7 +283,7 @@ export function MainView({ memberId }: { memberId: string }) {
                       <span aria-hidden>🏆</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong>{champPlayer?.name ?? "Unfinished"}</strong>
-                        <div className="muted" style={{ fontSize: 13 }}>
+                        <div className="meta-line">
                           {t.playerIds.length} players · {formatRelativeTime(t.createdAt)}
                         </div>
                       </div>

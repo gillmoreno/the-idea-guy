@@ -125,7 +125,7 @@ export function Setup() {
           />
         </div>
 
-        <p className="muted" style={{ fontSize: 13 }}>
+        <p className="meta-line">
           We&apos;ll add a starter set of chores you can edit later.
         </p>
         <button

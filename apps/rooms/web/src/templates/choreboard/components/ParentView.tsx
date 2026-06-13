@@ -377,7 +377,7 @@ function SettingsTab() {
     <>
       <div className="section-title">Codes &amp; devices</div>
       <div className="card stack-sm">
-        <p className="muted" style={{ fontSize: 13 }}>
+        <p className="meta-line">
           <strong>Family code</strong> — same code for every kid. After scanning, they
           pick their name on the next screen. Finish Setup here first or their device
           stays on &quot;Connecting…&quot;.
@@ -391,7 +391,7 @@ function SettingsTab() {
         </button>
         {hasAdminAccess && parentSecret && (
           <>
-            <p className="muted" style={{ fontSize: 13, marginTop: 12 }}>
+            <p className="meta-line" style={{ marginTop: 12 }}>
               <strong>Parent secret</strong> — only for parents. Unlocks chore catalog,
               payday, and settings. Never share with kids.
             </p>
@@ -596,7 +596,7 @@ function AddMember({ onDone }: { onDone: () => void }) {
   if (link) {
     return (
       <div className="card stack-sm">
-        <p className="muted" style={{ fontSize: 13 }}>
+        <p className="meta-line">
           On the kid&apos;s phone: pick their profile, paste this <strong>device link</strong>{" "}
           (once). It lets them sign completions cryptographically.
         </p>

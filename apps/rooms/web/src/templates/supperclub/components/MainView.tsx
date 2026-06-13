@@ -159,7 +159,7 @@ export function MainView({ memberId }: { memberId: string }) {
                   <strong>
                     {nextHost.id === memberId ? "You host next" : `${nextHost.name} hosts next`}
                   </strong>
-                  <div className="muted" style={{ fontSize: 13 }}>
+                  <div className="meta-line">
                     Fewest dinners hosted — keep the rotation fair.
                   </div>
                 </div>
@@ -194,7 +194,7 @@ export function MainView({ memberId }: { memberId: string }) {
                     <div key={t.id} className="card row gap-sm" style={{ alignItems: "center" }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong>{t.title}</strong>
-                        <div className="muted" style={{ fontSize: 13 }}>
+                        <div className="meta-line">
                           {author?.name ?? "Someone"}&apos;s idea
                         </div>
                       </div>
@@ -237,7 +237,7 @@ export function MainView({ memberId }: { memberId: string }) {
                         <strong>
                           {d.theme ? d.theme : "Dinner"} · {host?.name ?? "?"} hosted
                         </strong>
-                        <div className="muted" style={{ fontSize: 13 }}>
+                        <div className="meta-line">
                           {formatDate(d.date)}
                           {d.note ? ` · ${d.note}` : ""}
                         </div>

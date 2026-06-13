@@ -34,7 +34,7 @@ export function BalancesPanel({
         <div style={{ fontSize: 28, fontWeight: 700 }}>
           {formatMoney(totalSpentCents / 100, currency)}
         </div>
-        <p className="muted" style={{ fontSize: 13 }}>
+        <p className="meta-line">
           Shared spending so far — settle-ups not counted.
         </p>
       </div>
@@ -54,7 +54,7 @@ export function BalancesPanel({
                   <Avatar person={r} />
                   <div style={{ flex: 1 }}>
                     <strong>{r.name}</strong>
-                    <div className="muted" style={{ fontSize: 13 }}>
+                    <div className="meta-line">
                       {b.netCents > 0 ? "gets back" : "owes"}
                     </div>
                   </div>
@@ -68,7 +68,7 @@ export function BalancesPanel({
       {debts.length > 0 && (
         <>
           <div className="section-title">Settle up</div>
-          <p className="muted" style={{ fontSize: 13 }}>
+          <p className="meta-line">
             Minimum transfers to balance the house. Pay outside the app, then mark it paid —
             the payment is recorded and balances clear.
           </p>

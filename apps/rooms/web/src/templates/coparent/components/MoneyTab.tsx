@@ -214,7 +214,7 @@ function AddExpense({
         </div>
       </div>
       {amountCents !== null && (
-        <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+        <p className="meta-line" style={{ margin: 0 }}>
           Counts as {money(countedCents({ amountCents, split }), currency)} owed to the payer.
         </p>
       )}
@@ -284,7 +284,7 @@ export function MoneyTab({ memberId }: { memberId: string }) {
             ✓ Month settled — {byId.get(settlement.fromId)?.name ?? "?"} paid{" "}
             {byId.get(settlement.toId)?.name ?? "?"} {money(settlement.amountCents, config.currency)}
           </strong>
-          <div className="muted" style={{ fontSize: 13 }}>
+          <div className="meta-line">
             Recorded by {byId.get(settlement.byId)?.name ?? "someone"} ·{" "}
             {formatRelativeTime(settlement.at)}
           </div>
@@ -351,7 +351,7 @@ export function MoneyTab({ memberId }: { memberId: string }) {
             {partyA.name} owes {partyB.name}:{" "}
             <strong>{money(close.totals.get(partyB.id) ?? 0, config.currency)}</strong>
           </div>
-          <div className="muted" style={{ fontSize: 13 }}>
+          <div className="meta-line">
             Expenses net:{" "}
             {close.netCents === 0
               ? "even"

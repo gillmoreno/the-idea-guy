@@ -161,7 +161,7 @@ export function MainView({ memberId }: { memberId: string }) {
                       {carer && <Avatar person={carer} />}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong>{carer?.name ?? "Someone"} visited</strong>
-                        <div className="muted" style={{ fontSize: 13 }}>
+                        <div className="meta-line">
                           {timeLabel(visit.at)}
                           {visit.note ? ` · ${visit.note}` : ""}
                         </div>

@@ -117,7 +117,7 @@ Ordered by reuse × pain. Top of the list is the user's named bug.
 
 | # | Brick | Replaces | Why |
 |---|-------|----------|-----|
-| 6 | **`MetaLine`** — structured secondary line (date · category · attribution) with consistent separators & truncation | ad-hoc `.muted` lines in every template | Stop the "text run" anti-pattern at the source. |
+| 6 | ~~**`MetaLine`**~~ ✅ DONE | — | ✅ **Shipped 2026-06-13** — `kit/MetaLine.tsx` + `.meta-line` token. **Swept 59 inline `className="muted" style={{fontSize:13}}` across 21 templates → `.meta-line`** (inline-style dup eliminated app-wide). `<MetaLine items>` component (auto ` · ` separators, falsy-filtered) proven on carlog's joined text run. `tsc`+`build` green. _Optional later: convert remaining single-line `.meta-line` divs to `<MetaLine>`; 4 non-standard `fontSize:13` cases (a `<strong>`, danger `<p>`s, one reversed-prop line) left as-is._ |
 | 7 | **`EmptyState`** — teaching empty state (icon, one-line what, primary action) | roomledger/sitcoop hand-rolled empties | Solo-first first-run clarity. |
 | 8 | **`StatCard` / `Balance` row** — "gets back / owes" with direction color | tripsplit `BalancesPanel`, groupfund totals | Money summaries read at a glance. |
 | 9 | **`SectionHeader`** — `.section-title` + optional action/count | scattered inline headers | Vertical rhythm. |

@@ -87,7 +87,7 @@ export function MainView({ memberId }: { memberId: string }) {
           <>
             {next && (
               <div className="card stack-sm" style={{ textAlign: "center" }}>
-                <div className="muted" style={{ fontSize: 13 }}>
+                <div className="meta-line">
                   Next up
                 </div>
                 <div className="row gap-sm" style={{ justifyContent: "center", alignItems: "center" }}>
@@ -97,7 +97,7 @@ export function MainView({ memberId }: { memberId: string }) {
                   </div>
                 </div>
                 {lastDrive && (
-                  <div className="muted" style={{ fontSize: 13 }}>
+                  <div className="meta-line">
                     Last drive: {byId.get(lastDrive.driverId)?.name ?? "Someone"} ·{" "}
                     {formatRelativeTime(lastDrive.at)}
                   </div>
@@ -106,7 +106,7 @@ export function MainView({ memberId }: { memberId: string }) {
             )}
 
             <div className="section-title">Log a drive</div>
-            <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+            <p className="meta-line" style={{ margin: 0 }}>
               Tap whoever actually drove — swaps sort themselves out, the rota always
               suggests whoever has driven least.
             </p>
@@ -121,7 +121,7 @@ export function MainView({ memberId }: { memberId: string }) {
                         next up
                       </span>
                     )}
-                    <div className="muted" style={{ fontSize: 13 }}>
+                    <div className="meta-line">
                       {counts.get(d.id) ?? 0} drive{(counts.get(d.id) ?? 0) === 1 ? "" : "s"}
                     </div>
                   </div>
@@ -153,7 +153,7 @@ export function MainView({ memberId }: { memberId: string }) {
                         {driver && <Avatar person={driver} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <strong>{driver?.name ?? "Someone"} drove</strong>
-                          <div className="muted" style={{ fontSize: 13 }}>
+                          <div className="meta-line">
                             {timeLabel(drive.at)}
                           </div>
                         </div>

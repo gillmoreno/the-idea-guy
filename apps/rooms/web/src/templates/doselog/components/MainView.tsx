@@ -191,7 +191,7 @@ export function MainView({ memberId }: { memberId: string }) {
                   >
                     <div className="row gap-sm" style={{ alignItems: "baseline" }}>
                       <strong style={{ flex: 1, minWidth: 0 }}>{med.name}</strong>
-                      <span className="muted" style={{ fontSize: 13 }}>
+                      <span className="meta-line">
                         {[med.doseLabel, med.scheduleLabel].filter(Boolean).join(" · ")}
                       </span>
                     </div>
@@ -240,7 +240,7 @@ export function MainView({ memberId }: { memberId: string }) {
                         {carer && <Avatar person={carer} />}
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <strong>{event.medName}</strong>
-                          <div className="muted" style={{ fontSize: 13 }}>
+                          <div className="meta-line">
                             {timeLabel(event.at)} · {carer?.name ?? "Someone"}
                           </div>
                         </div>

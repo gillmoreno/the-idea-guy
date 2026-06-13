@@ -196,7 +196,7 @@ export function MainView({ memberId }: { memberId: string }) {
                       Today: {todayParent.id === memberId ? "kids are with you" : `kids are with ${todayParent.name}`}
                     </strong>
                     {todayStay?.note && (
-                      <div className="muted" style={{ fontSize: 13 }}>{todayStay.note}</div>
+                      <div className="meta-line">{todayStay.note}</div>
                     )}
                   </div>
                 </>

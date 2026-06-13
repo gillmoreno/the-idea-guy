@@ -15,7 +15,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import type { CarEvent } from "../lib/types";
 import { latestOdometer } from "../lib/types";
 import { useCarLogStore } from "../lib/useCarLogStore";
-import { Avatar } from "@/components/kit";
+import { Avatar, MetaLine } from "@/components/kit";
 
 type Tab = "car" | "log";
 
@@ -243,7 +243,7 @@ export function MainView({ memberId }: { memberId: string }) {
                     <strong>
                       {holderDriver.id === memberId ? "You have the car" : `${holderDriver.name} has the car`}
                     </strong>
-                    <div className="muted" style={{ fontSize: 13 }}>
+                    <div className="meta-line">
                       since {formatRelativeTime(holder!.at).replace(" ago", "")} ago
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export function MainView({ memberId }: { memberId: string }) {
                 </div>
               )}
               {odometer !== null && (
-                <div className="muted" style={{ fontSize: 13 }}>
+                <div className="meta-line">
                   Last odometer reading: <strong>{odometer.toLocaleString()}</strong>
                 </div>
               )}
@@ -302,12 +302,14 @@ export function MainView({ memberId }: { memberId: string }) {
                               ? `Fill-up${event.amountCents !== undefined ? ` · ${formatMoney(event.amountCents / 100, car.currency)}` : ""}`
                               : event.text}
                           </strong>
-                          <div className="muted" style={{ fontSize: 13 }}>
-                            {parts.join(" · ")}
-                            {event.kind !== "fuel" && event.amountCents !== undefined
-                              ? ` · ${formatMoney(event.amountCents / 100, car.currency)}`
-                              : ""}
-                          </div>
+                          <MetaLine
+                            items={[
+                              ...parts,
+                              event.kind !== "fuel" && event.amountCents !== undefined
+                                ? formatMoney(event.amountCents / 100, car.currency)
+                                : null,
+                            ]}
+                          />
                         </div>
                       </div>
                     );

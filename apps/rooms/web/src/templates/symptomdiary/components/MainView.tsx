@@ -168,7 +168,7 @@ export function MainView({ memberId }: { memberId: string }) {
             </div>
 
             {lastEntry && (
-              <p className="muted" style={{ fontSize: 13, margin: 0 }}>
+              <p className="meta-line" style={{ margin: 0 }}>
                 Last entry: {lastEntry.symptom} ({lastEntry.severity}) ·{" "}
                 {formatRelativeTime(lastEntry.at)} by{" "}
                 {byId.get(lastEntry.byId)?.name ?? "someone"}
@@ -192,7 +192,7 @@ export function MainView({ memberId }: { memberId: string }) {
                         <SeverityBadge severity={entry.severity} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <strong>{entry.symptom}</strong>
-                          <div className="muted" style={{ fontSize: 13 }}>
+                          <div className="meta-line">
                             {timeLabel(entry.at)} · {observer?.name ?? "someone"}
                             {entry.note ? ` · ${entry.note}` : ""}
                           </div>

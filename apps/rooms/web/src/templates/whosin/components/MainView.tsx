@@ -185,7 +185,7 @@ function OccurrencePanel({
       <RosterSection title="Maybe" players={maybes} rsvps={rsvps} />
       <RosterSection title="Can't make it" players={outs} rsvps={rsvps} />
       {noReply.length > 0 && (
-        <p className="muted" style={{ fontSize: 13 }}>
+        <p className="meta-line">
           No reply yet: {noReply.map((p) => p.name).join(", ")}
         </p>
       )}
@@ -258,7 +258,7 @@ export function MainView({ memberId }: { memberId: string }) {
                         <div key={o.id} className="card">
                           <strong>{formatDate(o.date)}</strong>
                           {o.note && (
-                            <span className="muted" style={{ fontSize: 13 }}> · {o.note}</span>
+                            <span className="meta-line"> · {o.note}</span>
                           )}
                         </div>
                       ))}
@@ -292,10 +292,10 @@ export function MainView({ memberId }: { memberId: string }) {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong>{formatDate(o.date)}</strong>
                         {o.note && (
-                          <div className="muted" style={{ fontSize: 13 }}>{o.note}</div>
+                          <div className="meta-line">{o.note}</div>
                         )}
                       </div>
-                      <span className="muted" style={{ fontSize: 13 }}>
+                      <span className="meta-line">
                         {ins.length} showed up
                       </span>
                     </div>

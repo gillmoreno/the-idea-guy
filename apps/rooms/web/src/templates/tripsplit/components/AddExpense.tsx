@@ -178,7 +178,7 @@ export function AddExpense({
                 {included && (
                   <>
                     {owed != null && (
-                      <span className="muted" style={{ fontSize: 13, whiteSpace: "nowrap" }}>
+                      <span className="meta-line" style={{ whiteSpace: "nowrap" }}>
                         {formatMoney(owed / 100, currency)}
                       </span>
                     )}
