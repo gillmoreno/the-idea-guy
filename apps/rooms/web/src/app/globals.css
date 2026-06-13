@@ -345,6 +345,24 @@ a {
   outline-offset: 2px;
 }
 
+/* SplitView — per-person split chips (kit/SplitView.tsx) */
+.split-view {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 4px;
+}
+.split-view__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.split-view__amount {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

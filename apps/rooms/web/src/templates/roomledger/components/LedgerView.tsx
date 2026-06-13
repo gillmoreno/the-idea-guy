@@ -17,7 +17,8 @@ import { ROOMMATE_COLORS } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
-import { Avatar, MoneyAmount, RecordRow } from "@/components/kit";
+import { Avatar, MoneyAmount, RecordRow, SplitView } from "@/components/kit";
+import { allocateShares } from "@/lib/splitMath";
 
 type Tab = "expenses" | "balances";
 
@@ -127,10 +128,13 @@ export function LedgerView({ memberId }: { memberId: string }) {
                         />
                       );
                     }
-                    const splitNames = entry.splitAmongIds
-                      .map((id) => byId.get(id)?.name)
-                      .filter(Boolean)
-                      .join(", ");
+                    const shareCents = allocateShares(entry.amountCents, entry.splitAmongIds);
+                    const splitMembers = entry.splitAmongIds.map((id) => ({
+                      id,
+                      person: byId.get(id),
+                      fallback: "?",
+                      amountCents: shareCents.get(id),
+                    }));
                     return (
                       <RecordRow
                         key={entry.id}
@@ -140,7 +144,13 @@ export function LedgerView({ memberId }: { memberId: string }) {
                           />
                         }
                         title={entry.description}
-                        meta={`${formatDate(entry.date)}${entry.category ? ` · ${entry.category}` : ""} · ${payer?.name ?? "Someone"} paid · split: ${splitNames}`}
+                        meta={
+                          <>
+                            {formatDate(entry.date)}
+                            {entry.category ? ` · ${entry.category}` : ""} · {payer?.name ?? "Someone"} paid
+                            <SplitView members={splitMembers} currency={house.currency} />
+                          </>
+                        }
                         trailing={<MoneyAmount cents={entry.amountCents} currency={house.currency} />}
                       />
                     );

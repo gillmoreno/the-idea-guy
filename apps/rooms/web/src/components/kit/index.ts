@@ -9,3 +9,4 @@ export { Avatar } from "./Avatar";
 export { MoneyAmount } from "./MoneyAmount";
 export { PersonChip } from "./PersonChip";
 export { RecordRow } from "./RecordRow";
+export { SplitView } from "./SplitView";

@@ -16,7 +16,8 @@ import { TRAVELER_COLORS } from "../lib/types";
 import { useTripSplitStore } from "../lib/useTripSplitStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
-import { Avatar, MoneyAmount, RecordRow } from "@/components/kit";
+import { Avatar, MoneyAmount, RecordRow, SplitView } from "@/components/kit";
+import { allocateShares } from "@/lib/splitMath";
 
 type Tab = "expenses" | "balances";
 
@@ -105,16 +106,13 @@ export function TripView({ memberId }: { memberId: string }) {
               <div className="stack-sm">
                 {expenses.map((exp) => {
                   const payer = byId.get(exp.paidById);
-                  const splitNames = exp.splitAmongIds
-                    .map((id) => {
-                      const name = byId.get(id)?.name;
-                      if (!name) return null;
-                      const w = exp.shares?.[id];
-                      return w && w !== 1 ? `${name} ×${w}` : name;
-                    })
-                    .filter(Boolean)
-                    .join(", ");
-                  const splitLabel = exp.shares ? "split by shares" : "split";
+                  const shareCents = allocateShares(exp.amountCents, exp.splitAmongIds, exp.shares);
+                  const splitMembers = exp.splitAmongIds.map((id) => ({
+                    id,
+                    person: byId.get(id),
+                    fallback: "?",
+                    amountCents: shareCents.get(id),
+                  }));
                   return (
                     <RecordRow
                       key={exp.id}
@@ -127,7 +125,12 @@ export function TripView({ memberId }: { memberId: string }) {
                         <Avatar person={payer ?? { id: exp.paidById, name: "?", color: "#ccc", joinedAt: 0 }} />
                       }
                       title={exp.description}
-                      meta={`${formatDate(exp.date)} · ${payer?.name ?? "Someone"} paid · ${splitLabel}: ${splitNames}`}
+                      meta={
+                        <>
+                          {formatDate(exp.date)} · {payer?.name ?? "Someone"} paid
+                          <SplitView members={splitMembers} currency={trip.currency} />
+                        </>
+                      }
                       trailing={<MoneyAmount cents={exp.amountCents} currency={trip.currency} />}
                     />
                   );
