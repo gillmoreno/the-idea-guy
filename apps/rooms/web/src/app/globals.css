@@ -415,6 +415,23 @@ a {
   padding: 28px 12px;
   font-size: 14px;
 }
+/* EmptyState slots (kit/EmptyState.tsx) */
+.empty__icon {
+  font-size: 32px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.empty__title {
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.empty__action {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
 
 /* ---------- balance hero ---------- */
 .balance-hero {

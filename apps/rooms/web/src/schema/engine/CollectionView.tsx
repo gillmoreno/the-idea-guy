@@ -6,6 +6,7 @@ import { getCollection, getFeatures } from "@/schema/validate";
 import type { CollectionDef, FeatureDef, RoomSchema } from "@/schema/types";
 import { useSchemaStore } from "@/schema/useSchemaStore";
 import { isImageFieldEmpty } from "@/lib/imageValue";
+import { EmptyState } from "@/components/kit";
 import { FieldInput } from "./FieldInput";
 import { RecordCard } from "./RecordCard";
 
@@ -143,7 +144,7 @@ export function CollectionView({
       )}
 
       {records.length === 0 && !adding && (
-        <div className="empty">Nothing here yet — add the first entry.</div>
+        <EmptyState>Nothing here yet — add the first entry.</EmptyState>
       )}
 
       {records.map((rec) => (

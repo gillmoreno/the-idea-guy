@@ -15,7 +15,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import { AddPersonByName } from "@/shell/AddPersonByName";
 import { SAVER_COLORS, totalsBySaver } from "../lib/types";
 import { useGroupFundStore } from "../lib/useGroupFundStore";
-import { Avatar, RecordRow } from "@/components/kit";
+import { Avatar, EmptyState, RecordRow } from "@/components/kit";
 
 type Tab = "fund" | "history";
 
@@ -189,7 +189,7 @@ export function MainView({ memberId }: { memberId: string }) {
         {tab === "history" && (
           <>
             {contributions.length === 0 ? (
-              <div className="empty">No contributions yet — be the first to chip in.</div>
+              <EmptyState>No contributions yet — be the first to chip in.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {contributions.map((c) => {

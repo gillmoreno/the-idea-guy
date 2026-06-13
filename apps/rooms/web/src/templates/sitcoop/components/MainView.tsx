@@ -16,7 +16,7 @@ import type { Family } from "../lib/types";
 import { FAMILY_COLORS, formatHours, minuteBalances, parseHoursToMinutes } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useSitCoopStore } from "../lib/useSitCoopStore";
-import { Avatar } from "@/components/kit";
+import { Avatar, EmptyState } from "@/components/kit";
 
 type Tab = "balances" | "history";
 
@@ -198,7 +198,7 @@ export function MainView({ memberId }: { memberId: string }) {
         {tab === "history" && (
           <>
             {sits.length === 0 ? (
-              <div className="empty">No sits logged yet — the first night out starts the bank.</div>
+              <EmptyState>No sits logged yet — the first night out starts the bank.</EmptyState>
             ) : (
               <div className="stack-sm">
                 {sits.map((sit) => {

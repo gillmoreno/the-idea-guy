@@ -6,6 +6,7 @@
  * Import from `@/components/kit`, never re-implement.
  */
 export { Avatar } from "./Avatar";
+export { EmptyState } from "./EmptyState";
 export { MoneyAmount } from "./MoneyAmount";
 export { PersonChip } from "./PersonChip";
 export { RecordRow } from "./RecordRow";

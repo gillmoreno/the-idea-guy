@@ -11,6 +11,7 @@ import { DeclarativeSetup } from "./Setup";
 import { DeclarativeProfilePicker } from "./ProfilePicker";
 import { CollectionView } from "./CollectionView";
 import { TemplateIcon } from "@/components/TemplateIcon";
+import { EmptyState } from "@/components/kit";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
 import { RoomInviteSettings } from "@/shell/RoomInviteSettings";
 import { RoomLocalStorage } from "@/shell/RoomLocalStorage";
@@ -112,7 +113,7 @@ export function DeclarativeApp() {
           />
         ))}
         {!primaryCollection && (
-          <div className="empty">This schema has no collections defined.</div>
+          <EmptyState>This schema has no collections defined.</EmptyState>
         )}
         {hasAdminAccess && (
           <div className="card stack" style={{ marginTop: 8 }}>

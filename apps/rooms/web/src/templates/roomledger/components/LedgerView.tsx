@@ -17,7 +17,7 @@ import { ROOMMATE_COLORS } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
-import { Avatar, MoneyAmount, RecordRow, SplitView } from "@/components/kit";
+import { Avatar, EmptyState, MoneyAmount, RecordRow, SplitView } from "@/components/kit";
 import { allocateShares } from "@/lib/splitMath";
 
 type Tab = "expenses" | "balances";
@@ -101,11 +101,11 @@ export function LedgerView({ memberId }: { memberId: string }) {
             )}
 
             {entries.length === 0 ? (
-              <div className="empty">
+              <EmptyState>
                 {roommates.length < 2
                   ? "Add your flatmates by name below — they don't need the app — then log the first bill."
                   : "No expenses yet. Add the first one — rent, internet, the shared groceries run."}
-              </div>
+              </EmptyState>
             ) : (
               groupByMonth(entries).map(([label, monthEntries]) => (
                 <div key={label} className="stack-sm">

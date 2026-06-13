@@ -4,7 +4,7 @@ import { formatMoney } from "@/templates/choreboard/lib/format";
 import { computeBalances, simplifyDebts } from "@/lib/splitMath";
 import type { LedgerEntry, Roommate } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";
-import { Avatar, MoneyAmount } from "@/components/kit";
+import { Avatar, EmptyState, MoneyAmount } from "@/components/kit";
 
 export function BalancesPanel({
   roommates,
@@ -41,7 +41,7 @@ export function BalancesPanel({
 
       <div className="section-title">Balances</div>
       {balances.every((b) => b.netCents === 0) ? (
-        <div className="empty">Everyone is settled up. 🎉</div>
+        <EmptyState>Everyone is settled up. 🎉</EmptyState>
       ) : (
         <div className="stack-sm">
           {balances

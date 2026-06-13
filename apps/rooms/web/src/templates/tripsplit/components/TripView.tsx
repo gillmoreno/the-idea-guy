@@ -16,7 +16,7 @@ import { TRAVELER_COLORS } from "../lib/types";
 import { useTripSplitStore } from "../lib/useTripSplitStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
-import { Avatar, MoneyAmount, RecordRow, SplitView } from "@/components/kit";
+import { Avatar, EmptyState, MoneyAmount, RecordRow, SplitView } from "@/components/kit";
 import { allocateShares } from "@/lib/splitMath";
 
 type Tab = "expenses" | "balances";
@@ -99,9 +99,9 @@ export function TripView({ memberId }: { memberId: string }) {
             )}
 
             {adding || editingExpense ? null : expenses.length === 0 ? (
-              <div className="empty">
+              <EmptyState>
                 No expenses yet. Add the first one — dinner, hotel, groceries, anything shared.
-              </div>
+              </EmptyState>
             ) : (
               <div className="stack-sm">
                 {expenses.map((exp) => {
