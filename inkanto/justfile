@@ -4,6 +4,8 @@
 dev:
     #!/usr/bin/env bash
     set -euo pipefail
+    # load .env so SECRET_KEY / INKANTO_USERS / CLAUDE_CODE_OAUTH_TOKEN reach all three services
+    if [ -f .env ]; then set -a; source .env; set +a; fi
     trap 'kill 0' EXIT
     (cd go-backend && go run ./cmd/server) &
     (cd ai-sidecar && npm start) &
