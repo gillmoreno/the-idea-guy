@@ -129,7 +129,7 @@ Ordered by reuse × pain. Top of the list is the user's named bug.
 | # | Work | Why |
 |---|------|-----|
 | 11 | Make `RecordCard` (declarative engine) render through the same Tier-1 kit (`RecordRow`, `MoneyAmount`, `PersonChip`) | Declarative and builtin rooms become visually identical; one fix touches both worlds |
-| 12 | Audit existing shell bricks (`AddPersonByName`, `ClaimProfile`, `SwitchProfile`, `ConfirmModal`, field bricks) against the rubric | They're already shared — verify they're *perfect*, not just present |
+| 12 | Audit existing shell bricks against the rubric | **In progress (2026-06-13)** — **`ConfirmModal` ✅ hardened** (rubric pt 7): added focus management — focus moves into the dialog (Cancel = safe default), Tab focus-trap, focus restored to the trigger on close; `useId` for unique title/message ids (was hardcoded `modal-title`); `aria-describedby` links the message; icon `aria-hidden`. 4 consumers, no API change. **Still to audit:** `AddPersonByName`, `ClaimProfile`, `SwitchProfile`, field bricks (`AvatarField`/`ImageField`/`AccentColorField`/`EmojiPicker`). |
 | 13 | Promote a new field type / brick whenever `/next-room` hits a wall | Keeps the library growing with real demand |
 
 **Kit reference doc — ✅ Shipped 2026-06-13:** `docs_and_changelog/html/rooms/kit.html` (manifest `rooms-kit`, nav added to every page) documents all 9 bricks — props contract, what each replaces, the `globals.css` tokens. **Satisfies rubric point 10 (Documented) across the whole kit.** _Follow-up: 3 template doc pages (choreboard/tripsplit/bookclub) drifted from earlier brick migrations — sync via `html-docs` next._
