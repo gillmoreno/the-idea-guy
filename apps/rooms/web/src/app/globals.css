@@ -1365,11 +1365,25 @@ textarea.input {
   font-size: 13px;
   color: var(--muted);
 }
-.schema-record__status-by-dot {
+/* PersonChip — inline color dot + name (kit/PersonChip.tsx) */
+.person-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  vertical-align: bottom;
+}
+.person-chip__dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
+  background: var(--border);
+}
+.person-chip__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .schema-record__created-by {
   display: flex;

@@ -7,3 +7,4 @@
  */
 export { Avatar } from "./Avatar";
 export { MoneyAmount } from "./MoneyAmount";
+export { PersonChip } from "./PersonChip";

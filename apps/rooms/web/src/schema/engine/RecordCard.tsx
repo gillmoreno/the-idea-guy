@@ -4,6 +4,7 @@ import { bodyFields, emojiField, titleField } from "@/schema/display";
 import { DEFAULT_RECORD_EMOJI } from "@/lib/emoji";
 import { imageValueSrc, parseImageValue } from "@/lib/imageValue";
 import { formatRelativeTime } from "@/lib/relativeTime";
+import { PersonChip } from "@/components/kit";
 import type { CollectionDef, FieldDef, SchemaMember, SchemaRecord } from "@/schema/types";
 
 function fieldValue(record: SchemaRecord, key: string): string {
@@ -28,18 +29,7 @@ function FieldBody({
     return (
       <p className="schema-record__meta schema-record__person">
         <span className="schema-record__meta-label">{field.label}</span>{" "}
-        {member ? (
-          <>
-            <span
-              className="schema-record__status-by-dot"
-              style={{ background: member.color }}
-              aria-hidden
-            />{" "}
-            {member.name}
-          </>
-        ) : (
-          value
-        )}
+        <PersonChip person={member} fallback={value} />
       </p>
     );
   }
@@ -177,24 +167,14 @@ export function RecordCard({
 
       {statusBy && status && status !== statusValues[0]?.id && (
         <p className="schema-record__status-by">
-          <span
-            className="schema-record__status-by-dot"
-            style={{ background: statusBy.color }}
-            aria-hidden
-          />
-          {statusBy.name}
+          <PersonChip person={statusBy} />
           {record.statusAt ? ` · ${formatRelativeTime(record.statusAt)}` : null}
         </p>
       )}
 
       {createdBy && (
         <p className="schema-record__created-by">
-          <span
-            className="schema-record__status-by-dot"
-            style={{ background: createdBy.color }}
-            aria-hidden
-          />
-          Added by {createdBy.name} · {formatRelativeTime(record.createdAt)}
+          Added by <PersonChip person={createdBy} /> · {formatRelativeTime(record.createdAt)}
         </p>
       )}
     </article>
