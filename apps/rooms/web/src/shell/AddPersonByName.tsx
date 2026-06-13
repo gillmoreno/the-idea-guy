@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 /**
  * Solo-friendly people brick: add a named participant without an invite.
@@ -10,6 +10,7 @@ import { useState } from "react";
  */
 export function AddPersonByName({
   placeholder = "Name",
+  label,
   buttonLabel = "Add",
   hint,
   existingNames,
@@ -17,6 +18,8 @@ export function AddPersonByName({
   onAdd,
 }: {
   placeholder?: string;
+  /** Accessible name for the input; defaults to `placeholder`. */
+  label?: string;
   buttonLabel?: string;
   /** Shown under the field, e.g. "No app needed — run everything from this phone." */
   hint?: string;
@@ -25,6 +28,7 @@ export function AddPersonByName({
   onAdd: (person: { name: string; color: string }) => void;
 }) {
   const [name, setName] = useState("");
+  const msgId = useId();
   const trimmed = name.trim();
   const duplicate =
     trimmed !== "" &&
@@ -44,6 +48,9 @@ export function AddPersonByName({
           className="input"
           style={{ flex: 1, minWidth: 0 }}
           placeholder={placeholder}
+          aria-label={label ?? placeholder}
+          aria-invalid={duplicate || undefined}
+          aria-describedby={duplicate || hint ? msgId : undefined}
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => {
@@ -58,12 +65,12 @@ export function AddPersonByName({
         </button>
       </div>
       {duplicate ? (
-        <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+        <p id={msgId} role="alert" className="muted" style={{ fontSize: 12, margin: 0 }}>
           Someone with that name is already in the room.
         </p>
       ) : (
         hint && (
-          <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+          <p id={msgId} className="muted" style={{ fontSize: 12, margin: 0 }}>
             {hint}
           </p>
         )
