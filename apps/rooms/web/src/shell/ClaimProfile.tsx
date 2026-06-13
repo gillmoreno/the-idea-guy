@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar, EmptyState } from "@/components/kit";
 import { AddPersonByName } from "./AddPersonByName";
 
 export interface ClaimablePerson {
@@ -51,32 +52,17 @@ export function ClaimProfile({
           <div className="profile-grid">
             {people.map((p) => (
               <button key={p.id} className="profile-card" onClick={() => onClaim(p.id)}>
-                <span
-                  aria-hidden
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: "50%",
-                    background: p.color,
-                    color: "#fff",
-                    display: "grid",
-                    placeItems: "center",
-                    fontWeight: 700,
-                    fontSize: 20,
-                  }}
-                >
-                  {p.name.trim().charAt(0).toUpperCase() || "?"}
-                </span>
+                <Avatar person={p} large />
                 <div className="name">{p.name}</div>
               </button>
             ))}
           </div>
         ) : (
-          <div className="empty">
+          <EmptyState>
             {addSelf
               ? "Nobody's been added yet — add yourself below to get started."
               : `No ${personLabel}s yet. Anyone already in the room can add them from settings.`}
-          </div>
+          </EmptyState>
         )}
 
         {addSelf && (
