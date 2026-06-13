@@ -10,6 +10,7 @@ export { EmptyState } from "./EmptyState";
 export { MoneyAmount } from "./MoneyAmount";
 export { PersonChip } from "./PersonChip";
 export { RecordRow } from "./RecordRow";
+export { SectionHeader } from "./SectionHeader";
 export { MetaLine } from "./MetaLine";
 export { SplitView } from "./SplitView";
 export { StatCard } from "./StatCard";

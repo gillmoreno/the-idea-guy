@@ -6,7 +6,7 @@ import { getCollection, getFeatures } from "@/schema/validate";
 import type { CollectionDef, FeatureDef, RoomSchema } from "@/schema/types";
 import { useSchemaStore } from "@/schema/useSchemaStore";
 import { isImageFieldEmpty } from "@/lib/imageValue";
-import { EmptyState } from "@/components/kit";
+import { EmptyState, SectionHeader } from "@/components/kit";
 import { FieldInput } from "./FieldInput";
 import { RecordCard } from "./RecordCard";
 
@@ -124,16 +124,16 @@ export function CollectionView({
 
   return (
     <div className="stack">
-      <div className="card-row">
-        <div className="section-title" style={{ margin: 0 }}>
-          {collection.label}
-        </div>
-        {!adding && (
-          <button className="btn btn-sm btn-primary" type="button" onClick={() => setAdding(true)}>
-            + Add
-          </button>
-        )}
-      </div>
+      <SectionHeader
+        title={collection.label}
+        action={
+          !adding ? (
+            <button className="btn btn-sm btn-primary" type="button" onClick={() => setAdding(true)}>
+              + Add
+            </button>
+          ) : undefined
+        }
+      />
 
       {adding && (
         <AddRecordForm

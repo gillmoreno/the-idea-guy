@@ -11,7 +11,7 @@ import { CATEGORY_META, Category, Difficulty } from "@/templates/choreboard/lib/
 import { formatMoney, formatDate } from "@/templates/choreboard/lib/format";
 import { TopbarPersona } from "@/shell/TopbarPersona";
 import { CadencePill, DiffPill, SyncBadge } from "./ui";
-import { EmptyState, MoneyAmount } from "@/components/kit";
+import { EmptyState, MoneyAmount, SectionHeader } from "@/components/kit";
 
 export function KidView({ memberId }: { memberId: string }) {
   const { sync, version } = useRoomSession();
@@ -71,14 +71,16 @@ export function KidView({ memberId }: { memberId: string }) {
           </div>
         )}
 
-        <div className="spread">
-          <div className="section-title">Chores you can do</div>
-          {perms.canProposeChores && (
-            <button className="btn btn-ghost btn-sm" onClick={() => setSuggesting((s) => !s)}>
-              {suggesting ? "Close" : "Suggest one"}
-            </button>
-          )}
-        </div>
+        <SectionHeader
+          title="Chores you can do"
+          action={
+            perms.canProposeChores ? (
+              <button className="btn btn-ghost btn-sm" onClick={() => setSuggesting((s) => !s)}>
+                {suggesting ? "Close" : "Suggest one"}
+              </button>
+            ) : undefined
+          }
+        />
 
         {suggesting && perms.canProposeChores && (
           <SuggestChore

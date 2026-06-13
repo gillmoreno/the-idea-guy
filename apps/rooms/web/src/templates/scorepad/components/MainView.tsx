@@ -15,7 +15,7 @@ import { AddPersonByName } from "@/shell/AddPersonByName";
 import type { Game, Player } from "../lib/types";
 import { PLAYER_COLORS, gameLeaders, gameTotals } from "../lib/types";
 import { useScorePadStore } from "../lib/useScorePadStore";
-import { EmptyState, Avatar } from "@/components/kit";
+import { Avatar, EmptyState, SectionHeader } from "@/components/kit";
 
 type Tab = "game" | "history";
 
@@ -263,19 +263,23 @@ export function MainView({ memberId }: { memberId: string }) {
               <StartGame players={players} memberId={memberId} />
             ) : (
               <>
-                <div className="card-row">
-                  <div className="section-title" style={{ margin: 0 }}>
-                    {current.title} · round {store.listRounds(current.id).length + 1}
-                    {current.lowWins ? " · lowest wins" : ""}
-                  </div>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => store.endGame(current.id)}
-                  >
-                    End game
-                  </button>
-                </div>
+                <SectionHeader
+                  title={
+                    <>
+                      {current.title} · round {store.listRounds(current.id).length + 1}
+                      {current.lowWins ? " · lowest wins" : ""}
+                    </>
+                  }
+                  action={
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => store.endGame(current.id)}
+                    >
+                      End game
+                    </button>
+                  }
+                />
 
                 {renderScoreboard(current)}
 

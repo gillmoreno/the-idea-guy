@@ -371,6 +371,25 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
+/* SectionHeader — section title + optional count/action (kit/SectionHeader.tsx) */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.section-header__title {
+  margin: 0;
+}
+.section-header__count {
+  margin-left: 6px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.section-header__action {
+  flex-shrink: 0;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

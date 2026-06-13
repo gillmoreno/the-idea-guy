@@ -24,7 +24,7 @@ import { formatMoney, formatDate, weekdayName } from "@/templates/choreboard/lib
 import { TopbarPersona } from "@/shell/TopbarPersona";
 import { BottomNav, BottomNavItem } from "@/shell/BottomNav";
 import { CadencePill, DiffPill, SyncBadge } from "./ui";
-import { EmptyState, Avatar, MoneyAmount } from "@/components/kit";
+import { Avatar, EmptyState, MoneyAmount, SectionHeader } from "@/components/kit";
 import { ChoreForm } from "./ChoreForm";
 import { ConfirmModal } from "@/components/ConfirmModal";
 
@@ -234,12 +234,14 @@ function ChoresTab() {
 
   return (
     <>
-      <div className="spread">
-        <div className="section-title">Chore catalog</div>
-        <button className="btn btn-primary btn-sm" onClick={() => setAdding((a) => !a)}>
-          {adding ? "Close" : "+ Add"}
-        </button>
-      </div>
+      <SectionHeader
+        title="Chore catalog"
+        action={
+          <button className="btn btn-primary btn-sm" onClick={() => setAdding((a) => !a)}>
+            {adding ? "Close" : "+ Add"}
+          </button>
+        }
+      />
 
       {adding && (
         <ChoreForm
@@ -434,12 +436,14 @@ function SettingsTab() {
         />
       </div>
 
-      <div className="spread">
-        <div className="section-title">Members</div>
-        <button className="btn btn-primary btn-sm" onClick={() => setAddingMember((a) => !a)}>
-          {addingMember ? "Close" : "+ Add"}
-        </button>
-      </div>
+      <SectionHeader
+        title="Members"
+        action={
+          <button className="btn btn-primary btn-sm" onClick={() => setAddingMember((a) => !a)}>
+            {addingMember ? "Close" : "+ Add"}
+          </button>
+        }
+      />
       {addingMember && <AddMember onDone={() => setAddingMember(false)} />}
       <div className="card list-divided">
         {members.map((m) => (
