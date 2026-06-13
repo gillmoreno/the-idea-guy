@@ -111,7 +111,7 @@ the hard agency apps last. Each row notes the **engine capability** the port req
 
 | # | Item | Notes |
 |---|------|-------|
-| E0 | **Export brick** — export a room's data to **JSON + CSV** | ⏳ IN PROGRESS (2026-06-13). Generic over any room's CRDT data; surfaced in room Settings / Danger Zone. Export only; no import. Must ship before the final removal pass so the ~5 real trip data points aren't lost. |
+| E0 | **Export brick** — export a room's data to **JSON + CSV** | ✅ **DONE (2026-06-13)** — `src/shell/ExportData.tsx` (+ `src/lib/roomExport.ts` snapshot/CSV-flatten, `src/lib/downloadFile.ts`). Generic over any room via `Y.Doc.toJSON()` — zero template-specific code. JSON = lossless backup; CSV = best-effort flatten of record-like collections (opens in Excel/Sheets). Mounted **once** in `RoomInviteSettings` (admin area, before `RoomDangerZone`) → appears in every builtin **and** declarative room. Export only; no import (by design). `tsc` green. _Admin-gated for now (it's the whole dataset); could open to all members later._ |
 
 ### Tier 1 — money cluster (build `money` field + `split`/balance feature)
 

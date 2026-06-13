@@ -7,6 +7,7 @@ import { sendPostSetupRoomInvites } from "@/lib/sendPostSetupRoomInvites";
 import type { InviteeSlot } from "@/lib/roomMemberInvites";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { RoomDangerZone } from "@/shell/RoomDangerZone";
+import { ExportData } from "@/shell/ExportData";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 
 /**
@@ -38,6 +39,7 @@ export function RoomInviteSettings({
         memberColors={memberColors}
         minContacts={minContacts}
       />
+      <ExportData />
       <RoomDangerZone />
     </>
   );
