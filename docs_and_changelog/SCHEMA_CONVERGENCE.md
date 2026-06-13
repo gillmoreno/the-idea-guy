@@ -163,6 +163,79 @@ remove in the final pass.
 
 ---
 
+## Worked port — TripSplit (spec ready; engine work pending)
+
+Analysis (loop steps 2–3) is done so the next run can go straight to building. Held off
+on the engine edits because a brick-polish loop was actively editing the tree (2026-06-13)
+— do these when the tree is calm and you can QA + flip + verify in `/run`.
+
+### Parity checklist (what the schema must reproduce)
+
+TripSplit data (`templates/tripsplit/lib/types.ts`): **Expense** = `{ id, description,
+amountCents:int, paidById, splitAmongIds:string[], shares?:Record<id,weight>, date:"YYYY-MM-DD",
+createdAt, createdById }`; **Traveler** = `{ id, name, color, joinedAt }`; **Trip** =
+`{ name, currency, createdAt }`. Capabilities:
+- [ ] Add/edit/delete expense (description, amount, date, payer, split set, optional per-person weights)
+- [ ] Expense list, newest first, with payer + amount + split chips (already uses kit `RecordRow`/`MoneyAmount`/`SplitView`)
+- [ ] Balances tab: trip total, per-member net (green owed / red owes), simplified settle-up
+- [ ] Currency (ISO code) applied to all amounts
+- [ ] Solo-first: creator adds travelers by name (`AddPersonByName`); expenses proxy-attributable
+- Settle-up math already exists and is reusable: `src/lib/splitMath.ts` →
+  `allocateShares(amountCents, ids, shares?)` (largest-remainder), `computeBalances(expenses, ids)`,
+  `simplifyDebts(balances)` (Splitwise-style greedy).
+
+### Engine additions required (forward-compat, bump `CURRENT_ENGINE_VERSION` 1→2)
+
+| Add | File | What |
+|-----|------|------|
+| `money` field type | `schema/types.ts:13` | store cents as string in `fields`; currency from schema (see decision below) |
+| `date` field type | `schema/types.ts:13` | store `YYYY-MM-DD`; input `<input type="date">` |
+| `person-list` field type | `schema/types.ts:13` | store `string[]` of member ids (multi-person; `person` is single-only) |
+| `balance` feature | `schema/types.ts:40–49` | `{type:"balance", collection, fields:{amount,paidBy,splitAmong,shares?,date?}}` |
+| money input/display | `engine/FieldInput.tsx`, `engine/RecordCard.tsx` | decimal input → cents; render via kit `MoneyAmount` |
+| date input/display | same | native date input; formatted text |
+| person-list input/display | same | checkbox/multi-select of members; render via kit `SplitView` |
+| `BalancePanel` | new `engine/BalancePanel.tsx`, hook in `engine/CollectionView.tsx` after the records loop | read collection records, map fields → `computeBalances`/`simplifyDebts`, render total + per-member `MoneyAmount` + settle-up (port the layout from `tripsplit/components/BalancesPanel.tsx`) |
+| validation | `schema/validate.ts` | accept the new field/feature types (unknown types already pass through forward-compat) |
+
+**Open design decision — currency source.** TripSplit stores currency in trip settings.
+For the schema, simplest is a schema-level `currency` (in `extensions` or a top-level field)
+set at room setup, read by the `money` renderer + `BalancePanel`. Decide at build time;
+don't bake currency into each money value.
+
+### Target schema (drop into `public/catalog/v1.json` once the engine supports the types)
+
+Catalog entries wrap a `RoomSchema` as `{ id, name, description, emoji, accent, schema }`
+inside `{ version:1, templates:[…] }`; loaded via `validateRoomSchema(entry.schema)`.
+
+```json
+{
+  "schemaVersion": 1, "engineVersion": 2,
+  "id": "tripsplit", "name": "Trip Split", "emoji": "💰", "accent": "#06b6d4",
+  "description": "Shared trip expenses — who paid, split fairly, settle up.",
+  "collections": [{
+    "id": "expenses", "label": "Expenses", "singular": "expense",
+    "fields": [
+      { "key": "description", "label": "What was it for?", "type": "text", "required": true },
+      { "key": "amount", "label": "Amount", "type": "money", "required": true },
+      { "key": "date", "label": "Date", "type": "date", "required": true },
+      { "key": "paidBy", "label": "Paid by", "type": "person", "required": true },
+      { "key": "splitAmong", "label": "Split between", "type": "person-list", "required": true },
+      { "key": "shares", "label": "Share weights (optional)", "type": "text" }
+    ],
+    "permissions": { "create": "member", "edit": "member" }
+  }],
+  "features": [{
+    "type": "balance", "collection": "expenses",
+    "fields": { "amount": "amount", "paidBy": "paidBy", "splitAmong": "splitAmong", "shares": "shares", "date": "date" }
+  }]
+}
+```
+
+These three field types (`money`/`date`/`person-list`) + the `balance` feature are exactly
+the Tier-2 (`date`) and money-cluster (`money`/`split`) capabilities the rest of the queue
+reuses — so this first port front-loads the most leveraged engine work.
+
 ## Engine capability ledger
 
 Track the field/feature types the engine gains, so later ports reuse them.
