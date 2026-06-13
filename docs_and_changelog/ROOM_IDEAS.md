@@ -10,7 +10,9 @@ full definition of what qualifies.
 
 ## Building (max 1 — finish before starting anything new)
 
-_(empty)_
+- [ ] **Practice Log** 🎻 — kid practices a thing (reading, violin, free kicks); adults log minutes, streak + weekly-goal bar. Merges the Reading Log candidate. Builtin-lite. Started 2026-06-12.
+
+_(Stale "Co-Parenting Hub" candidate removed — shipped 2026-06-12.)_
 
 ## Shipped
 
@@ -69,10 +71,7 @@ _(empty)_
 
 - [ ] **Co-op Order** 📦 — neighbors bulk-buy together: propose an order, claim items & quantities, settle later. Declarative (claim status); pairs with Roommate Ledger for money.
 - [ ] **Allotment Crew** 🌱 — community garden plot: watering rota (fairness brick), tasks, harvest photo log. Builtin composing existing bricks.
-- [ ] **Co-Parenting Hub** 👨‍👩‍👧 — separated parents: handoff calendar, kid info, shared notes. Builtin (sensitive — E2E story strong; custody schedule is the core mechanic).
 - [ ] **Stage Crew** 🎭 — amateur theater production: props checklist with claims + costumes/scenes notes. Declarative (two collections).
-- [ ] **Reading Log** 📚 — school reading log for a kid: either parent logs minutes/books, streaks, ready for the teacher. Builtin-lite (event log + named kid).
-- [ ] **Practice Log** 🎻 — instrument/sport practice: log sessions & minutes, streaks, parent + kid + teacher all see the same record. Builtin-lite (event log).
 - [ ] **Garage Sale Crew** 🏷️ — neighbors run a joint yard sale: items with prices & photos, mark sold, whose-item attribution for payouts. Declarative (status + image).
 
 ## Parked
