@@ -17,7 +17,7 @@ import { ROOMMATE_COLORS } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
-import { Avatar, MoneyAmount } from "@/components/kit";
+import { Avatar, MoneyAmount, RecordRow } from "@/components/kit";
 
 type Tab = "expenses" | "balances";
 
@@ -114,20 +114,17 @@ export function LedgerView({ memberId }: { memberId: string }) {
                     if (entry.kind === "settlement") {
                       const recipient = byId.get(entry.splitAmongIds[0] ?? "");
                       return (
-                        <div key={entry.id} className="card row gap-sm">
-                          <Avatar
-                            person={payer ?? { id: entry.paidById, name: "?", color: "#ccc", joinedAt: 0 }}
-                          />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <strong>
-                              {payer?.name ?? "Someone"} paid {recipient?.name ?? "someone"}
-                            </strong>
-                            <div className="muted" style={{ fontSize: 13 }}>
-                              {formatDate(entry.date)} · settle-up
-                            </div>
-                          </div>
-                          <MoneyAmount cents={entry.amountCents} currency={house.currency} />
-                        </div>
+                        <RecordRow
+                          key={entry.id}
+                          leading={
+                            <Avatar
+                              person={payer ?? { id: entry.paidById, name: "?", color: "#ccc", joinedAt: 0 }}
+                            />
+                          }
+                          title={`${payer?.name ?? "Someone"} paid ${recipient?.name ?? "someone"}`}
+                          meta={`${formatDate(entry.date)} · settle-up`}
+                          trailing={<MoneyAmount cents={entry.amountCents} currency={house.currency} />}
+                        />
                       );
                     }
                     const splitNames = entry.splitAmongIds
@@ -135,20 +132,17 @@ export function LedgerView({ memberId }: { memberId: string }) {
                       .filter(Boolean)
                       .join(", ");
                     return (
-                      <div key={entry.id} className="card row gap-sm">
-                        <Avatar
-                          person={payer ?? { id: entry.paidById, name: "?", color: "#ccc", joinedAt: 0 }}
-                        />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <strong>{entry.description}</strong>
-                          <div className="muted" style={{ fontSize: 13 }}>
-                            {formatDate(entry.date)}
-                            {entry.category ? ` · ${entry.category}` : ""} ·{" "}
-                            {payer?.name ?? "Someone"} paid · split: {splitNames}
-                          </div>
-                        </div>
-                        <MoneyAmount cents={entry.amountCents} currency={house.currency} />
-                      </div>
+                      <RecordRow
+                        key={entry.id}
+                        leading={
+                          <Avatar
+                            person={payer ?? { id: entry.paidById, name: "?", color: "#ccc", joinedAt: 0 }}
+                          />
+                        }
+                        title={entry.description}
+                        meta={`${formatDate(entry.date)}${entry.category ? ` · ${entry.category}` : ""} · ${payer?.name ?? "Someone"} paid · split: ${splitNames}`}
+                        trailing={<MoneyAmount cents={entry.amountCents} currency={house.currency} />}
+                      />
                     );
                   })}
                 </div>

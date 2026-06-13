@@ -16,7 +16,7 @@ import { TRAVELER_COLORS } from "../lib/types";
 import { useTripSplitStore } from "../lib/useTripSplitStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
-import { Avatar, MoneyAmount } from "@/components/kit";
+import { Avatar, MoneyAmount, RecordRow } from "@/components/kit";
 
 type Tab = "expenses" | "balances";
 
@@ -116,33 +116,20 @@ export function TripView({ memberId }: { memberId: string }) {
                     .join(", ");
                   const splitLabel = exp.shares ? "split by shares" : "split";
                   return (
-                    <div
+                    <RecordRow
                       key={exp.id}
-                      className="card row gap-sm"
-                      role="button"
-                      tabIndex={0}
-                      style={{ cursor: "pointer", textAlign: "left", width: "100%" }}
+                      ariaLabel={`Edit ${exp.description}`}
                       onClick={() => {
                         setAdding(false);
                         setEditingId(exp.id);
                       }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          setAdding(false);
-                          setEditingId(exp.id);
-                        }
-                      }}
-                    >
-                      <Avatar person={payer ?? { id: exp.paidById, name: "?", color: "#ccc", joinedAt: 0 }} />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <strong>{exp.description}</strong>
-                        <div className="muted" style={{ fontSize: 13 }}>
-                          {formatDate(exp.date)} · {payer?.name ?? "Someone"} paid · {splitLabel}: {splitNames}
-                        </div>
-                      </div>
-                      <MoneyAmount cents={exp.amountCents} currency={trip.currency} />
-                    </div>
+                      leading={
+                        <Avatar person={payer ?? { id: exp.paidById, name: "?", color: "#ccc", joinedAt: 0 }} />
+                      }
+                      title={exp.description}
+                      meta={`${formatDate(exp.date)} · ${payer?.name ?? "Someone"} paid · ${splitLabel}: ${splitNames}`}
+                      trailing={<MoneyAmount cents={exp.amountCents} currency={trip.currency} />}
+                    />
                   );
                 })}
               </div>

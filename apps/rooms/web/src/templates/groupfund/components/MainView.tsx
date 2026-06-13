@@ -15,7 +15,7 @@ import { SwitchProfile } from "@/shell/SwitchProfile";
 import { AddPersonByName } from "@/shell/AddPersonByName";
 import { SAVER_COLORS, totalsBySaver } from "../lib/types";
 import { useGroupFundStore } from "../lib/useGroupFundStore";
-import { Avatar } from "@/components/kit";
+import { Avatar, RecordRow } from "@/components/kit";
 
 type Tab = "fund" | "history";
 
@@ -195,26 +195,24 @@ export function MainView({ memberId }: { memberId: string }) {
                 {contributions.map((c) => {
                   const saver = byId.get(c.byId);
                   return (
-                    <div key={c.id} className="card row gap-sm" style={{ alignItems: "center" }}>
-                      {saver && <Avatar person={saver} />}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <strong>{saver?.name ?? "Someone"} added {money(c.amountCents)}</strong>
-                        <div className="muted" style={{ fontSize: 13 }}>
-                          {formatRelativeTime(c.at)}
-                          {c.note ? ` · ${c.note}` : ""}
-                        </div>
-                      </div>
-                      {c.byId === memberId && (
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-sm"
-                          aria-label="Remove contribution"
-                          onClick={() => store.removeContribution(c.id)}
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </div>
+                    <RecordRow
+                      key={c.id}
+                      leading={saver ? <Avatar person={saver} /> : undefined}
+                      title={`${saver?.name ?? "Someone"} added ${money(c.amountCents)}`}
+                      meta={`${formatRelativeTime(c.at)}${c.note ? ` · ${c.note}` : ""}`}
+                      trailing={
+                        c.byId === memberId ? (
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm"
+                            aria-label="Remove contribution"
+                            onClick={() => store.removeContribution(c.id)}
+                          >
+                            ✕
+                          </button>
+                        ) : undefined
+                      }
+                    />
                   );
                 })}
               </div>

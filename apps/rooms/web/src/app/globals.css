@@ -313,6 +313,35 @@ a {
   gap: 8px;
 }
 
+/* RecordRow — canonical record/expense row card (kit/RecordRow.tsx) */
+.record-row__body {
+  flex: 1;
+  min-width: 0;
+}
+.record-row__title {
+  display: block;
+}
+.record-row__meta {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.record-row__trailing {
+  flex-shrink: 0;
+}
+.record-row--clickable {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.record-row--clickable:focus-visible {
+  outline: 2px solid var(--template-accent, var(--primary));
+  outline-offset: 2px;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
