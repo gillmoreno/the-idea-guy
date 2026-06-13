@@ -132,6 +132,8 @@ Ordered by reuse × pain. Top of the list is the user's named bug.
 | 12 | Audit existing shell bricks (`AddPersonByName`, `ClaimProfile`, `SwitchProfile`, `ConfirmModal`, field bricks) against the rubric | They're already shared — verify they're *perfect*, not just present |
 | 13 | Promote a new field type / brick whenever `/next-room` hits a wall | Keeps the library growing with real demand |
 
+**Kit reference doc — ✅ Shipped 2026-06-13:** `docs_and_changelog/html/rooms/kit.html` (manifest `rooms-kit`, nav added to every page) documents all 9 bricks — props contract, what each replaces, the `globals.css` tokens. **Satisfies rubric point 10 (Documented) across the whole kit.** _Follow-up: 3 template doc pages (choreboard/tripsplit/bookclub) drifted from earlier brick migrations — sync via `html-docs` next._
+
 ---
 
 ## Worked example — iteration 1 (the tripsplit card)

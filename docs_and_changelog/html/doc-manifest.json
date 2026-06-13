@@ -93,6 +93,16 @@
       ]
     },
     {
+      "id": "rooms-kit",
+      "title": "Component kit",
+      "doc": "docs_and_changelog/html/rooms/kit.html",
+      "sources": [
+        "apps/rooms/web/src/components/kit/",
+        "apps/rooms/web/src/app/globals.css",
+        "docs_and_changelog/BRICK_POLISH.md"
+      ]
+    },
+    {
       "id": "rooms-themes",
       "title": "Themes, profile & settings",
       "doc": "docs_and_changelog/html/rooms/themes-and-profile.html",

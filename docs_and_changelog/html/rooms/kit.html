@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Component kit — The Idea Guy</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <p style="font-weight:700;font-size:15px;margin:0 0 4px;">The Idea Guy</p>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 16px;">Technical docs</p>
+      <h2>Start</h2>
+      <a href="../index.html">Overview</a>
+      <a href="../backlog.html">Backlog &amp; priorities</a>
+      <a href="../how-docs-work.html">How these docs work</a>
+      <h2>Rooms platform</h2>
+      <a href="architecture.html">Architecture</a>
+      <a href="sync-and-local-first.html">Sync &amp; local-first</a>
+      <a href="security.html">Security &amp; invites</a>
+      <a href="personas-and-contacts.html">Personas &amp; contacts</a>
+      <a href="schema-engine.html">Schema engine</a>
+      <a href="kit.html" class="active">Component kit</a>
+      <a href="ai-generation.html">AI generation</a>
+      <a href="themes-and-profile.html">Themes &amp; profile</a>
+      <h2>Templates</h2>
+      <a href="../templates/choreboard.html">ChoreBoard</a>
+      <a href="../templates/tripsplit.html">Trip Split</a>
+      <a href="../templates/bookclub.html">Book Club</a>
+      <a href="../templates/fitcrew.html">Fit Crew</a>
+      <a href="../templates/backlog-room.html">Backlog room</a>
+      <h2>Other apps</h2>
+      <a href="../secondbrain/overview.html">Second Brain</a>
+      <a href="../website/overview.html">Website</a>
+      <a href="../inkanto/overview.html">Inkanto</a>
+    </nav>
+    <main>
+      <article>
+        <h1>Component kit</h1>
+        <p class="lead">A single shared presentational kit that collapses the 20 bespoke per-template <code>ui.tsx</code> copies and the declarative engine's cards into canonical, themeable bricks.</p>
+
+        <h2>What it is / why</h2>
+        <p>Rooms had <strong>two rendering worlds that drifted apart</strong>. The declarative <a href="schema-engine.html">schema engine</a> renders catalog rooms from a schema through one shared <code>RecordCard</code> — consistent, but generic. The 20 builtin templates each hand-rolled their own cards in a private <code>templates/&lt;name&gt;/components/ui.tsx</code>: 20 copies of <code>Avatar</code>, <code>MoneyCents</code>, and the same card layout, each drifting independently. The named symptom was a Trip Split expense card that rendered <em>who paid, how much, who owes</em> as one continuous run of muted 13px text — all the facts present, no visual hierarchy, unanswerable in under two seconds.</p>
+        <div class="card">
+          <strong>The fix in one line</strong>
+          One shared presentational kit at <code>@/components/kit</code> that <em>both</em> the engine and the bespoke templates render with — fix a brick once, every room improves.
+        </div>
+        <p>The kit is <strong>presentational only</strong>: each brick takes plain data props, holds no room logic or store access, and renders through shared CSS tokens. It was built incrementally by the <strong>brick-polish loop</strong> — each iteration takes one duplicated pattern, perfects it against a rubric (scannable in &lt;2s, token-pure, overflow-safe, accessible, solo-first/proxy-aware), migrates every consumer, and deletes the per-template copy. Templates import from the barrel and never re-implement a brick.</p>
+
+        <h2>The bricks</h2>
+        <p>Nine bricks ship today, exported from <code>kit/index.ts</code>. Props below are the typed contract in summary — see each source file for the full signature.</p>
+        <table>
+          <tr><th>Brick</th><th>Props (summary)</th><th>Replaces / used by</th></tr>
+          <tr>
+            <td><strong>Avatar</strong></td>
+            <td><code>person?:{name,color}</code> or scalar <code>name</code>/<code>color</code>; <code>large</code>, <code>title</code></td>
+            <td>Initials circle over the person's accent, with a <code>?</code> fallback for unnamed proxy rows. Replaced 20 hand-rolled copies; used by every room.</td>
+          </tr>
+          <tr>
+            <td><strong>MoneyAmount</strong></td>
+            <td><code>amount</code> (major units) <em>or</em> <code>cents</code>; <code>currency</code>, <code>className</code></td>
+            <td>Sign-colored, tabular-figure money render. Replaced per-template <code>Money</code>/<code>MoneyCents</code>; used by the money rooms (Trip Split, RoomLedger, GroupFund, CoParent, ChoreBoard).</td>
+          </tr>
+          <tr>
+            <td><strong>PersonChip</strong></td>
+            <td><code>person?:{name,color}</code> or <code>name</code>; <code>fallback</code> (raw id), <code>className</code></td>
+            <td>Inline color dot + name so a raw id never leaks; neutral dot on fallback. Used by the engine's <code>RecordCard</code> (person field, status-by, created-by) and inline attribution.</td>
+          </tr>
+          <tr>
+            <td><strong>RecordRow</strong></td>
+            <td><code>leading</code>, <code>title</code>, <code>meta?</code>, <code>trailing?</code> slots; <code>onClick?</code>, <code>ariaLabel?</code>, <code>className</code>, <code>style</code></td>
+            <td>The canonical "actor did X · amount" row card; becomes an accessible <code>&lt;button&gt;</code> with centralized keyboard/focus handling when <code>onClick</code> is set. Used by every record list across the 4 money rooms.</td>
+          </tr>
+          <tr>
+            <td><strong>SplitView</strong></td>
+            <td><code>members[]</code> (each <code>person</code>/<code>name</code>/<code>fallback</code> + optional <code>amountCents</code>), <code>currency?</code></td>
+            <td>Replaces the <code>split: a, b, c</code> muted comma run with wrapping <code>PersonChip</code>s, each showing that person's share. Drops into <code>RecordRow.meta</code>; used by Trip Split and RoomLedger.</td>
+          </tr>
+          <tr>
+            <td><strong>MetaLine</strong></td>
+            <td><code>items?[]</code> (joined by <code>·</code>, falsy dropped) <em>or</em> <code>children</code>; <code>as</code>, <code>className</code></td>
+            <td>The muted 13px secondary line, replacing inline <code>style={{fontSize:13}}</code> across 21 templates. Structured segments compose conditionally without manual separators.</td>
+          </tr>
+          <tr>
+            <td><strong>EmptyState</strong></td>
+            <td><code>icon?</code>, <code>title?</code>, <code>children</code> (message), <code>action?</code>, <code>className</code></td>
+            <td>The teaching empty state with a solo-first "here's the one thing to do first" CTA slot. Replaces the bare <code>&lt;div class="empty"&gt;</code> blocks every room hand-rolled.</td>
+          </tr>
+          <tr>
+            <td><strong>StatCard</strong></td>
+            <td><code>label?</code>, <code>value</code>, <code>sub?</code>, <code>tone?:"pos"|"neg"</code>, <code>children?</code></td>
+            <td>A headline summary stat (trip total, household total, fund total) replacing the inline big-number pattern; tone color-codes directional figures.</td>
+          </tr>
+          <tr>
+            <td><strong>SectionHeader</strong></td>
+            <td><code>title</code>, <code>count?</code>, <code>action?</code>, <code>className</code></td>
+            <td>A section title with an optional count and a trailing action button, replacing the hand-rolled <code>.spread</code>-wrapping header rows. Bare titles stay a plain section title.</td>
+          </tr>
+        </table>
+
+        <h2>Design tokens</h2>
+        <p>Every brick renders through <code>globals.css</code> tokens only — no hardcoded hex, no magic spacing — so a room takes its own tint for free: each room's accent sets <code>--template-accent</code>, and the bricks (focus rings, dots, emphasis) follow it. The key classes per brick:</p>
+        <table>
+          <tr><th>Brick</th><th>Classes</th></tr>
+          <tr><td>Avatar</td><td><code>.avatar</code> (<code>.lg</code> for large)</td></tr>
+          <tr><td>MoneyAmount</td><td><code>.money</code> (tabular figures) + <code>.amount-pos</code> / <code>.amount-neg</code></td></tr>
+          <tr><td>PersonChip</td><td><code>.person-chip</code>, <code>.person-chip__dot</code>, <code>.person-chip__name</code></td></tr>
+          <tr><td>RecordRow</td><td><code>.card .row</code> + <code>.record-row</code> (<code>--clickable</code> for the button form)</td></tr>
+          <tr><td>SplitView</td><td><code>.split-view</code>, <code>.split-view__item</code>, <code>.split-view__amount</code></td></tr>
+          <tr><td>MetaLine</td><td><code>.meta-line</code>, <code>.meta-line__sep</code></td></tr>
+          <tr><td>EmptyState</td><td><code>.empty</code>, <code>.empty__icon</code>, <code>.empty__title</code>, <code>.empty__action</code></td></tr>
+          <tr><td>StatCard</td><td><code>.stat-card__value</code> (+ <code>.amount-pos/neg</code> for tone)</td></tr>
+          <tr><td>SectionHeader</td><td><code>.section-header</code>, <code>.section-title</code>, <code>.section-header__count</code></td></tr>
+        </table>
+
+        <h2>Key code paths</h2>
+        <ul>
+          <li><code>apps/rooms/web/src/components/kit/</code> (one file per brick + the <code>index.ts</code> barrel)</li>
+          <li><code>apps/rooms/web/src/app/globals.css</code></li>
+        </ul>
+        <p>Background on the loop that builds and migrates these bricks lives in <code>docs_and_changelog/BRICK_POLISH.md</code>.</p>
+
+        <p class="footer">Sources: <code>apps/rooms/web/src/components/kit/</code> · <code>apps/rooms/web/src/app/globals.css</code> · Last synced 2026-06-13</p>
+      </article>
+    </main>
+  </div>
+</body>
+</html>
