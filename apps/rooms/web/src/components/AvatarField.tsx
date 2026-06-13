@@ -126,7 +126,7 @@ export function AvatarField({
             </div>
           ) : (
             <>
-              <div className="image-field__modes" role="tablist">
+              <div className="image-field__modes" role="tablist" aria-label="Photo source">
                 <button
                   type="button"
                   role="tab"
