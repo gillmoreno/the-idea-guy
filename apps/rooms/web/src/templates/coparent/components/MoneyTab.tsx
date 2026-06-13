@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CURRENCY_OPTIONS, formatDate, formatMoney } from "@/templates/choreboard/lib/format";
+import { CURRENCY_OPTIONS, formatDate, formatMoney } from "@/lib/format";
 import { formatRelativeTime } from "@/lib/relativeTime";
 import type { ExpenseSplit, Parent } from "../lib/types";
 import {

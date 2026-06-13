@@ -1,6 +1,6 @@
 "use client";
 
-import { formatMoney } from "@/templates/choreboard/lib/format";
+import { formatMoney } from "@/lib/format";
 import { computeBalances, simplifyDebts } from "@/lib/splitMath";
 import type { LedgerEntry, Roommate } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";

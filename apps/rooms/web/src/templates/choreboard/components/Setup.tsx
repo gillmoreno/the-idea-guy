@@ -6,7 +6,7 @@ import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { RoomMemberInviteField } from "@/components/RoomMemberInviteField";
 import { buildInviteeSlots, buildOrganizerMember } from "@/lib/roomMemberInvites";
-import { CURRENCY_OPTIONS, WEEKDAY_OPTIONS } from "@/templates/choreboard/lib/format";
+import { CURRENCY_OPTIONS, WEEKDAY_OPTIONS } from "@/lib/format";
 import { seedChores } from "@/templates/choreboard/lib/seed";
 import { CHOREBOARD_TEMPLATE_ID } from "@/templates/choreboard/lib/store";
 import { MEMBER_COLORS } from "@/templates/choreboard/lib/types";

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { formatDate } from "@/templates/choreboard/lib/format";
+import { formatDate } from "@/lib/format";
 import { nextUp } from "@/lib/fairness";
 import { TopbarPersona } from "@/shell/TopbarPersona";
 import { AppTabBar } from "@/shell/AppTabBar";

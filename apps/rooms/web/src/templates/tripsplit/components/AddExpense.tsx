@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { formatMoney } from "@/templates/choreboard/lib/format";
+import { formatMoney } from "@/lib/format";
 import { allocateShares } from "@/lib/splitMath";
 import { todayStr } from "../lib/store";
 import type { Expense, Traveler } from "../lib/types";

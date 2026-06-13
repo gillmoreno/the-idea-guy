@@ -20,7 +20,7 @@ import { Completion } from "@/templates/choreboard/lib/types";
 import { weekRange } from "@/templates/choreboard/lib/store";
 import { resolveFrequencyLimit } from "@/templates/choreboard/lib/frequency";
 import { CATEGORY_META, MEMBER_COLORS, Role } from "@/templates/choreboard/lib/types";
-import { formatMoney, formatDate, weekdayName } from "@/templates/choreboard/lib/format";
+import { formatMoney, formatDate, weekdayName } from "@/lib/format";
 import { TopbarPersona } from "@/shell/TopbarPersona";
 import { BottomNav, BottomNavItem } from "@/shell/BottomNav";
 import { CadencePill, DiffPill, SyncBadge } from "./ui";

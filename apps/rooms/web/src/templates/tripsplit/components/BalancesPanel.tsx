@@ -1,6 +1,6 @@
 "use client";
 
-import { formatMoney } from "@/templates/choreboard/lib/format";
+import { formatMoney } from "@/lib/format";
 import { computeBalances, simplifyDebts } from "../lib/balances";
 import type { Expense, Traveler } from "../lib/types";
 import { Avatar, EmptyState, MoneyAmount, RecordRow, StatCard } from "@/components/kit";

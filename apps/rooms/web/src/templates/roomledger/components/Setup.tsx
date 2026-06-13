@@ -7,7 +7,7 @@ import { usePersonaContacts } from "@/shell/PersonaContactsProvider";
 import { RoomMemberInviteField } from "@/components/RoomMemberInviteField";
 import { finishRoomSetupWithInvites } from "@/lib/finishRoomSetup";
 import { useSetupFinishWithInviteReminder } from "@/lib/useSetupFinishWithInviteReminder";
-import { CURRENCY_OPTIONS } from "@/templates/choreboard/lib/format";
+import { CURRENCY_OPTIONS } from "@/lib/format";
 import { ROOMMATE_COLORS } from "../lib/types";
 import { ROOMLEDGER_TEMPLATE_ID } from "../lib/store";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";

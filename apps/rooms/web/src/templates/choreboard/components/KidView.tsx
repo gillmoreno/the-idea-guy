@@ -8,7 +8,7 @@ import { getEffectivePermissions } from "@/templates/choreboard/lib/permissions"
 import { weekRange } from "@/templates/choreboard/lib/store";
 import { resolveFrequencyLimit } from "@/templates/choreboard/lib/frequency";
 import { CATEGORY_META, Category, Difficulty } from "@/templates/choreboard/lib/types";
-import { formatMoney, formatDate } from "@/templates/choreboard/lib/format";
+import { formatMoney, formatDate } from "@/lib/format";
 import { TopbarPersona } from "@/shell/TopbarPersona";
 import { CadencePill, DiffPill, SyncBadge } from "./ui";
 import { EmptyState, MoneyAmount, SectionHeader } from "@/components/kit";

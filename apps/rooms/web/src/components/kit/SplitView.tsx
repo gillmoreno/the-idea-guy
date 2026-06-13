@@ -1,4 +1,4 @@
-import { formatMoney } from "@/templates/choreboard/lib/format";
+import { formatMoney } from "@/lib/format";
 import { PersonChip } from "./PersonChip";
 
 /**
