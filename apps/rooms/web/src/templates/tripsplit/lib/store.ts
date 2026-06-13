@@ -21,6 +21,21 @@ export function todayStr(d = new Date()): string {
   return `${y}-${m}-${day}`;
 }
 
+/**
+ * Return a shares map to persist, or undefined for a plain equal split. Only
+ * uneven splits get a stored map — keeps equal splits as clean data and lets
+ * the math fall back to its weight-1 default.
+ */
+function normalizeShares(
+  splitAmongIds: string[],
+  shares?: Record<string, number>,
+): Record<string, number> | undefined {
+  if (!shares) return undefined;
+  const vals = splitAmongIds.map((id) => shares[id] ?? 1);
+  if (vals.length === 0 || vals.every((w) => w === vals[0])) return undefined;
+  return Object.fromEntries(splitAmongIds.map((id) => [id, shares[id] ?? 1]));
+}
+
 export class TripSplitStore {
   readonly publicDoc: Y.Doc;
   readonly adminDoc: Y.Doc | null;
@@ -117,6 +132,8 @@ export class TripSplitStore {
     amountCents: number;
     paidById: string;
     splitAmongIds: string[];
+    /** Per-traveler weights; omit (or pass equal weights) for a plain equal split. */
+    shares?: Record<string, number>;
     date?: string;
     createdById: string;
   }): Expense {
@@ -130,12 +147,50 @@ export class TripSplitStore {
       createdAt: Date.now(),
       createdById: input.createdById,
     };
+    const shares = normalizeShares(input.splitAmongIds, input.shares);
+    if (shares) expense.shares = shares;
     this.publicDoc.transact(() => {
       const pub = ensureTemplateBranch(this.publicDoc, TRIPSPLIT_TEMPLATE_ID);
       const expenses = ensureNestedMap<Expense>(pub, "expenses");
       expenses.set(expense.id, expense);
     });
     return expense;
+  }
+
+  /**
+   * Overwrite an existing expense's editable fields (description, amount,
+   * payer, split, shares, date). Identity fields — id, createdAt, createdById —
+   * are preserved. No-op if the id is unknown.
+   */
+  updateExpense(
+    id: string,
+    patch: {
+      description: string;
+      amountCents: number;
+      paidById: string;
+      splitAmongIds: string[];
+      shares?: Record<string, number>;
+      date?: string;
+    },
+  ): Expense | null {
+    const existing = this.readExpensesMap()?.get(id);
+    if (!existing) return null;
+    const next: Expense = {
+      ...existing,
+      description: patch.description.trim(),
+      amountCents: patch.amountCents,
+      paidById: patch.paidById,
+      splitAmongIds: [...patch.splitAmongIds],
+      date: patch.date ?? existing.date,
+    };
+    const shares = normalizeShares(patch.splitAmongIds, patch.shares);
+    if (shares) next.shares = shares;
+    else delete next.shares;
+    this.publicDoc.transact(() => {
+      const expenses = this.readExpensesMap();
+      expenses?.set(id, next);
+    });
+    return next;
   }
 
   removeExpense(id: string) {

@@ -16,7 +16,8 @@ import { TRAVELER_COLORS } from "../lib/types";
 import { useTripSplitStore } from "../lib/useTripSplitStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
-import { Avatar, MoneyCents } from "./ui";
+import { MoneyCents } from "./ui";
+import { Avatar } from "@/components/kit";
 
 type Tab = "expenses" | "balances";
 
@@ -25,6 +26,7 @@ export function TripView({ memberId }: { memberId: string }) {
   const store = useTripSplitStore();
   const [tab, setTab] = useState<Tab>("expenses");
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   if (!store) return null;
 
@@ -33,6 +35,7 @@ export function TripView({ memberId }: { memberId: string }) {
   const expenses = store.listExpenses();
   const me = store.getTraveler(memberId);
   const byId = new Map(travelers.map((t) => [t.id, t]));
+  const editingExpense = editingId ? (expenses.find((e) => e.id === editingId) ?? null) : null;
 
   return (
     <div className="app">
@@ -68,17 +71,34 @@ export function TripView({ memberId }: { memberId: string }) {
           <>
             {adding ? (
               <AddExpense
+                key="add-expense"
                 travelers={travelers}
                 currentMemberId={memberId}
+                currency={trip.currency}
                 onDone={() => setAdding(false)}
               />
+            ) : editingExpense ? (
+              <AddExpense
+                key={editingExpense.id}
+                travelers={travelers}
+                currentMemberId={memberId}
+                currency={trip.currency}
+                expense={editingExpense}
+                onDone={() => setEditingId(null)}
+              />
             ) : (
-              <button className="btn btn-primary btn-block" onClick={() => setAdding(true)}>
+              <button
+                className="btn btn-primary btn-block"
+                onClick={() => {
+                  setEditingId(null);
+                  setAdding(true);
+                }}
+              >
                 + Add expense
               </button>
             )}
 
-            {expenses.length === 0 ? (
+            {adding || editingExpense ? null : expenses.length === 0 ? (
               <div className="empty">
                 No expenses yet. Add the first one — dinner, hotel, groceries, anything shared.
               </div>
@@ -87,16 +107,39 @@ export function TripView({ memberId }: { memberId: string }) {
                 {expenses.map((exp) => {
                   const payer = byId.get(exp.paidById);
                   const splitNames = exp.splitAmongIds
-                    .map((id) => byId.get(id)?.name)
+                    .map((id) => {
+                      const name = byId.get(id)?.name;
+                      if (!name) return null;
+                      const w = exp.shares?.[id];
+                      return w && w !== 1 ? `${name} ×${w}` : name;
+                    })
                     .filter(Boolean)
                     .join(", ");
+                  const splitLabel = exp.shares ? "split by shares" : "split";
                   return (
-                    <div key={exp.id} className="card row gap-sm">
-                      <Avatar traveler={payer ?? { id: exp.paidById, name: "?", color: "#ccc", joinedAt: 0 }} />
+                    <div
+                      key={exp.id}
+                      className="card row gap-sm"
+                      role="button"
+                      tabIndex={0}
+                      style={{ cursor: "pointer", textAlign: "left", width: "100%" }}
+                      onClick={() => {
+                        setAdding(false);
+                        setEditingId(exp.id);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setAdding(false);
+                          setEditingId(exp.id);
+                        }
+                      }}
+                    >
+                      <Avatar person={payer ?? { id: exp.paidById, name: "?", color: "#ccc", joinedAt: 0 }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong>{exp.description}</strong>
                         <div className="muted" style={{ fontSize: 13 }}>
-                          {formatDate(exp.date)} · {payer?.name ?? "Someone"} paid · split: {splitNames}
+                          {formatDate(exp.date)} · {payer?.name ?? "Someone"} paid · {splitLabel}: {splitNames}
                         </div>
                       </div>
                       <MoneyCents cents={exp.amountCents} currency={trip.currency} />

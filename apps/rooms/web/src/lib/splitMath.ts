@@ -7,8 +7,51 @@ export interface SplitEntry {
   /** Integer cents to avoid float drift. */
   amountCents: number;
   paidById: string;
-  /** Equal split among these member ids. */
+  /** Members the expense is split between. */
   splitAmongIds: string[];
+  /**
+   * Optional per-member weights (memberId → share count). When present, the
+   * expense splits proportionally to these weights instead of equally; a
+   * member with no entry defaults to 1 share. Absent ⇒ plain equal split.
+   */
+  shares?: Record<string, number>;
+}
+
+/**
+ * Split an amount across members by weight, returning integer cents that sum
+ * exactly to `amountCents`. Leftover cents go to the largest fractional
+ * remainders (ties broken by member order) — the standard largest-remainder
+ * method. With all-equal weights this reproduces a plain equal split.
+ */
+export function allocateShares(
+  amountCents: number,
+  memberIds: string[],
+  shares?: Record<string, number>,
+): Map<string, number> {
+  const result = new Map<string, number>();
+  if (memberIds.length === 0) return result;
+
+  const weights = memberIds.map((id) => {
+    const w = shares?.[id];
+    return Number.isFinite(w) && (w as number) > 0 ? (w as number) : 1;
+  });
+  const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+  if (totalWeight <= 0) return result;
+
+  const parts = memberIds.map((id, i) => {
+    const exact = (amountCents * weights[i]) / totalWeight;
+    const base = Math.floor(exact);
+    return { id, base, frac: exact - base, order: i };
+  });
+
+  const allocated = parts.reduce((sum, p) => sum + p.base, 0);
+  const remainder = amountCents - allocated; // 0 ≤ remainder < memberIds.length
+
+  const byFrac = [...parts].sort((a, b) => b.frac - a.frac || a.order - b.order);
+  for (let k = 0; k < remainder; k++) byFrac[k].base += 1;
+
+  for (const p of parts) result.set(p.id, p.base);
+  return result;
 }
 
 export interface MemberBalance {
@@ -33,16 +76,11 @@ export function computeBalances(
     const splitters = exp.splitAmongIds.filter((id) => nets.has(id));
     if (splitters.length === 0) continue;
 
-    const share = Math.floor(exp.amountCents / splitters.length);
-    let remainder = exp.amountCents - share * splitters.length;
+    const owedByMember = allocateShares(exp.amountCents, splitters, exp.shares);
 
     for (const id of splitters) {
       if (id === exp.paidById) continue;
-      let owed = share;
-      if (remainder > 0) {
-        owed += 1;
-        remainder -= 1;
-      }
+      const owed = owedByMember.get(id) ?? 0;
       nets.set(id, (nets.get(id) ?? 0) - owed);
       nets.set(exp.paidById, (nets.get(exp.paidById) ?? 0) + owed);
     }

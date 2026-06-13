@@ -3,7 +3,8 @@
 import { formatMoney } from "@/templates/choreboard/lib/format";
 import { computeBalances, simplifyDebts } from "../lib/balances";
 import type { Expense, Traveler } from "../lib/types";
-import { Avatar, MoneyCents } from "./ui";
+import { MoneyCents } from "./ui";
+import { Avatar } from "@/components/kit";
 
 export function BalancesPanel({
   travelers,
@@ -45,7 +46,7 @@ export function BalancesPanel({
               if (!t) return null;
               return (
                 <div key={b.memberId} className="card row gap-sm">
-                  <Avatar traveler={t} />
+                  <Avatar person={t} />
                   <div style={{ flex: 1 }}>
                     <strong>{t.name}</strong>
                     <div className="muted" style={{ fontSize: 13 }}>

@@ -17,8 +17,13 @@ export interface Expense {
   /** Stored as integer cents to avoid float drift. */
   amountCents: number;
   paidById: string;
-  /** Equal split among these traveler ids. */
+  /** Travelers this expense is split between. */
   splitAmongIds: string[];
+  /**
+   * Optional per-traveler share weights (travelerId → share count). Absent ⇒
+   * equal split; present ⇒ proportional (e.g. {a:2, b:2, c:1} = divide by 5).
+   */
+  shares?: Record<string, number>;
   date: string;
   createdAt: number;
   createdById: string;

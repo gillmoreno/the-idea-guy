@@ -48,16 +48,17 @@
   <h2>Key flows</h2>
   <ul>
     <li><strong>Create &amp; join</strong> — pick Trip Split, name the trip, add travelers (minimum 2). Share the room code; friends join from the Rooms home screen, and each device picks "who's on this device" via the profile picker. The creator holds the room's admin secret (shell-level role), but all v1 trip data is on the public channel — any traveler can add or delete expenses.</li>
-    <li><strong>Log an expense</strong> — description, amount, who paid, and which travelers it's split among (equal split). Date defaults to today; expenses list newest-first by date then creation time.</li>
+    <li><strong>Log an expense</strong> — description, amount, who paid, and which travelers it's split between. Each traveler in the split has a <strong>shares</strong> stepper (everyone starts at 1 = an equal split); bumping someone's shares makes them carry a proportionally bigger slice — e.g. 2 / 2 / 1 divides the cost by five. The form shows each person's live amount as you adjust. Date defaults to today; expenses list newest-first by date then creation time.</li>
+    <li><strong>Edit or delete an expense</strong> — tap any expense in the list to reopen the same form prefilled (amount, payer, split, shares, date); "Save changes" overwrites it, "Delete expense" removes it. Identity fields (creator, creation time) are preserved on edit; balances recompute from the updated list.</li>
     <li><strong>Check balances</strong> — the Balances tab shows each traveler's net position (positive = others owe them) plus the simplified debt list, e.g. "Ana owes Ben $42.50".</li>
   </ul>
   <p>The UI is two tabs (<code>TripView</code>): <strong>Expenses</strong> and <strong>Balances</strong>, on the shared <code>AppTabBar</code>.</p>
 
   <h2>Balance math</h2>
-  <p>Two pure functions in <code>lib/balances.ts</code> do all the work, recomputed from scratch on every render — there's no stored balance state to drift out of sync:</p>
+  <p>The money logic lives in the shared kit at <code>src/lib/splitMath.ts</code> (re-exported by <code>lib/balances.ts</code> and reused by the Roommate Ledger template). Pure functions, recomputed from scratch on every render — there's no stored balance state to drift out of sync:</p>
   <div class="card">
     <strong>1. computeBalances</strong>
-    For each expense, the amount is split equally among <code>splitAmongIds</code>. Each non-payer's share decreases their net and increases the payer's net by the same amount. (If the payer is in the split, their own share simply cancels out — it's skipped.)
+    For each expense, <code>allocateShares</code> divides the amount across <code>splitAmongIds</code> in proportion to each member's weight in the expense's optional <code>shares</code> map (a member with no entry, or an expense with no <code>shares</code> at all, defaults to weight 1 — i.e. an equal split). Each non-payer's share decreases their net and increases the payer's net by the same amount. (If the payer is in the split, their own share simply cancels out — it's skipped.)
   </div>
   <div class="card">
     <strong>2. simplifyDebts</strong>
@@ -68,7 +69,7 @@
   <ul>
     <li>All amounts are stored as <strong>integer cents</strong> (<code>amountCents</code>) to avoid floating-point drift.</li>
     <li>One currency per trip, chosen at setup (default USD); it's a display label, not converted.</li>
-    <li>Uneven divisions are handled deterministically: each splitter gets <code>floor(amount / n)</code>, and the leftover cents are distributed one each to the first splitters in the list — so a $10.00 three-way split charges 334 / 333 / 333 cents and always sums exactly to the total.</li>
+    <li>Uneven divisions are handled deterministically by the <strong>largest-remainder method</strong> in <code>allocateShares</code>: each splitter gets <code>floor(amount × theirShares / totalShares)</code>, and the leftover cents go one each to the largest fractional remainders (ties broken by member order) — so totals always sum exactly. With all-equal weights this reproduces a plain equal split (a $10.00 three-way split → 334 / 333 / 333 cents); a 2 / 2 / 1 split of $100 → $40 / $40 / $20.</li>
   </ul>
 
   <h2>Data model (Yjs keys)</h2>
@@ -77,27 +78,29 @@
     <tr><th>Key</th><th>Holds</th></tr>
     <tr><td><code>template.tripsplit.trip</code></td><td><code>{ name, currency, createdAt }</code></td></tr>
     <tr><td><code>template.tripsplit.travelers</code></td><td>Map of <code>{ id, name, color, joinedAt }</code></td></tr>
-    <tr><td><code>template.tripsplit.expenses</code></td><td>Map of <code>{ id, description, amountCents, paidById, splitAmongIds[], date, createdAt, createdById }</code></td></tr>
+    <tr><td><code>template.tripsplit.expenses</code></td><td>Map of <code>{ id, description, amountCents, paidById, splitAmongIds[], shares?, date, createdAt, createdById }</code>. <code>shares</code> is an optional <code>{ travelerId: weight }</code> map, persisted only when the split is actually uneven — equal splits omit it entirely.</td></tr>
   </table>
 
   <h2>Notable rules &amp; edge cases</h2>
   <ul>
     <li>Balances ignore split ids that don't match a known traveler (defensive filter in <code>computeBalances</code>), so a removed or unknown id can't corrupt totals.</li>
     <li>Expenses record <code>createdById</code> separately from <code>paidById</code> — anyone can log an expense on someone else's behalf.</li>
-    <li>Deleting an expense is the only mutation besides adding; balances simply recompute.</li>
-    <li>Intentional v1 limits: equal splits only (no shares/percentages), single currency, no recorded settlements (paying someone back doesn't zero the ledger — you'd delete or offset expenses), no categories/receipts, and travelers are added at setup only. Unequal splits, settlements, and mid-trip traveler add are the planned next steps.</li>
+    <li>Expenses can be added, edited, or deleted by anyone in the room; <code>updateExpense</code> preserves <code>id</code>/<code>createdAt</code>/<code>createdById</code> and re-runs <code>normalizeShares</code>, so editing a split back to even drops the stored <code>shares</code> map. Balances always recompute from the current list.</li>
+    <li>Unequal splits are supported via per-traveler <strong>shares</strong> (weights), defaulting to equal; percentages and exact-amount entry are not (shares cover the same cases). Equal splits store no <code>shares</code> map, so expenses logged before this feature keep working unchanged.</li>
+    <li>Remaining intentional limits: single currency, no recorded settlements (paying someone back doesn't zero the ledger — you'd delete or offset expenses), and no categories/receipts. Travelers can be added mid-trip (by name or invite), but settlements are still the planned next step.</li>
   </ul>
 
   <h2>Key code paths</h2>
   <ul>
-    <li><code>apps/rooms/web/src/templates/tripsplit/lib/balances.ts</code> — <code>computeBalances</code> + <code>simplifyDebts</code> (all the money logic).</li>
-    <li><code>apps/rooms/web/src/templates/tripsplit/lib/store.ts</code> — <code>TripSplitStore</code>: Yjs CRUD for trip, travelers, expenses.</li>
+    <li><code>apps/rooms/web/src/lib/splitMath.ts</code> — <code>allocateShares</code>, <code>computeBalances</code> + <code>simplifyDebts</code> (all the money logic; shared with Roommate Ledger).</li>
+    <li><code>apps/rooms/web/src/templates/tripsplit/lib/balances.ts</code> — thin re-export of the shared split math for existing imports.</li>
+    <li><code>apps/rooms/web/src/templates/tripsplit/lib/store.ts</code> — <code>TripSplitStore</code>: Yjs CRUD for trip, travelers, expenses (<code>addExpense</code> / <code>updateExpense</code> / <code>removeExpense</code>, sharing the <code>normalizeShares</code> helper).</li>
     <li><code>apps/rooms/web/src/templates/tripsplit/lib/types.ts</code> — data shapes (integer-cents convention documented here).</li>
     <li><code>apps/rooms/web/src/templates/tripsplit/TripSplitApp.tsx</code> — shell: loading → setup → profile → main.</li>
-    <li><code>apps/rooms/web/src/templates/tripsplit/components/TripView.tsx</code>, <code>AddExpense.tsx</code>, <code>BalancesPanel.tsx</code>, <code>Setup.tsx</code> — tabs and forms.</li>
+    <li><code>apps/rooms/web/src/templates/tripsplit/components/TripView.tsx</code>, <code>AddExpense.tsx</code> (doubles as the edit form via an optional <code>expense</code> prop), <code>BalancesPanel.tsx</code>, <code>Setup.tsx</code> — tabs and forms.</li>
   </ul>
 
-  <p class="footer">Sources: <code>docs_and_changelog/TRIP_SPLIT.md, apps/rooms/web/src/templates/tripsplit/</code> · Last synced 2026-06-10</p>
+  <p class="footer">Sources: <code>docs_and_changelog/TRIP_SPLIT.md, apps/rooms/web/src/templates/tripsplit/, apps/rooms/web/src/lib/splitMath.ts</code> · Last synced 2026-06-13 (edit/delete + shares)</p>
 </article>
 </main>
 </div>

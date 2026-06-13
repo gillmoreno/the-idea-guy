@@ -14,7 +14,7 @@ Trip Split is the second **Rooms** template (after ChoreBoard). Friends on a tri
 |-------------------|---------------|
 | Group | Room (invite code) |
 | Friends | Travelers (set up at create) |
-| Expense | Description, amount, payer, equal split |
+| Expense | Description, amount, payer, split (equal or by per-person shares) |
 | Balances | Net per person + simplified debts |
 | Settle outside app | Shown as “X owes Y $Z” — Venmo/cash/etc. |
 
@@ -27,7 +27,7 @@ Trip Split is the second **Rooms** template (after ChoreBoard). Friends on a tri
 1. **Create** → pick **Trip Split** → name the trip → add travelers (min 2).
 2. **Share** the room code; friends **Join** from the Rooms home screen.
 3. Each device picks **who’s on this device** (profile picker).
-4. Anyone can **add expenses** and view **balances**.
+4. Anyone can **add, edit, or delete expenses** (tap an expense to edit) and view **balances**.
 
 Organizer = room owner with admin secret (same shell model as ChoreBoard).
 
@@ -40,7 +40,8 @@ Public Yjs branch only in v1 (no admin-only trip data yet).
 ```
 template.tripsplit.trip       → { name, currency, createdAt }
 template.tripsplit.travelers  → Map<id, { id, name, color, joinedAt }>
-template.tripsplit.expenses   → Map<id, { description, amountCents, paidById, splitAmongIds, date, … }>
+template.tripsplit.expenses   → Map<id, { description, amountCents, paidById, splitAmongIds, shares?, date, … }>
+                                 # shares?: { travelerId: weight } — present only when the split is uneven
 ```
 
 Amounts stored as **integer cents** to avoid float drift.
@@ -49,7 +50,7 @@ Amounts stored as **integer cents** to avoid float drift.
 
 ## Balance math
 
-1. For each expense, split `amountCents` equally among `splitAmongIds`.
+1. For each expense, `allocateShares` (in `src/lib/splitMath.ts`) splits `amountCents` across `splitAmongIds` in proportion to the optional `shares` weights — defaulting to weight 1 each, i.e. an equal split. Leftover cents use the largest-remainder method so totals sum exactly.
 2. Each non-payer’s share reduces their net balance; payer’s net increases by that share.
 3. **Simplify debts:** greedy match creditors and debtors for minimum “A owes B” lines (Splitwise-style).
 
@@ -57,11 +58,10 @@ Amounts stored as **integer cents** to avoid float drift.
 
 ## v1 limits (intentional)
 
-- Equal split only (no custom shares or percentages).
+- Splits support per-person **shares** (equal by default); no percentage or exact-amount entry.
 - Single currency per trip.
 - No recorded settlements (balances are computed from expenses only).
 - No expense categories or receipts.
-- Travelers added at setup only (no mid-trip add from UI yet).
 
 ---
 
@@ -69,8 +69,9 @@ Amounts stored as **integer cents** to avoid float drift.
 
 | Path | Role |
 |------|------|
-| `templates/tripsplit/lib/store.ts` | Yjs CRUD |
-| `templates/tripsplit/lib/balances.ts` | Net balances + debt simplification |
+| `templates/tripsplit/lib/store.ts` | Yjs CRUD (add / update / remove expense) |
+| `src/lib/splitMath.ts` | `allocateShares` + net balances + debt simplification (shared) |
+| `templates/tripsplit/lib/balances.ts` | Re-export of the shared split math |
 | `templates/tripsplit/TripSplitApp.tsx` | Shell: loading, setup, profile, main |
 | `templates/tripsplit/components/*` | Setup, expenses, balances UI |
 | `templates/registry.ts` | Template picker entry |
