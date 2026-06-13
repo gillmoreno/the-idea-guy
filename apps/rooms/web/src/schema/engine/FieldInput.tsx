@@ -48,6 +48,51 @@ function PersonInput({ value, onChange }: { value: string; onChange: (v: string)
   );
 }
 
+/** Multi-member picker; stores a comma-joined list of member ids. */
+function PersonListInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const store = useSchemaStore();
+  const members = store?.listMembers() ?? [];
+  const selected = value
+    ? value.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+
+  const toggle = (id: string) => {
+    const next = selected.includes(id)
+      ? selected.filter((s) => s !== id)
+      : [...selected, id];
+    onChange(next.join(","));
+  };
+
+  return (
+    <div className="stack-sm">
+      <div className="row gap-sm" style={{ flexWrap: "wrap" }}>
+        {members.map((m) => (
+          <button
+            type="button"
+            key={m.id}
+            className={`btn btn-sm${selected.includes(m.id) ? " btn-primary" : ""}`}
+            aria-pressed={selected.includes(m.id)}
+            onClick={() => toggle(m.id)}
+          >
+            {m.name}
+          </button>
+        ))}
+      </div>
+      <AddPersonByName
+        placeholder="Or add someone by name"
+        hint="No app needed — they claim their name if they join later."
+        existingNames={members.map((m) => m.name)}
+        colors={PERSON_COLORS}
+        onAdd={(p) => {
+          if (!store) return;
+          const member = store.addMember({ name: p.name, color: p.color });
+          onChange([...selected, member.id].join(","));
+        }}
+      />
+    </div>
+  );
+}
+
 export function FieldInput({
   field,
   value,
@@ -57,7 +102,7 @@ export function FieldInput({
   value: string;
   onChange: (value: string) => void;
 }) {
-  const { compactRoom } = useRoomSession();
+  const { compactRoom, roomSchema } = useRoomSession();
 
   if (field.type === "textarea") {
     return (
@@ -76,6 +121,40 @@ export function FieldInput({
 
   if (field.type === "person") {
     return <PersonInput value={value} onChange={onChange} />;
+  }
+
+  if (field.type === "person-list") {
+    return <PersonListInput value={value} onChange={onChange} />;
+  }
+
+  if (field.type === "money") {
+    const currency = (roomSchema?.extensions?.currency as string) || "USD";
+    return (
+      <div className="row gap-sm" style={{ alignItems: "center" }}>
+        <span className="muted">{currency}</span>
+        <input
+          className="input"
+          type="number"
+          inputMode="decimal"
+          step="0.01"
+          min="0"
+          placeholder="0.00"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      </div>
+    );
+  }
+
+  if (field.type === "date") {
+    return (
+      <input
+        className="input"
+        type="date"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
   }
 
   if (field.type === "image") {

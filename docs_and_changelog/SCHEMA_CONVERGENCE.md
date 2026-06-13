@@ -129,7 +129,7 @@ the hard agency apps last. Each row notes the **engine capability** the port req
 
 | # | App | Engine capability needed | Status |
 |---|-----|--------------------------|--------|
-| 1 | **tripsplit** 🧳 | `money` field type · `split`/balance feature (settlement). Kit bricks exist (`MoneyAmount`/`SplitView`/`allocateShares`) — wire them as engine types. | ⏳ **In progress (2026-06-13)** — first port |
+| 1 | **tripsplit** 🧳 | `money`/`date`/`person-list` field types · `balance` feature (settlement). | ✅ **Schema version live ALONGSIDE (2026-06-13)** — catalog `tripsplit-x` "Trip Split (new engine)". Engine grew money/date/person-list + a `balance` feature (`BalancePanel` reuses `splitMath`/`SplitView`/`MoneyAmount`/`StatCard`). `tsc`+`build`+`qa:schema-ui`(×3) green. **Awaiting side-by-side sign-off** before flipping/retiring the bespoke `tripsplit`. _Known gap vs bespoke: engine has no record edit/delete yet, and weighted shares omitted (equal split) — both general engine follow-ups, not tripsplit-specific._ |
 | 2 | roomledger 🏠 | reuse `money` + `split` | todo |
 | 3 | groupfund 🎯 | `money` + goal/total aggregate | todo |
 | 4 | coparent 👪 | `money` + schedule (date); partial agency | todo |
@@ -254,12 +254,18 @@ Track the field/feature types the engine gains, so later ports reuse them.
 
 | Capability | Kind | Added by | Reuses kit | Status |
 |------------|------|----------|-----------|--------|
-| `money` | field type | tripsplit port | `MoneyAmount` | ⏳ |
-| `split` / balance | feature | tripsplit port | `SplitView`, `allocateShares` | ⏳ |
-| `date` | field type | tier 2 | — | todo |
+| `money` | field type | tripsplit port | `MoneyAmount` | ✅ done (engine v2) |
+| `date` | field type | tripsplit port | — | ✅ done (engine v2) |
+| `person-list` | field type | tripsplit port | `SplitView`/`PersonChip` | ✅ done (engine v2) |
+| `balance` / split | feature | tripsplit port | `SplitView`, `allocateShares`, `StatCard` | ✅ done (engine v2) |
 | `rsvp` | feature | whosin | — | todo |
 | `number` | field type | tier 3 | — | todo |
 | `leaderboard` | feature | tier 3 | — | todo |
+
+**Engine bumped to v2** (`CURRENT_ENGINE_VERSION`). Currency comes from
+`schema.extensions.currency` (default USD; tripsplit-x uses EUR). Open follow-ups surfaced
+by this port: schema-driven **currency picker at setup**, **record edit/delete** in the
+engine, and **weighted shares** input for `balance`.
 
 ---
 

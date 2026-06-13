@@ -2,6 +2,46 @@
   "version": 1,
   "templates": [
     {
+      "id": "tripsplit-x",
+      "name": "Trip Split (new engine)",
+      "description": "Shared trip expenses — who paid, split fairly, settle up. Declarative-engine port; runs alongside the classic Trip Split for comparison.",
+      "emoji": "💸",
+      "accent": "#06b6d4",
+      "schema": {
+        "schemaVersion": 1,
+        "engineVersion": 2,
+        "id": "tripsplit-x",
+        "name": "Trip Split (new engine)",
+        "description": "Track shared trip expenses — who paid, who owes whom.",
+        "emoji": "💸",
+        "accent": "#06b6d4",
+        "extensions": { "currency": "EUR" },
+        "collections": [
+          {
+            "id": "expenses",
+            "label": "Expenses",
+            "singular": "expense",
+            "fields": [
+              { "key": "description", "label": "What was it for?", "type": "text", "required": true },
+              { "key": "amount", "label": "Amount", "type": "money", "required": true },
+              { "key": "date", "label": "Date", "type": "date" },
+              { "key": "paidBy", "label": "Paid by", "type": "person", "required": true },
+              { "key": "splitAmong", "label": "Split between", "type": "person-list", "required": true }
+            ],
+            "views": ["list", "add"],
+            "permissions": { "create": "member", "edit": "member" }
+          }
+        ],
+        "features": [
+          {
+            "type": "balance",
+            "collection": "expenses",
+            "fields": { "amount": "amount", "paidBy": "paidBy", "splitAmong": "splitAmong", "date": "date" }
+          }
+        ]
+      }
+    },
+    {
       "id": "potluck",
       "name": "Potluck",
       "description": "Who brings what — dietary tags and headcount for shared meals.",

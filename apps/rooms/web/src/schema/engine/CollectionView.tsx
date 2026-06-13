@@ -9,6 +9,7 @@ import { isImageFieldEmpty } from "@/lib/imageValue";
 import { EmptyState, SectionHeader } from "@/components/kit";
 import { FieldInput } from "./FieldInput";
 import { RecordCard } from "./RecordCard";
+import { BalancePanel } from "./BalancePanel";
 
 function fieldFilled(field: { type: string; required?: boolean }, raw: string): boolean {
   if (!field.required) return true;
@@ -38,7 +39,7 @@ function AddRecordForm({
     for (const f of collection.fields) {
       const raw = (fields[f.key] ?? "").trim();
       if (f.required && !raw) return;
-      if (f.type === "tags") {
+      if (f.type === "tags" || f.type === "person-list") {
         payload[f.key] = raw
           .split(",")
           .map((t) => t.trim())
@@ -122,6 +123,12 @@ export function CollectionView({
     !!statusFeature &&
     (statusFeature.setBy === "member" || (statusFeature.setBy === "owner" && isOwner));
 
+  const currency = (schema.extensions?.currency as string) || "USD";
+  const balanceFeature = getFeatures(schema, "balance").find(
+    (f): f is Extract<FeatureDef, { type: "balance" }> =>
+      f.type === "balance" && (f as { collection?: string }).collection === collectionId,
+  );
+
   return (
     <div className="stack">
       <SectionHeader
@@ -162,9 +169,12 @@ export function CollectionView({
           statusBy={rec.statusById ? store.getMember(rec.statusById) : null}
           createdBy={store.getMember(rec.createdById)}
           members={store.listMembers()}
+          currency={currency}
           onStatusChange={(s) => store.setRecordStatus(collectionId, rec.id, s, memberId)}
         />
       ))}
+
+      {balanceFeature && <BalancePanel feature={balanceFeature} currency={currency} />}
     </div>
   );
 }

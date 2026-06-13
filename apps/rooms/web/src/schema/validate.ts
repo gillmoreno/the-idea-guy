@@ -63,9 +63,22 @@ function validateFeature(
   if (!isRecord(f) || typeof f.type !== "string") {
     return [issue(`features[${index}]`, "Feature must have a type")];
   }
-  if (f.type === "votes" || f.type === "status") {
+  if (f.type === "votes" || f.type === "status" || f.type === "balance") {
     if (typeof f.collection !== "string" || !collectionIds.has(f.collection)) {
       issues.push(issue(`features[${index}].collection`, "Must reference an existing collection id"));
+    }
+  }
+  if (f.type === "balance") {
+    const flds = (f as { fields?: unknown }).fields;
+    if (
+      !isRecord(flds) ||
+      typeof flds.amount !== "string" ||
+      typeof flds.paidBy !== "string" ||
+      typeof flds.splitAmong !== "string"
+    ) {
+      issues.push(
+        issue(`features[${index}].fields`, "Balance needs fields.amount, fields.paidBy, fields.splitAmong"),
+      );
     }
   }
   if (f.type === "status") {

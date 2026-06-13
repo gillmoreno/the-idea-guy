@@ -7,10 +7,23 @@
  */
 
 export const CURRENT_SCHEMA_VERSION = 1;
-export const CURRENT_ENGINE_VERSION = 1;
+// v2: adds money/date/person-list field types + the `balance` feature (TripSplit port).
+export const CURRENT_ENGINE_VERSION = 2;
 
 /** Built-in field bricks — extend over time; unknown types render as read-only text. */
-export type KnownFieldType = "text" | "textarea" | "tags" | "emoji" | "image" | "person";
+export type KnownFieldType =
+  | "text"
+  | "textarea"
+  | "tags"
+  | "emoji"
+  | "image"
+  | "person"
+  /** Decimal amount stored as a major-units string; rendered via kit MoneyAmount. */
+  | "money"
+  /** Calendar date stored as a `YYYY-MM-DD` string. */
+  | "date"
+  /** Multiple member ids (stored as string[]); rendered via kit SplitView. */
+  | "person-list";
 
 export interface FieldDef {
   key: string;
@@ -45,6 +58,21 @@ export type FeatureDef =
       collection: string;
       values: StatusValue[];
       setBy: "owner" | "member";
+    }
+  | {
+      /**
+       * Expense-splitting: computes who-owes-whom across a collection and renders
+       * a balances/settle-up panel. `fields` maps to the record field keys that
+       * hold the amount (money), payer (person) and participants (person-list).
+       */
+      type: "balance";
+      collection: string;
+      fields: {
+        amount: string;
+        paidBy: string;
+        splitAmong: string;
+        date?: string;
+      };
     }
   | { type: string; [key: string]: unknown };
 
