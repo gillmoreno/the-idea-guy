@@ -17,7 +17,7 @@ import type { Parent, Stay } from "../lib/types";
 import { PARENT_COLORS, overlappingStayIds, stayOn, staysOverlap } from "../lib/types";
 import { todayStr } from "../lib/store";
 import { useCoParentStore } from "../lib/useCoParentStore";
-import { Avatar } from "@/components/kit";
+import { Avatar, RecordRow } from "@/components/kit";
 import { MoneyTab } from "./MoneyTab";
 
 type Tab = "schedule" | "updates" | "money";
@@ -123,31 +123,26 @@ export function MainView({ memberId }: { memberId: string }) {
   const renderStay = (s: Stay) => {
     const parent = byId.get(s.parentId);
     return (
-      <div
+      <RecordRow
         key={s.id}
-        className="card row gap-sm"
-        style={{
-          alignItems: "center",
-          ...(clashes.has(s.id) ? { borderColor: "var(--danger, #dc2626)" } : {}),
-        }}
-      >
-        {parent && <Avatar person={parent} />}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <strong>
-            {formatDate(s.start)} – {formatDate(s.end)}
-          </strong>
-          <div className="muted" style={{ fontSize: 13 }}>
+        style={clashes.has(s.id) ? { borderColor: "var(--danger, #dc2626)" } : undefined}
+        leading={parent ? <Avatar person={parent} /> : undefined}
+        title={`${formatDate(s.start)} – ${formatDate(s.end)}`}
+        meta={
+          <>
             with {parent?.name ?? "someone"}
             {s.note ? ` · ${s.note}` : ""}
             {clashes.has(s.id) ? " · ⚠️ overlaps" : ""}
-          </div>
-        </div>
-        {s.parentId === memberId && (
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => store.removeStay(s.id)}>
-            Remove
-          </button>
-        )}
-      </div>
+          </>
+        }
+        trailing={
+          s.parentId === memberId ? (
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => store.removeStay(s.id)}>
+              Remove
+            </button>
+          ) : undefined
+        }
+      />
     );
   };
 
