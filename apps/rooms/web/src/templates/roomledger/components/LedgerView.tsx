@@ -17,8 +17,7 @@ import { ROOMMATE_COLORS } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
-import { MoneyCents } from "./ui";
-import { Avatar } from "@/components/kit";
+import { Avatar, MoneyAmount } from "@/components/kit";
 
 type Tab = "expenses" | "balances";
 
@@ -127,7 +126,7 @@ export function LedgerView({ memberId }: { memberId: string }) {
                               {formatDate(entry.date)} · settle-up
                             </div>
                           </div>
-                          <MoneyCents cents={entry.amountCents} currency={house.currency} />
+                          <MoneyAmount cents={entry.amountCents} currency={house.currency} />
                         </div>
                       );
                     }
@@ -148,7 +147,7 @@ export function LedgerView({ memberId }: { memberId: string }) {
                             {payer?.name ?? "Someone"} paid · split: {splitNames}
                           </div>
                         </div>
-                        <MoneyCents cents={entry.amountCents} currency={house.currency} />
+                        <MoneyAmount cents={entry.amountCents} currency={house.currency} />
                       </div>
                     );
                   })}

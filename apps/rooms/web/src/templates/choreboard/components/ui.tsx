@@ -2,12 +2,6 @@
 
 import { formatFrequencyCadence } from "@/templates/choreboard/lib/frequency";
 import { ChoreFrequencyLimit, DIFFICULTY_META, Difficulty } from "@/templates/choreboard/lib/types";
-import { formatMoney } from "@/templates/choreboard/lib/format";
-
-export function Money({ amount, currency }: { amount: number; currency: string }) {
-  const cls = amount < 0 ? "amount-neg" : "amount-pos";
-  return <span className={cls}>{formatMoney(amount, currency)}</span>;
-}
 
 export function DiffPill({ difficulty }: { difficulty: Difficulty }) {
   return (

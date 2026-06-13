@@ -713,6 +713,7 @@ textarea.input {
   justify-content: space-between;
   gap: 10px;
 }
+.money { font-variant-numeric: tabular-nums; }
 .amount-pos { color: var(--success); font-weight: 700; }
 .amount-neg { color: var(--danger); font-weight: 700; }
 

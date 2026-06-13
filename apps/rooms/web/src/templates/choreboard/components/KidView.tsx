@@ -10,7 +10,8 @@ import { resolveFrequencyLimit } from "@/templates/choreboard/lib/frequency";
 import { CATEGORY_META, Category, Difficulty } from "@/templates/choreboard/lib/types";
 import { formatMoney, formatDate } from "@/templates/choreboard/lib/format";
 import { TopbarPersona } from "@/shell/TopbarPersona";
-import { CadencePill, DiffPill, Money, SyncBadge } from "./ui";
+import { CadencePill, DiffPill, SyncBadge } from "./ui";
+import { MoneyAmount } from "@/components/kit";
 
 export function KidView({ memberId }: { memberId: string }) {
   const { sync, version } = useRoomSession();
@@ -138,7 +139,7 @@ export function KidView({ memberId }: { memberId: string }) {
                     {c.kind === "penalty" ? "Penalty" : c.status}
                   </span>
                   {perms.seeChoreRewards && (
-                    <Money amount={c.amount} currency={currency} />
+                    <MoneyAmount amount={c.amount} currency={currency} />
                   )}
                 </div>
               ))}

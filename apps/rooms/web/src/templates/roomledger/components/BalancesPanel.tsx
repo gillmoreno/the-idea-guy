@@ -4,8 +4,7 @@ import { formatMoney } from "@/templates/choreboard/lib/format";
 import { computeBalances, simplifyDebts } from "@/lib/splitMath";
 import type { LedgerEntry, Roommate } from "../lib/types";
 import { useRoomLedgerStore } from "../lib/useRoomLedgerStore";
-import { MoneyCents } from "./ui";
-import { Avatar } from "@/components/kit";
+import { Avatar, MoneyAmount } from "@/components/kit";
 
 export function BalancesPanel({
   roommates,
@@ -59,7 +58,7 @@ export function BalancesPanel({
                       {b.netCents > 0 ? "gets back" : "owes"}
                     </div>
                   </div>
-                  <MoneyCents cents={Math.abs(b.netCents)} currency={currency} />
+                  <MoneyAmount cents={Math.abs(b.netCents)} currency={currency} />
                 </div>
               );
             })}
@@ -85,7 +84,7 @@ export function BalancesPanel({
                     <span className="muted"> owes </span>
                     <strong>{to.name}</strong>
                     <div style={{ marginTop: 4 }}>
-                      <MoneyCents cents={d.amountCents} currency={currency} />
+                      <MoneyAmount cents={d.amountCents} currency={currency} />
                     </div>
                   </div>
                   <button

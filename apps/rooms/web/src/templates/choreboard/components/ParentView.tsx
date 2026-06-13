@@ -23,8 +23,8 @@ import { CATEGORY_META, MEMBER_COLORS, Role } from "@/templates/choreboard/lib/t
 import { formatMoney, formatDate, weekdayName } from "@/templates/choreboard/lib/format";
 import { TopbarPersona } from "@/shell/TopbarPersona";
 import { BottomNav, BottomNavItem } from "@/shell/BottomNav";
-import { CadencePill, DiffPill, Money, SyncBadge } from "./ui";
-import { Avatar } from "@/components/kit";
+import { CadencePill, DiffPill, SyncBadge } from "./ui";
+import { Avatar, MoneyAmount } from "@/components/kit";
 import { ChoreForm } from "./ChoreForm";
 import { ConfirmModal } from "@/components/ConfirmModal";
 
@@ -111,7 +111,7 @@ function HomeTab() {
             </div>
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: 12 }} className="muted">Owed</div>
-              <Money amount={store.balanceFor(k.id)} currency={currency} />
+              <MoneyAmount amount={store.balanceFor(k.id)} currency={currency} />
             </div>
           </div>
         ))}
@@ -170,7 +170,7 @@ function ApprovalsTab({ byId }: { byId: string }) {
                     </p>
                   )}
                 </div>
-                <Money amount={c.amount} currency={currency} />
+                <MoneyAmount amount={c.amount} currency={currency} />
               </div>
               <div className="btn-row">
                 <button className="btn btn-success btn-sm" onClick={() => void checkAndApprove(c)}>
@@ -316,7 +316,7 @@ function PaydayTab({ byId }: { byId: string }) {
                 <div className="title" style={{ fontWeight: 600 }}>{k.name}</div>
               </div>
               <div className="card-row" style={{ gap: 12 }}>
-                <Money amount={owed} currency={currency} />
+                <MoneyAmount amount={owed} currency={currency} />
                 <button
                   className="btn btn-success btn-sm"
                   disabled={owed <= 0}
@@ -341,7 +341,7 @@ function PaydayTab({ byId }: { byId: string }) {
                 <div className="title" style={{ fontSize: 14 }}>{kid?.name ?? "?"}</div>
                 <div className="desc">Paid {formatDate(p.paidDate)}</div>
               </div>
-              <Money amount={p.total} currency={currency} />
+              <MoneyAmount amount={p.total} currency={currency} />
             </div>
           );
         })}

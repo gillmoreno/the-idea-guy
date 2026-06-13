@@ -16,8 +16,7 @@ import { TRAVELER_COLORS } from "../lib/types";
 import { useTripSplitStore } from "../lib/useTripSplitStore";
 import { AddExpense } from "./AddExpense";
 import { BalancesPanel } from "./BalancesPanel";
-import { MoneyCents } from "./ui";
-import { Avatar } from "@/components/kit";
+import { Avatar, MoneyAmount } from "@/components/kit";
 
 type Tab = "expenses" | "balances";
 
@@ -142,7 +141,7 @@ export function TripView({ memberId }: { memberId: string }) {
                           {formatDate(exp.date)} · {payer?.name ?? "Someone"} paid · {splitLabel}: {splitNames}
                         </div>
                       </div>
-                      <MoneyCents cents={exp.amountCents} currency={trip.currency} />
+                      <MoneyAmount cents={exp.amountCents} currency={trip.currency} />
                     </div>
                   );
                 })}

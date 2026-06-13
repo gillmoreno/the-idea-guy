@@ -6,3 +6,4 @@
  * Import from `@/components/kit`, never re-implement.
  */
 export { Avatar } from "./Avatar";
+export { MoneyAmount } from "./MoneyAmount";
