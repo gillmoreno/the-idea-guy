@@ -99,6 +99,16 @@
         </div>
         <p>The container is exposed through a cloudflared tunnel. <code>relay.the-idea-guy.com</code> also points at the same bundle so the legacy standalone ChoreBoard app keeps working, and the relay reuses the existing persistent room-data volume (<code>relay_choreboard-relay-data</code>) so no rooms were lost in the migration. Deploying is one command: <code>deploy/rooms/redeploy.sh</code> rebuilds, restarts, and health-checks the bundle.</p>
 
+        <h2>The PWA shell: offline, updates &amp; splash</h2>
+        <p>Because there is no server-side app, the installed PWA <em>is</em> the product, and three of its behaviours are deliberate rather than accidental:</p>
+        <p><strong>Offline-first service worker.</strong> <code>public/sw.js</code> precaches the app shell and serves assets cache-first (navigations are network-first with a cached <code>/</code> fallback), so a room opens with no network. It never touches the relay origin or <code>/sync</code> — encrypted sync is left entirely to the WebSocket.</p>
+        <div class="card">
+          <p><strong>Self-updating without app-store friction.</strong> The single Docker bundle means front-end and relay always share one version, so the app only needs to answer one question: "am I running the latest build?" Each build stamps a version (the git sha, or a timestamp fallback) into three places — the cache name inside <code>sw.js</code>, a <code>/version.json</code> beacon served <code>no-cache</code>, and a <code>NEXT_PUBLIC_APP_VERSION</code> constant baked into the bundle. Stamping the cache name is the crucial part: it makes <code>sw.js</code> byte-different on every deploy, which is what makes the browser actually notice a new worker (a static cache name silently pins users to a stale build forever — the original bug this fixed).</p>
+        </div>
+        <p><code>AppUpdater</code> detects an update two ways — the service-worker lifecycle (a new worker reaching <em>installed</em> while one already controls the page) and a periodic <code>/version.json</code> poll compared against the baked-in version. The new worker <em>waits</em> rather than auto-activating, so the app controls timing: it shows an unobtrusive "Update" toast and also auto-applies on refocus or next cold start, then reloads once the new worker takes control. Reloading is always safe because room state is CRDT-synced, not held in volatile page memory. A subtle build-version label on the home screen lets a user confirm at a glance which build they're on.</p>
+        <p><strong>Launch splash, once per session.</strong> The branded indigo splash (<code>SplashScreen</code>, standalone-display only) is a cold-open moment, not a per-screen interruption. A <code>sessionStorage</code> flag — read before first paint by an inline gate in the root layout — suppresses it on reloads and in-app navigation; only a genuine new session (the user fully reopening the app) replays it.</p>
+        <p>Version stamping is wired through the build: <code>prebuild</code> (<code>scripts/compute-version.mjs</code>) writes <code>.build-version</code> and <code>public/version.json</code>; <code>next.config.js</code> bakes <code>NEXT_PUBLIC_APP_VERSION</code>; <code>postbuild</code> (<code>scripts/stamp-sw.mjs</code>) patches the exported <code>sw.js</code>; and <code>redeploy.sh</code> passes the git sha into the Docker build.</p>
+
         <h2>URLs, ports &amp; dev commands</h2>
         <p>All routes are client-side in a Next.js 15 static export: <code>/</code> (my rooms), <code>/create</code>, <code>/join</code>, <code>/room#c={roomCode}</code>, plus <code>/profile</code>, <code>/contacts</code>, and <code>/schema</code>. Secrets like admin keys ride in the URL <em>hash</em> so they never reach CDN or server logs. Two newer link conventions follow the same rule: contact "add me" links put the whole contact card in the hash of <code>/contacts</code> (so a phone camera scan opens the app and auto-sends the connection request — the QR code and the copy button share the exact same URL), and member/admin invite links can carry a one-bit <code>pp=1</code> hash flag signalling the room is passphrase-protected, never the passphrase itself. The <code>/join</code> page can also scan an invite QR with the camera and auto-join on a valid scan, using the shared <code>QRScanner</code> component (generic, filter-by-callback; the contact scanner is a thin wrapper around it).</p>
         <div class="card">
@@ -124,7 +134,11 @@
           <li><code>apps/rooms/web/src/templates/TemplateApp.tsx</code> — mounts templates; gates on the deletion tombstone</li>
           <li><code>apps/rooms/web/src/templates/registry.ts</code> — template registry (the one place new templates register)</li>
           <li><code>apps/rooms/web/src/templates/</code> — template plugins (choreboard, tripsplit, bookclub, backlog, fitcrew)</li>
-          <li><code>apps/rooms/web/src/app/</code> — client-side routes (home, create, join, room, profile)</li>
+          <li><code>apps/rooms/web/src/app/</code> — client-side routes (home, create, join, room, profile); root layout hosts the splash gate, <code>SplashScreen</code> and <code>AppUpdater</code></li>
+          <li><code>apps/rooms/web/src/shell/AppUpdater.tsx</code> — service-worker registration + update detection (SW lifecycle + <code>/version.json</code> poll), update toast, auto-apply on refocus</li>
+          <li><code>apps/rooms/web/src/shell/SplashScreen.tsx</code> — once-per-session branded launch splash</li>
+          <li><code>apps/rooms/web/public/sw.js</code> — offline-first worker; cache name stamped per build for update detection</li>
+          <li><code>apps/rooms/web/scripts/compute-version.mjs</code> + <code>scripts/stamp-sw.mjs</code> — build-version stamping (prebuild/postbuild)</li>
           <li><code>packages/room-kit/src/</code> — shared crypto, sync, vault, invites, relay protocol, types</li>
           <li><code>packages/room-kit/src/links.ts</code> — invite/contact deep links (hash-only secrets, <code>pp</code> flag, contact-add URLs)</li>
           <li><code>apps/rooms/web/src/components/QRScanner.tsx</code> — shared camera QR scanner (invite + contact scanning)</li>
@@ -133,7 +147,7 @@
           <li><code>apps/rooms/Makefile</code> — dev/preview commands</li>
         </ul>
 
-        <p class="footer">Sources: <code>docs_and_changelog/ROOM_KIT.md, docs_and_changelog/ROOM_KIT_ARCHITECTURE.md, docs_and_changelog/ARCHITECTURE.md, apps/rooms/web/package.json, apps/rooms/web/src/templates/registry.ts, packages/room-kit/src/types.ts, packages/room-kit/src/links.ts, apps/rooms/web/src/components/QRScanner.tsx, apps/rooms/web/src/shell/RoomSessionProvider.tsx, apps/rooms/web/src/shell/roomMeta.ts, apps/rooms/web/src/shell/RoomDangerZone.tsx, apps/rooms/web/src/shell/RoomDeleted.tsx, apps/rooms/web/src/templates/TemplateApp.tsx, deploy/rooms/</code> · Last synced 2026-06-11</p>
+        <p class="footer">Sources: <code>docs_and_changelog/ROOM_KIT.md, docs_and_changelog/ROOM_KIT_ARCHITECTURE.md, docs_and_changelog/ARCHITECTURE.md, apps/rooms/web/package.json, apps/rooms/web/src/templates/registry.ts, packages/room-kit/src/types.ts, packages/room-kit/src/links.ts, apps/rooms/web/src/components/QRScanner.tsx, apps/rooms/web/src/shell/RoomSessionProvider.tsx, apps/rooms/web/src/shell/roomMeta.ts, apps/rooms/web/src/shell/RoomDangerZone.tsx, apps/rooms/web/src/shell/RoomDeleted.tsx, apps/rooms/web/src/templates/TemplateApp.tsx, apps/rooms/web/src/shell/AppUpdater.tsx, apps/rooms/web/src/shell/SplashScreen.tsx, apps/rooms/web/public/sw.js, deploy/rooms/</code> · Last synced 2026-06-14</p>
       </article>
     </main>
   </div>
