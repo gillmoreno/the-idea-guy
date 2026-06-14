@@ -98,6 +98,17 @@ export interface SchemaMember {
   joinedAt: number;
 }
 
+/** One entry in a record's change log — who did what, when, and optionally why. */
+export interface RecordRevision {
+  at: number;
+  byId: string;
+  action: "created" | "updated" | "status";
+  /** Field keys that changed (for `updated`), or the new status id (for `status`). */
+  changed?: string[];
+  /** Optional human note — the "why" behind the change. */
+  note?: string;
+}
+
 export interface SchemaRecord {
   id: string;
   collectionId: string;
@@ -108,6 +119,11 @@ export interface SchemaRecord {
   /** Member who last set `status` (older records/engines: undefined). */
   statusById?: string;
   statusAt?: number;
+  /** Last modification (older records: undefined ⇒ never edited since create). */
+  updatedAt?: number;
+  updatedById?: string;
+  /** Append-only change log; oldest first. Older records may lack it. */
+  history?: RecordRevision[];
 }
 
 export interface ValidationIssue {

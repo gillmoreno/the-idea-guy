@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRoomSession } from "@/shell/RoomSessionProvider";
 import { getCollection, getFeatures } from "@/schema/validate";
-import type { CollectionDef, FeatureDef, RoomSchema } from "@/schema/types";
+import type { CollectionDef, FeatureDef, RoomSchema, SchemaRecord } from "@/schema/types";
 import { useSchemaStore } from "@/schema/useSchemaStore";
 import { isImageFieldEmpty } from "@/lib/imageValue";
 import { EmptyState, SectionHeader } from "@/components/kit";
@@ -20,18 +20,25 @@ function fieldFilled(field: { type: string; required?: boolean }, raw: string): 
 function AddRecordForm({
   collection,
   memberId,
+  record,
   onDone,
 }: {
   collection: CollectionDef;
   memberId: string;
+  record?: SchemaRecord;
   onDone: () => void;
 }) {
   const store = useSchemaStore();
+  const editing = !!record;
   const [fields, setFields] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
-    for (const f of collection.fields) init[f.key] = "";
+    for (const f of collection.fields) {
+      const v = record?.fields[f.key];
+      init[f.key] = Array.isArray(v) ? v.join(", ") : typeof v === "string" ? v : "";
+    }
     return init;
   });
+  const [note, setNote] = useState("");
 
   const submit = () => {
     if (!store) return;
@@ -48,16 +55,20 @@ function AddRecordForm({
         payload[f.key] = raw;
       }
     }
-    const statusFeature = getFeatures(store.schema, "status").find(
-      (sf): sf is Extract<FeatureDef, { type: "status" }> =>
-        sf.type === "status" && sf.collection === collection.id,
-    );
-    const defaultStatus = statusFeature?.values[0]?.id;
-    store.addRecord(collection.id, {
-      fields: payload,
-      createdById: memberId,
-      status: defaultStatus,
-    });
+    if (editing && record) {
+      store.updateRecord(collection.id, record.id, payload, memberId, note);
+    } else {
+      const statusFeature = getFeatures(store.schema, "status").find(
+        (sf): sf is Extract<FeatureDef, { type: "status" }> =>
+          sf.type === "status" && sf.collection === collection.id,
+      );
+      const defaultStatus = statusFeature?.values[0]?.id;
+      store.addRecord(collection.id, {
+        fields: payload,
+        createdById: memberId,
+        status: defaultStatus,
+      });
+    }
     onDone();
   };
 
@@ -65,7 +76,9 @@ function AddRecordForm({
 
   return (
     <div className="card stack">
-      <div className="section-title">Add {collection.singular ?? collection.label}</div>
+      <div className="section-title">
+        {editing ? "Edit" : "Add"} {collection.singular ?? collection.label}
+      </div>
       {collection.fields.map((f) => (
         <div key={f.key} className="field">
           <label>
@@ -79,9 +92,20 @@ function AddRecordForm({
           />
         </div>
       ))}
+      {editing && (
+        <div className="field">
+          <label>Reason for change (optional)</label>
+          <input
+            className="input"
+            value={note}
+            placeholder="e.g. fixed the amount"
+            onChange={(e) => setNote(e.target.value)}
+          />
+        </div>
+      )}
       <div className="row gap-sm">
         <button className="btn btn-primary" type="button" disabled={!canSubmit} onClick={submit}>
-          Add
+          {editing ? "Save changes" : "Add"}
         </button>
         <button className="btn" type="button" onClick={onDone}>
           Cancel
@@ -103,10 +127,14 @@ export function CollectionView({
   const { isOwner, version } = useRoomSession();
   const store = useSchemaStore();
   const [adding, setAdding] = useState(false);
+  const [editing, setEditing] = useState<SchemaRecord | null>(null);
   void version;
 
   const collection = getCollection(schema, collectionId);
   if (!store || !collection) return null;
+
+  const canEdit =
+    !collection.permissions?.edit || collection.permissions.edit === "member" || isOwner;
 
   const voteFeature = getFeatures(schema, "votes").some((f) => f.collection === collectionId);
   const statusFeature = getFeatures(schema, "status").find(
@@ -134,7 +162,7 @@ export function CollectionView({
       <SectionHeader
         title={collection.label}
         action={
-          !adding ? (
+          !adding && !editing ? (
             <button className="btn btn-sm btn-primary" type="button" onClick={() => setAdding(true)}>
               + Add
             </button>
@@ -142,11 +170,15 @@ export function CollectionView({
         }
       />
 
-      {adding && (
+      {(adding || editing) && (
         <AddRecordForm
           collection={collection}
           memberId={memberId}
-          onDone={() => setAdding(false)}
+          record={editing ?? undefined}
+          onDone={() => {
+            setAdding(false);
+            setEditing(null);
+          }}
         />
       )}
 
@@ -171,6 +203,23 @@ export function CollectionView({
           members={store.listMembers()}
           currency={currency}
           onStatusChange={(s) => store.setRecordStatus(collectionId, rec.id, s, memberId)}
+          onEdit={
+            canEdit
+              ? () => {
+                  setEditing(rec);
+                  setAdding(false);
+                }
+              : undefined
+          }
+          onDelete={
+            canEdit
+              ? () => {
+                  if (window.confirm("Delete this entry? This can't be undone.")) {
+                    store.removeRecord(collectionId, rec.id);
+                  }
+                }
+              : undefined
+          }
         />
       ))}
 

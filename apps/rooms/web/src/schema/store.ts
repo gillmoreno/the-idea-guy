@@ -134,13 +134,15 @@ export class SchemaStore {
     collectionId: string,
     input: { fields: Record<string, string | string[]>; createdById: string; status?: string },
   ): SchemaRecord {
+    const now = Date.now();
     const record: SchemaRecord = {
       id: uid("r_"),
       collectionId,
-      createdAt: Date.now(),
+      createdAt: now,
       createdById: input.createdById,
       fields: input.fields,
       status: input.status,
+      history: [{ at: now, byId: input.createdById, action: "created" }],
     };
     this.publicDoc.transact(() => {
       const pub = ensureTemplateBranch(this.publicDoc, SCHEMA_BRANCH_ID);
@@ -155,14 +157,79 @@ export class SchemaStore {
     return record;
   }
 
-  setRecordStatus(collectionId: string, recordId: string, status: string, memberId?: string) {
+  getRecord(collectionId: string, recordId: string): SchemaRecord | null {
+    return this.readRecordsMap(collectionId)?.get(recordId) ?? null;
+  }
+
+  /** Append-only history fallback for records created before the history field. */
+  private historyOf(record: SchemaRecord): SchemaRecord["history"] {
+    return (
+      record.history ?? [{ at: record.createdAt, byId: record.createdById, action: "created" }]
+    );
+  }
+
+  /** Edit a record's fields; stamps updatedAt/By and appends a revision. */
+  updateRecord(
+    collectionId: string,
+    recordId: string,
+    fields: Record<string, string | string[]>,
+    memberId: string,
+    note?: string,
+  ): SchemaRecord | null {
     const record = this.readRecordsMap(collectionId)?.get(recordId);
-    if (!record) return;
+    if (!record) return null;
+    const now = Date.now();
+    const changed = Object.keys(fields).filter(
+      (k) => JSON.stringify(record.fields[k]) !== JSON.stringify(fields[k]),
+    );
+    const updated: SchemaRecord = {
+      ...record,
+      fields: { ...record.fields, ...fields },
+      updatedAt: now,
+      updatedById: memberId,
+      history: [
+        ...(this.historyOf(record) ?? []),
+        { at: now, byId: memberId, action: "updated", changed, note: note?.trim() || undefined },
+      ],
+    };
     this.publicDoc.transact(() => {
       const pub = ensureTemplateBranch(this.publicDoc, SCHEMA_BRANCH_ID);
       const data = ensureNestedMap(pub, "data");
       const bucket = ensureNestedMap<SchemaRecord>(data, collectionId);
-      bucket.set(recordId, { ...record, status, statusById: memberId, statusAt: Date.now() });
+      bucket.set(recordId, updated);
+    });
+    return updated;
+  }
+
+  removeRecord(collectionId: string, recordId: string): void {
+    this.publicDoc.transact(() => {
+      const pub = ensureTemplateBranch(this.publicDoc, SCHEMA_BRANCH_ID);
+      const data = ensureNestedMap(pub, "data");
+      const bucket = ensureNestedMap<SchemaRecord>(data, collectionId);
+      bucket.delete(recordId);
+    });
+  }
+
+  setRecordStatus(collectionId: string, recordId: string, status: string, memberId?: string) {
+    const record = this.readRecordsMap(collectionId)?.get(recordId);
+    if (!record) return;
+    const now = Date.now();
+    this.publicDoc.transact(() => {
+      const pub = ensureTemplateBranch(this.publicDoc, SCHEMA_BRANCH_ID);
+      const data = ensureNestedMap(pub, "data");
+      const bucket = ensureNestedMap<SchemaRecord>(data, collectionId);
+      bucket.set(recordId, {
+        ...record,
+        status,
+        statusById: memberId,
+        statusAt: now,
+        updatedAt: now,
+        updatedById: memberId,
+        history: [
+          ...(this.historyOf(record) ?? []),
+          { at: now, byId: memberId ?? record.createdById, action: "status", changed: [status] },
+        ],
+      });
     });
   }
 

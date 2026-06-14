@@ -263,9 +263,18 @@ Track the field/feature types the engine gains, so later ports reuse them.
 | `leaderboard` | feature | tier 3 | — | todo |
 
 **Engine bumped to v2** (`CURRENT_ENGINE_VERSION`). Currency comes from
-`schema.extensions.currency` (default USD; tripsplit-x uses EUR). Open follow-ups surfaced
-by this port: schema-driven **currency picker at setup**, **record edit/delete** in the
-engine, and **weighted shares** input for `balance`.
+`schema.extensions.currency` (default USD; tripsplit-x uses EUR).
+
+✅ **Record edit/delete + git-like history shipped engine-wide (2026-06-14):** every
+declarative record now tracks `updatedAt`/`updatedById` and an append-only `history`
+(who · when · what changed · optional "why" note). RecordCard shows "Updated by …" + a
+"History (n)" expander; the add form doubles as an edit form with a reason field;
+`store.updateRecord`/`removeRecord`/`getRecord`. Applies to **all** declarative rooms, so
+every ported room inherits change history. _CRDT note: history is a JSON array on the record
+(whole-record LWW, like status) — fine for low single-record concurrency; a Y.Array per
+record is the upgrade if concurrent edits to one record become common._ Remaining
+follow-ups: schema-driven **currency picker at setup**, **weighted shares** for `balance`,
+and **inline person-creation discoverability** in person fields (verify the reported gap).
 
 ---
 

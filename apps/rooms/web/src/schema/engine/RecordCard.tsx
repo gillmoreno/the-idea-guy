@@ -137,6 +137,8 @@ export function RecordCard({
   members,
   currency = "USD",
   onStatusChange,
+  onEdit,
+  onDelete,
 }: {
   record: SchemaRecord;
   collection: CollectionDef;
@@ -154,6 +156,10 @@ export function RecordCard({
   /** Currency for money fields; defaults to USD when not supplied (e.g. preview). */
   currency?: string;
   onStatusChange: (status: string) => void;
+  /** When provided, an Edit button appears (opens the edit form). */
+  onEdit?: () => void;
+  /** When provided, a Delete button appears (caller confirms). */
+  onDelete?: () => void;
 }) {
   const titleKey = titleField(collection)?.key ?? "title";
   const title = fieldValue(record, titleKey) || "Untitled";
@@ -230,6 +236,57 @@ export function RecordCard({
         <p className="schema-record__created-by">
           Added by <PersonChip person={createdBy} /> · {formatRelativeTime(record.createdAt)}
         </p>
+      )}
+
+      {record.updatedAt && record.updatedAt !== record.createdAt && (
+        <p className="schema-record__created-by">
+          Updated by{" "}
+          <PersonChip
+            person={members?.find((m) => m.id === record.updatedById) ?? undefined}
+            fallback={record.updatedById}
+          />{" "}
+          · {formatRelativeTime(record.updatedAt)}
+        </p>
+      )}
+
+      {record.history && record.history.length > 1 && (
+        <details className="schema-record__history">
+          <summary className="muted" style={{ fontSize: 12, cursor: "pointer" }}>
+            History ({record.history.length})
+          </summary>
+          <ul className="stack-sm" style={{ margin: "6px 0 0", paddingLeft: 16 }}>
+            {[...record.history].reverse().map((h, i) => {
+              const who = members?.find((m) => m.id === h.byId)?.name ?? "someone";
+              const verb =
+                h.action === "created"
+                  ? "created"
+                  : h.action === "status"
+                    ? "changed status"
+                    : "edited";
+              return (
+                <li key={i} className="meta-line">
+                  {who} {verb} · {formatRelativeTime(h.at)}
+                  {h.note ? ` — “${h.note}”` : ""}
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      )}
+
+      {(onEdit || onDelete) && (
+        <div className="row gap-sm">
+          {onEdit && (
+            <button type="button" className="btn btn-sm btn-ghost" onClick={onEdit}>
+              Edit
+            </button>
+          )}
+          {onDelete && (
+            <button type="button" className="btn btn-sm btn-ghost" onClick={onDelete}>
+              Delete
+            </button>
+          )}
+        </div>
       )}
     </article>
   );
