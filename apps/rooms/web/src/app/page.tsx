@@ -59,7 +59,8 @@ export default function HomePage() {
       </div>
       <div className="app-main stack">
         <div className="card stack hero-card" style={{ textAlign: "center" }}>
-          <TemplateIcon emoji="🏠" size="lg" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icon.svg" alt="Rooms" className="app-logo-mark" width={72} height={72} />
           <p className="muted">
             Local-first rooms for small groups. Your data stays on your devices — the relay only
             syncs encrypted blobs.
@@ -177,6 +178,8 @@ export default function HomePage() {
             </div>
           </>
         )}
+
+        <p className="app-version-label">v{process.env.NEXT_PUBLIC_APP_VERSION ?? "dev"}</p>
       </div>
 
       <ConfirmModal

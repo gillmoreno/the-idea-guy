@@ -1,1 +1,3 @@
 qa-output/
+.build-version
+public/version.json

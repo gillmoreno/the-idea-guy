@@ -2175,6 +2175,12 @@ textarea.input {
   }
 }
 
+/* Splash already played this session (set pre-paint by the layout gate): never
+   replay it on reloads or in-app navigation — only a fresh cold open shows it. */
+.splash-seen .app-splash {
+  display: none !important;
+}
+
 .app-splash.app-splash-out {
   opacity: 0;
   transition: opacity 0.38s ease;
@@ -2224,6 +2230,64 @@ textarea.input {
   .app-splash .splash-tile,
   .app-splash .splash-name {
     animation: none !important;
+  }
+}
+
+/* App logo mark on the home hero (the real PWA icon, not an emoji). */
+.app-logo-mark {
+  align-self: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+}
+
+/* Subtle build-version label so you can confirm which build you're on. */
+.app-version-label {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--muted, #9aa0aa);
+  opacity: 0.7;
+}
+
+/* ---------- App update toast ---------- */
+/* Surfaces when AppUpdater detects a fresh build; also auto-applies on
+   refocus, so this is a tap-to-update-now shortcut, not a required action. */
+.app-update-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: calc(100vw - 24px);
+  padding: 10px 12px 10px 16px;
+  border-radius: 14px;
+  background: #1e1b4b;
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  animation: app-update-in 0.32s cubic-bezier(0.34, 1.45, 0.64, 1) backwards;
+}
+
+.app-update-toast__text {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+@keyframes app-update-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-update-toast {
+    animation: none;
   }
 }
 

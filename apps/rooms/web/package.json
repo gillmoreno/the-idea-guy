@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3300",
+    "prebuild": "node scripts/compute-version.mjs",
     "build": "next build",
+    "postbuild": "node scripts/stamp-sw.mjs",
     "start": "next start -p 3300",
     "lint": "next lint",
     "qa:schema-ui": "node scripts/schema-ui-quality.mjs"

@@ -4,8 +4,13 @@ import { DeviceProvider } from "@/shell/DeviceProvider";
 import { PersonaContactsProvider } from "@/shell/PersonaContactsProvider";
 import { ThemeProvider } from "@/shell/ThemeProvider";
 import { VaultLockProvider } from "@/shell/VaultLockProvider";
-import { ServiceWorker } from "@/templates/choreboard/components/ServiceWorker";
+import { AppUpdater } from "@/shell/AppUpdater";
 import { SplashScreen } from "@/shell/SplashScreen";
+
+// Runs before first paint: if the launch splash already played this session,
+// hide it synchronously so reloads/nav within a live session never replay it.
+// Only a genuine cold start (new session) clears the flag and shows it again.
+const SPLASH_GATE = `try{if(sessionStorage.getItem('rooms:splash-shown'))document.documentElement.classList.add('splash-seen')}catch(e){}`;
 
 export const metadata: Metadata = {
   title: "Rooms — local-first for small groups",
@@ -31,6 +36,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SPLASH_GATE }} />
+      </head>
       <body>
         <ThemeProvider>
           <VaultLockProvider>
@@ -40,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </VaultLockProvider>
         </ThemeProvider>
         <SplashScreen />
-        <ServiceWorker />
+        <AppUpdater />
       </body>
     </html>
   );

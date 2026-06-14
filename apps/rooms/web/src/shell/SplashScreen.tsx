@@ -4,17 +4,28 @@ import { useEffect, useState } from "react";
 
 const SHOW_MS = 1500;
 const FADE_MS = 380;
+const SEEN_KEY = "rooms:splash-shown";
 
 /**
  * Branded launch splash for the installed app: full indigo screen with the
  * logo tiles popping in, then a fade into the UI. Server-rendered into the
  * static HTML so it covers the boot gap instantly; CSS limits it to
  * standalone display mode, so browser tabs never see it.
+ *
+ * Plays once per session only — a sessionStorage flag (set here, read
+ * pre-paint by the layout's SPLASH_GATE) suppresses it on reloads and
+ * in-app navigation, so it's a cold-open moment, not a per-screen interruption.
  */
 export function SplashScreen() {
   const [phase, setPhase] = useState<"show" | "fade" | "gone">("show");
 
   useEffect(() => {
+    // Already played this session (e.g. a reload) — drop straight out.
+    if (sessionStorage.getItem(SEEN_KEY)) {
+      setPhase("gone");
+      return;
+    }
+    sessionStorage.setItem(SEEN_KEY, "1");
     const fade = setTimeout(() => setPhase("fade"), SHOW_MS);
     const gone = setTimeout(() => setPhase("gone"), SHOW_MS + FADE_MS);
     return () => {

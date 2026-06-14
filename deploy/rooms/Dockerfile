@@ -13,8 +13,13 @@ COPY packages/room-kit packages/room-kit
 COPY apps/rooms/web apps/rooms/web
 ARG NEXT_PUBLIC_APP_URL=https://rooms.the-idea-guy.com
 ARG NEXT_PUBLIC_RELAY_URL=wss://rooms.the-idea-guy.com
+# Build version stamped into the bundle, version.json and sw.js (update detection).
+# .git isn't in the build image, so redeploy.sh passes the git sha; empty falls
+# back to a timestamp in compute-version.mjs so every build still differs.
+ARG APP_BUILD_VERSION=
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
-    NEXT_PUBLIC_RELAY_URL=$NEXT_PUBLIC_RELAY_URL
+    NEXT_PUBLIC_RELAY_URL=$NEXT_PUBLIC_RELAY_URL \
+    APP_BUILD_VERSION=$APP_BUILD_VERSION
 RUN npm --prefix apps/rooms/web run build
 
 # ---- stage 2: relay (static Go binary) ----

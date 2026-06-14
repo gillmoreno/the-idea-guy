@@ -3,6 +3,8 @@ services:
     build:
       context: ../..
       dockerfile: deploy/rooms/Dockerfile
+      args:
+        APP_BUILD_VERSION: "${APP_BUILD_VERSION:-}"
     image: rooms-bundle:latest
     container_name: rooms
     ports:

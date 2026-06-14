@@ -1,10 +1,24 @@
 const path = require("path");
+const fs = require("fs");
+
+// Single build-version source of truth, written by scripts/compute-version.mjs
+// (the `prebuild` step). Baked into the bundle so the running app knows which
+// build it is and can compare against /version.json at runtime.
+let buildVersion = (process.env.APP_BUILD_VERSION || "").trim();
+if (!buildVersion) {
+  try {
+    buildVersion = fs.readFileSync(path.join(__dirname, ".build-version"), "utf8").trim();
+  } catch {
+    buildVersion = "dev";
+  }
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
   reactStrictMode: true,
   images: { unoptimized: true },
+  env: { NEXT_PUBLIC_APP_VERSION: buildVersion },
   outputFileTracingRoot: path.join(__dirname, "../../.."),
   transpilePackages: ["@the-idea-guy/room-kit"],
   serverExternalPackages: ["yjs", "y-indexeddb"],
