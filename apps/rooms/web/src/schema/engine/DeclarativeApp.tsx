@@ -10,6 +10,7 @@ import { useSchemaStore } from "@/schema/useSchemaStore";
 import { DeclarativeSetup } from "./Setup";
 import { DeclarativeProfilePicker } from "./ProfilePicker";
 import { CollectionView } from "./CollectionView";
+import { PeoplePanel } from "./PeoplePanel";
 import { TemplateIcon } from "@/components/TemplateIcon";
 import { EmptyState } from "@/components/kit";
 import { RoomCodeShare } from "@/shell/RoomCodeShare";
@@ -115,6 +116,9 @@ export function DeclarativeApp() {
         {!primaryCollection && (
           <EmptyState>This schema has no collections defined.</EmptyState>
         )}
+
+        <PeoplePanel />
+
         {hasAdminAccess && (
           <div className="card stack" style={{ marginTop: 8 }}>
             <RoomLocalStorage roomCode={roomCode} includeAdmin />

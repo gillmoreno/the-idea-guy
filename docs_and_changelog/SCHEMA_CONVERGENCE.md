@@ -272,9 +272,12 @@ declarative record now tracks `updatedAt`/`updatedById` and an append-only `hist
 `store.updateRecord`/`removeRecord`/`getRecord`. Applies to **all** declarative rooms, so
 every ported room inherits change history. _CRDT note: history is a JSON array on the record
 (whole-record LWW, like status) — fine for low single-record concurrency; a Y.Array per
-record is the upgrade if concurrent edits to one record become common._ Remaining
-follow-ups: schema-driven **currency picker at setup**, **weighted shares** for `balance`,
-and **inline person-creation discoverability** in person fields (verify the reported gap).
+record is the upgrade if concurrent edits to one record become common._ ✅ **People panel shipped engine-wide (2026-06-14):** `engine/PeoplePanel.tsx` gives every
+declarative room a first-class add-participant-by-name UI (solo-first, no invite, all
+members) — `DeclarativeApp` rendered only an admin-gated *invite-contacts* card before, so
+there was no way to just create a named participant. Fixes the reported "can't create
+people" gap. Remaining follow-ups: schema-driven **currency picker at setup** and
+**weighted shares** for `balance`.
 
 ---
 
